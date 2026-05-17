@@ -1016,7 +1016,7 @@ export default function Page() {
                       borderRadius: 20,
                     }}
                   >
-                    ⚡ 9+ Years Experience
+                    ⚡ 10+ Years Experience
                   </div>
                 </div>
 
@@ -1482,14 +1482,14 @@ export default function Page() {
 
             {/* Doctor Highlight */}
             <p className="founder-hero-doctor-highlight">
-              Led by Dr. Ekhlaq Ahmed • 9+ Years Clinical Experience
+              Led by Dr. Ekhlaq Ahmed • 10+ Years Clinical Experience
             </p>
 
             {/* Stats (SEO-friendly with semantic markup) */}
             <div className="founder-hero-stats">
               {[
                 ["5000+", "Procedures"],
-                ["9+", "Years Experience"],
+                ["10+", "Years Experience"],
                 ["5.0★", "Google Rating"],
               ].map(([value, label]) => (
                 <div key={label} className="founder-hero-stat-item">
@@ -1720,7 +1720,7 @@ export default function Page() {
                   borderRadius: 30,
                 }}
               >
-                9+ Years Experience
+                10+ Years Experience
               </span>
             </div>
           </div>

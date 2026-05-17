@@ -115,7 +115,7 @@ export default function AboutPage() {
                   drives every aspect of the organization, ensuring patient-centric care remains at the heart of all operations.
                 </p>
                 <div style={{ marginTop: 24, display: "flex", gap: 12 }}>
-                  <span style={{ background: "#d1fae5", padding: "5px 12px", borderRadius: 20, fontSize: 12 }}>9+ Years Experience</span>
+                  <span style={{ background: "#d1fae5", padding: "5px 12px", borderRadius: 20, fontSize: 12 }}>10+ Years Experience</span>
                   <span style={{ background: "#d1fae5", padding: "5px 12px", borderRadius: 20, fontSize: 12 }}>Regenerative Dentistry Expert</span>
                 </div>
               </div>

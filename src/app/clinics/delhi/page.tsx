@@ -105,7 +105,7 @@ export default function DelhiClinicPage() {
                 Our Doctors
               </h2>
               {[
-                { name: "Dr. Ekhlaq Ahmed", specialty: "Dental Surgeon", exp: "9+ Years", timing: "Mon-Sat: 10AM-6PM" },
+                { name: "Dr. Ekhlaq Ahmed", specialty: "Dental Surgeon", exp: "10+ Years", timing: "Mon-Sat: 10AM-6PM" },
                 { name: "Dr. Priya Sharma", specialty: "Physician", exp: "12+ Years", timing: "Mon-Sat: 9AM-5PM" },
                 { name: "Dr. Rajesh Kumar", specialty: "Orthopedic", exp: "15+ Years", timing: "Tue-Thu-Sat: 11AM-7PM" },
               ].map(doc => (

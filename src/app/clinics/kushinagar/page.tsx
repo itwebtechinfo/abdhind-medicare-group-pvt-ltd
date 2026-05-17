@@ -106,7 +106,7 @@ export default function KushinagarClinicPage() {
                 Our Doctors
               </h2>
               {[
-                { name: "Dr. Ekhlaq Ahmed", specialty: "Dental Surgeon", exp: "9+ Years", timing: "Mon-Sat: 10AM-6PM" },
+                { name: "Dr. Ekhlaq Ahmed", specialty: "Dental Surgeon", exp: "10+ Years", timing: "Mon-Sat: 10AM-6PM" },
                 { name: "Dr. Neha Verma", specialty: "Physician", exp: "8+ Years", timing: "Mon-Sat: 9AM-5PM" },
                 { name: "Dr. Suresh Patel", specialty: "Ayurveda", exp: "12+ Years", timing: "Mon-Thu-Sat: 11AM-7PM" },
               ].map(doc => (
