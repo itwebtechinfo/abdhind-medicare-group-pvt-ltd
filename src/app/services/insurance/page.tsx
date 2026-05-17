@@ -214,7 +214,7 @@ export default function InsurancePage() {
           <h3 style={{ fontSize: 24, marginBottom: 12 }}>Need Assistance With Insurance?</h3>
           <p style={{ marginBottom: 24, opacity: 0.9 }}>Our dedicated insurance helpdesk is available 24/7 to assist you</p>
           <div style={{ display: "flex", gap: 16, justifyContent: "center", flexWrap: "wrap" }}>
-            <a href="tel:+919876543210" style={{ background: "#f59e0b", color: "white", padding: "14px 32px", borderRadius: 50, textDecoration: "none", fontWeight: 600, display: "inline-flex", alignItems: "center", gap: 8 }}>
+            <a href="tel:+919540929832" style={{ background: "#f59e0b", color: "white", padding: "14px 32px", borderRadius: 50, textDecoration: "none", fontWeight: 600, display: "inline-flex", alignItems: "center", gap: 8 }}>
               <Phone size={18} />
               Call Insurance Helpdesk
             </a>

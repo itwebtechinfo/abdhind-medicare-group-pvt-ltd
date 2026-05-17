@@ -221,7 +221,7 @@ export default function WellnessPage() {
             Book a wellness consultation or health checkup package
           </p>
           <div style={{ display: "flex", gap: 16, justifyContent: "center", flexWrap: "wrap" }}>
-            <a href="tel:+919876543210" style={{ background: "white", color: "#064e3b", padding: "14px 32px", borderRadius: 50, textDecoration: "none", fontWeight: 600, display: "inline-flex", alignItems: "center", gap: 8 }}>
+            <a href="tel:+919540929832" style={{ background: "white", color: "#064e3b", padding: "14px 32px", borderRadius: 50, textDecoration: "none", fontWeight: 600, display: "inline-flex", alignItems: "center", gap: 8 }}>
               <Phone size={18} />
               Call for Appointment
             </a>

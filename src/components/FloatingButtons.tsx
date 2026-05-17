@@ -13,7 +13,7 @@ export function FloatingButtons() {
       {/* 📞 Phone */}
       <Tip label="📞 Call Now">
         <a
-          href="tel:+919876543210"
+          href="tel:+919540929832"
           className="w-14 h-14 rounded-full flex items-center justify-center
             text-white transition-transform duration-300 hover:scale-110 hover:-rotate-12"
           style={{
@@ -28,7 +28,7 @@ export function FloatingButtons() {
       {/* 💬 WhatsApp */}
       <Tip label="💬 WhatsApp">
         <a
-          href="https://wa.me/919876543210"
+          href="https://wa.me/919540929832"
           target="_blank"
           rel="noopener noreferrer"
           className="w-14 h-14 rounded-full flex items-center justify-center

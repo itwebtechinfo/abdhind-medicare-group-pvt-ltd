@@ -21,7 +21,7 @@ export default function EmergencyPage() {
         
         {/* Big Call Button */}
         <a 
-          href="tel:+919876543210"
+          href="tel:+919540929832"
           style={{
             display: "inline-flex",
             alignItems: "center",

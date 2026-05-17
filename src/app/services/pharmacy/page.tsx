@@ -94,7 +94,7 @@ export default function PharmacyPage() {
                   <Phone size={16} color="#2563eb" />
                   <span style={{ fontWeight: 600 }}>Order via WhatsApp</span>
                 </div>
-                <a href="https://wa.me/919876543210" style={{ color: "#2563eb", fontWeight: 600, textDecoration: "none", fontSize: 18 }}>+91 95409 29832</a>
+                <a href="https://wa.me/919540929832" style={{ color: "#2563eb", fontWeight: 600, textDecoration: "none", fontSize: 18 }}>+91 95409 29832</a>
               </div>
             </div>
           </div>
@@ -156,11 +156,11 @@ export default function PharmacyPage() {
           <h3 style={{ fontSize: 22, marginBottom: 12 }}>Need Medicines?</h3>
           <p style={{ marginBottom: 20, opacity: 0.9 }}>Order now for free home delivery</p>
           <div style={{ display: "flex", gap: 16, justifyContent: "center", flexWrap: "wrap" }}>
-            <a href="tel:+919876543210" style={{ background: "#f59e0b", color: "white", padding: "12px 28px", borderRadius: 40, textDecoration: "none", fontWeight: 600, display: "inline-flex", alignItems: "center", gap: 8 }}>
+            <a href="tel:+919540929832" style={{ background: "#f59e0b", color: "white", padding: "12px 28px", borderRadius: 40, textDecoration: "none", fontWeight: 600, display: "inline-flex", alignItems: "center", gap: 8 }}>
               <Phone size={18} />
               Call to Order
             </a>
-            <a href="https://wa.me/919876543210" style={{ background: "rgba(255,255,255,0.2)", padding: "12px 28px", borderRadius: 40, textDecoration: "none", fontWeight: 600 }}>
+            <a href="https://wa.me/919540929832" style={{ background: "rgba(255,255,255,0.2)", padding: "12px 28px", borderRadius: 40, textDecoration: "none", fontWeight: 600 }}>
               📱 Order on WhatsApp
             </a>
           </div>
