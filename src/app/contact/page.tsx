@@ -461,13 +461,13 @@ export default function ContactPage() {
                 Follow us for dental tips or leave a review on Google.
               </p>
               <div className="flex gap-3">
-                <a href="#" className="w-10 h-10 bg-blue-600 rounded-full flex items-center justify-center text-white hover:scale-110 transition">
+                <a href="/contact" aria-label="Visit Abd Hind Medicare contact page" className="w-10 h-10 bg-blue-600 rounded-full flex items-center justify-center text-white hover:scale-110 transition">
                   <Globe className="w-5 h-5" />
                 </a>
-                <a href="#" className="w-10 h-10 bg-sky-500 rounded-full flex items-center justify-center text-white hover:scale-110 transition">
+                <a href="https://wa.me/919540929832" aria-label="Message Abd Hind Medicare on WhatsApp" className="w-10 h-10 bg-sky-500 rounded-full flex items-center justify-center text-white hover:scale-110 transition">
                   <MessageCircle className="w-5 h-5" />
                 </a>
-                <a href="#" className="w-10 h-10 bg-pink-600 rounded-full flex items-center justify-center text-white hover:scale-110 transition">
+                <a href="/book-appointment" aria-label="Book an appointment with Abd Hind Medicare" className="w-10 h-10 bg-pink-600 rounded-full flex items-center justify-center text-white hover:scale-110 transition">
                   <Heart className="w-5 h-5" />
                 </a>
                 <a href="https://www.google.com/search?q=mr+dental+clinic+jama+masjid" target="_blank" className="w-10 h-10 bg-yellow-500 rounded-full flex items-center justify-center text-white hover:scale-110 transition">

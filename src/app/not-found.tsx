@@ -2,80 +2,99 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Home, Search, ArrowLeft, Heart } from "lucide-react";
+import {
+  ArrowLeft,
+  Calendar,
+  HeartPulse,
+  Home,
+  Phone,
+  Search,
+  Stethoscope,
+} from "lucide-react";
 
 export default function NotFound() {
   const router = useRouter();
 
   return (
-    <div className="min-h-[70vh] flex items-center justify-center px-4">
-      <div className="text-center max-w-md">
-        {/* Animated Background Effect */}
-        <div className="relative mb-8">
-          <div className="absolute inset-0 flex items-center justify-center">
-            <div className="w-32 h-32 bg-green-100 rounded-full blur-2xl opacity-60"></div>
-          </div>
-          <div className="relative">
-            <div className="text-8xl font-bold text-gray-200 select-none">404</div>
-            <div className="absolute inset-0 flex items-center justify-center">
-              <Heart className="w-16 h-16 text-green-600 opacity-20" />
+    <div className="min-h-[70vh] px-4 py-10">
+      <div className="mx-auto max-w-5xl overflow-hidden rounded-3xl border border-teal-100 bg-gradient-to-br from-white via-teal-50 to-sky-50 shadow-xl">
+        <div className="grid gap-8 p-6 md:grid-cols-[1fr_360px] md:p-10">
+          <div className="flex flex-col justify-center">
+            <div className="mb-6 inline-flex w-fit items-center gap-2 rounded-full bg-teal-100 px-4 py-1.5 text-sm font-semibold text-teal-700">
+              <HeartPulse className="h-4 w-4" />
+              Abd Hind Medicare Group
+            </div>
+
+            <div className="text-7xl font-bold leading-none text-teal-100 md:text-8xl">
+              404
+            </div>
+            <h1 className="mt-4 text-3xl font-bold text-gray-900 md:text-5xl">
+              This care route is unavailable
+            </h1>
+            <p className="mt-4 max-w-2xl leading-7 text-gray-600">
+              The page may have moved, or the link may be outdated. You can
+              return to our main healthcare pathways below.
+            </p>
+
+            <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+              <Link
+                href="/"
+                className="inline-flex items-center justify-center gap-2 rounded-xl bg-teal-600 px-6 py-3 font-semibold text-white shadow-md transition hover:bg-teal-700 hover:shadow-lg"
+              >
+                <Home className="h-4 w-4" />
+                Homepage
+              </Link>
+              <Link
+                href="/services"
+                className="inline-flex items-center justify-center gap-2 rounded-xl border border-gray-300 bg-white px-6 py-3 font-semibold text-gray-700 transition hover:border-teal-600 hover:text-teal-700"
+              >
+                <Stethoscope className="h-4 w-4" />
+                Services
+              </Link>
+              <button
+                onClick={() => router.back()}
+                className="inline-flex items-center justify-center gap-2 rounded-xl border border-gray-300 bg-white px-6 py-3 font-semibold text-gray-700 transition hover:border-teal-600 hover:text-teal-700"
+              >
+                <ArrowLeft className="h-4 w-4" />
+                Go Back
+              </button>
             </div>
           </div>
-        </div>
 
-        {/* Main Message */}
-        <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-3">
-          Page Not Found
-        </h1>
-        
-        <p className="text-gray-600 mb-8 leading-relaxed">
-          Oops! The page you're looking for doesn't exist or has been moved. 
-          Let's get you back on track.
-        </p>
-
-        {/* Action Buttons */}
-        <div className="flex flex-col sm:flex-row gap-4 justify-center">
-          <Link
-            href="/"
-            className="inline-flex items-center justify-center gap-2 bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-xl font-medium transition-all shadow-md hover:shadow-lg"
-          >
-            <Home className="w-4 h-4" />
-            Go Home
-          </Link>
-          
-          <button
-            onClick={() => router.back()}
-            className="inline-flex items-center justify-center gap-2 border-2 border-gray-300 hover:border-green-600 text-gray-700 hover:text-green-600 px-6 py-3 rounded-xl font-medium transition-all"
-          >
-            <ArrowLeft className="w-4 h-4" />
-            Go Back
-          </button>
-        </div>
-
-        {/* Quick Links */}
-        <div className="mt-12 pt-8 border-t border-gray-200">
-          <p className="text-sm text-gray-500 mb-4">Quick Navigation</p>
-          <div className="flex flex-wrap gap-3 justify-center">
-            <Link href="/services" className="text-sm text-gray-600 hover:text-green-600 transition-colors">
-              Our Services
-            </Link>
-            <span className="text-gray-300">•</span>
-            <Link href="/contact" className="text-sm text-gray-600 hover:text-green-600 transition-colors">
-              Contact Us
-            </Link>
-            <span className="text-gray-300">•</span>
-            <Link href="/appointment" className="text-sm text-gray-600 hover:text-green-600 transition-colors">
-              Book Appointment
-            </Link>
+          <div className="rounded-2xl bg-white p-5 shadow-sm">
+            <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-teal-50 text-teal-600">
+              <Search className="h-6 w-6" />
+            </div>
+            <h2 className="text-xl font-bold text-gray-900">
+              Quick Navigation
+            </h2>
+            <div className="mt-5 grid gap-3">
+              <Link
+                href="/book-appointment"
+                className="flex items-center justify-between rounded-xl bg-teal-50 px-4 py-3 text-sm font-semibold text-teal-800 transition hover:bg-teal-100"
+              >
+                Book Appointment
+                <Calendar className="h-4 w-4" />
+              </Link>
+              <Link
+                href="/contact"
+                className="flex items-center justify-between rounded-xl bg-gray-50 px-4 py-3 text-sm font-semibold text-gray-700 transition hover:bg-gray-100"
+              >
+                Contact Care Team
+                <Phone className="h-4 w-4" />
+              </Link>
+              <Link
+                href="/services/emergency"
+                className="flex items-center justify-between rounded-xl bg-gray-50 px-4 py-3 text-sm font-semibold text-gray-700 transition hover:bg-gray-100"
+              >
+                Emergency Support
+                <HeartPulse className="h-4 w-4" />
+              </Link>
+            </div>
+            <p className="mt-6 text-sm text-gray-500">
+              Need help now? Call +91 95409 29832.
+            </p>
           </div>
-        </div>
-
-        {/* Search Suggestion */}
-        <div className="mt-6 text-sm text-gray-400">
-          <span className="inline-flex items-center gap-1">
-            <Search className="w-3 h-3" />
-            Need help? Call us at +91 95409 29832
-          </span>
         </div>
       </div>
     </div>
