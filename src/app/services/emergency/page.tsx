@@ -6,7 +6,7 @@ export default function EmergencyPage() {
     <div style={{ fontFamily: "system-ui, sans-serif", background: "#f8fafc", minHeight: "100vh" }}>
       {/* Simple Red Header */}
       <div style={{ background: "#dc2626", color: "white", textAlign: "center", padding: "12px", fontWeight: "bold" }}>
-        🚨 24/7 EMERGENCY SERVICE • CALL NOW: +91 98765 43210
+        🚨 24/7 EMERGENCY SERVICE • CALL NOW: +91 95409 29832
       </div>
 
       {/* Hero */}
@@ -37,7 +37,7 @@ export default function EmergencyPage() {
           }}
         >
           <Phone size={28} />
-          +91 98765 43210
+          +91 95409 29832
         </a>
 
         {/* Quick Info Cards */}

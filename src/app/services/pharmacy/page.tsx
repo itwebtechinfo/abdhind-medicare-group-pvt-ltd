@@ -94,7 +94,7 @@ export default function PharmacyPage() {
                   <Phone size={16} color="#2563eb" />
                   <span style={{ fontWeight: 600 }}>Order via WhatsApp</span>
                 </div>
-                <a href="https://wa.me/919876543210" style={{ color: "#2563eb", fontWeight: 600, textDecoration: "none", fontSize: 18 }}>+91 98765 43210</a>
+                <a href="https://wa.me/919876543210" style={{ color: "#2563eb", fontWeight: 600, textDecoration: "none", fontSize: 18 }}>+91 95409 29832</a>
               </div>
             </div>
           </div>
@@ -123,7 +123,7 @@ export default function PharmacyPage() {
           <h2 style={{ fontSize: 24, fontWeight: 700, textAlign: "center", marginBottom: 24 }}>Our Store Locations</h2>
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: 20 }}>
             {[
-              { name: "Delhi - Main", address: "Sector 44, Noida", timing: "24/7", phone: "+91 98765 43210" },
+              { name: "Delhi - Main", address: "Sector 44, Noida", timing: "24/7", phone: "+91 95409 29832" },
               { name: "Kushinagar", address: "Kasia, Kushinagar", timing: "8AM - 10PM", phone: "+91 98765 43211" },
             ].map(store => (
               <div key={store.name} style={{ background: "white", borderRadius: 16, padding: 20, border: "1px solid #e2e8f0" }}>

@@ -28,7 +28,7 @@ export default function DelhiClinicPage() {
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(250px, 1fr))", gap: 20, marginBottom: 40 }}>
           {[
             { icon: MapPin, label: "Address", value: "Sector 44, Near Metro Station, Noida - 201301" },
-            { icon: Phone, label: "Contact", value: "+91 98765 43210", link: "tel:+919876543210" },
+            { icon: Phone, label: "Contact", value: "+91 95409 29832", link: "tel:+919876543210" },
             { icon: Clock, label: "Timing", value: "Mon-Sat: 9AM - 8PM | Sun: 10AM - 2PM" },
             { icon: Calendar, label: "Emergency", value: "24/7 Available" },
           ].map((info, i) => (

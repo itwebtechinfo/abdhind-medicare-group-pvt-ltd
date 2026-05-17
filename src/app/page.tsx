@@ -137,7 +137,7 @@ export default function Page() {
           <span style={{ color: "#2563eb" }}>Strict Safety</span> • 💬 WhatsApp
           Support • 📞{" "}
           <span style={{ color: "#dc2626", fontWeight: 700 }}>Call Now</span>:
-          +91 98765 43210
+          +91 95409 29832
         </div>
       </div>
       <style>{`

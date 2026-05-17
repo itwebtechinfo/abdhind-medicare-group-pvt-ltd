@@ -237,7 +237,7 @@ export default function AboutPage() {
           
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: 24 }}>
             {[
-              { city: "Delhi NCR", address: "Sector 44, Noida", phone: "+91 98765 43210", timing: "24/7 Emergency" },
+              { city: "Delhi NCR", address: "Sector 44, Noida", phone: "+91 95409 29832", timing: "24/7 Emergency" },
               { city: "Kushinagar", address: "Kasia, Kushinagar, UP", phone: "+91 98765 43211", timing: "8AM - 10PM" },
             ].map((loc, i) => (
               <div key={i} style={{ background: "white", borderRadius: 20, padding: 24, border: "1px solid #e2e8f0" }}>
