@@ -74,7 +74,7 @@ export default function NotFound() {
         <div className="mt-6 text-sm text-gray-400">
           <span className="inline-flex items-center gap-1">
             <Search className="w-3 h-3" />
-            Need help? Call us at +91 1234567890
+            Need help? Call us at +91 95409 29832
           </span>
         </div>
       </div>

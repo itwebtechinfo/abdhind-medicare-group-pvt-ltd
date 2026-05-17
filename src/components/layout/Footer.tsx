@@ -154,18 +154,18 @@ export function Footer() {
             <ul className="space-y-3 text-sm">
               <li className="flex items-start gap-3">
                 <MapPin className="w-4 h-4 text-green-400 mt-0.5 flex-shrink-0" />
-                <span>123 Healthcare Avenue, New Delhi - 110001</span>
+                <span>Jama Masjid, Delhi 110006</span>
               </li>
               <li className="flex items-center gap-3">
                 <Phone className="w-4 h-4 text-green-400 flex-shrink-0" />
                 <a href="tel:+911234567890" className="hover:text-green-400 transition-colors">
-                  +91 1234567890
+                  +91 95409 29832
                 </a>
               </li>
               <li className="flex items-center gap-3">
                 <Mail className="w-4 h-4 text-green-400 flex-shrink-0" />
-                <a href="mailto:care@abdhind.com" className="hover:text-green-400 transition-colors">
-                  care@abdhind.com
+                <a href="mailto:info@abdhindmedicare.com" className="hover:text-green-400 transition-colors">
+                  info@abdhindmedicare.com
                 </a>
               </li>
               <li className="flex items-center gap-3">

@@ -96,8 +96,8 @@ export default function ContactPage() {
       title: "Email & Social",
       icon: <Globe className="w-6 h-6" />,
       details: [
-        { label: "Email Us", value: "care@mrdentalclinic.com", href: "mailto:care@mrdentalclinic.com" },
-        { label: "Follow Us", value: "@mrdentalclinic", href: "https://instagram.com/mrdentalclinic" }
+        { label: "Email Us", value: "info@abdhindmedicare.com", href: "mailto:info@abdhindmedicare.com" },
+        // { label: "Follow Us", value: "@mrdentalclinic", href: "https://instagram.com/mrdentalclinic" }
       ],
       color: "bg-green-50 text-green-600",
       gradient: "from-green-500 to-green-600"
@@ -110,7 +110,7 @@ export default function ContactPage() {
       name: "MR Dental Clinic - Jama Masjid",
       address: "887, Near Salam Hotel, Churiwalan, Jama Masjid, New Delhi, Delhi 110006",
       phone: "+91 95409 29832",
-      email: "care@mrdentalclinic.com",
+      email: "info@abdhindmedicare.com",
       timings: "Mon-Sat: 11:30 AM - 8:30 PM",
       facilities: ["Dental Implants", "Root Canal", "Smile Makeover", "Pediatric Dentistry", "Laser Dentistry"]
     }
