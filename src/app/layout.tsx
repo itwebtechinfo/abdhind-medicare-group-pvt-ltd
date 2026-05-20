@@ -125,7 +125,7 @@ export default function RootLayout({
         <Navbar />
 
         {/* Announcement Bar */}
-        <AnnouncementBar />
+        {/* <AnnouncementBar /> */}
 
         {/* Main Content */}
         <main className="flex-1 px-4 md:px-10 pt-[108px] pb-6">
