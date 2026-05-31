@@ -22,9 +22,21 @@ import {
   Sparkles
 } from "lucide-react";
 
+interface Doctor {
+  id: number;
+  name: string;
+  specialty: string;
+  department: string;
+  description: string;
+  experience: number;
+  rating: number;
+  available: boolean;
+  status: string;
+}
+
 export default function BookAppointmentPage() {
   const [step, setStep] = useState(1);
-  const [selectedDoctor, setSelectedDoctor] = useState<any>(null);
+  const [selectedDoctor, setSelectedDoctor] = useState<Doctor | null>(null);
   const [selectedDate, setSelectedDate] = useState("");
   const [selectedTime, setSelectedTime] = useState("");
   const [formData, setFormData] = useState({
@@ -38,54 +50,72 @@ export default function BookAppointmentPage() {
   const [bookingConfirmed, setBookingConfirmed] = useState(false);
   const [bookingId, setBookingId] = useState("");
 
-  const doctors = [
+  const doctors: Doctor[] = [
     {
       id: 1,
-      name: "Dr. Rajesh Kumar",
-      specialty: "Cardiologist",
-      experience: 18,
+      name: "Dr. Ekhlaq Ahmed",
+      specialty: "Dental Surgeon",
+      department: "Dental Clinic",
+      description: "Regenerative dentistry, painless RCT, crowns, implants, pediatric dental care, and smile rehabilitation.",
+      experience: 10,
       rating: 4.9,
-      available: true
+      available: true,
+      status: "Available Now"
     },
     {
       id: 2,
-      name: "Dr. Priya Sharma",
-      specialty: "Neurologist",
-      experience: 14,
+      name: "Cardiology Department",
+      specialty: "Cardiology",
+      department: "Heart Care",
+      description: "ECG, preventive cardiology, hypertension clinic, and cardiac rehabilitation services are being prepared.",
+      experience: 0,
       rating: 4.8,
-      available: true
+      available: false,
+      status: "Coming Soon"
     },
     {
       id: 3,
-      name: "Dr. Anil Mehta",
-      specialty: "Orthopedic Surgeon",
-      experience: 22,
+      name: "Orthopedics Department",
+      specialty: "Orthopedics",
+      department: "Bone & Joint Care",
+      description: "Joint pain, fracture care, sports injury, and physiotherapy-led recovery services are planned.",
+      experience: 0,
       rating: 4.9,
-      available: true
+      available: false,
+      status: "Coming Soon"
     },
     {
       id: 4,
-      name: "Dr. Meera Gupta",
-      specialty: "Pediatrician",
-      experience: 12,
+      name: "Pediatrics Department",
+      specialty: "Pediatrics",
+      department: "Child Care",
+      description: "Child consultations, vaccination planning, growth monitoring, and pediatric emergency guidance are upcoming.",
+      experience: 0,
       rating: 4.9,
-      available: true
+      available: false,
+      status: "Coming Soon"
     },
     {
       id: 5,
-      name: "Dr. Sunil Verma",
-      specialty: "Ophthalmologist",
-      experience: 10,
+      name: "Neurology Department",
+      specialty: "Neurology",
+      department: "Neuro Care",
+      description: "Headache, seizure, stroke follow-up, and neurodiagnostic services are under expansion.",
+      experience: 0,
       rating: 4.7,
-      available: true
+      available: false,
+      status: "Coming Soon"
     },
     {
       id: 6,
-      name: "Dr. Vikram Reddy",
-      specialty: "General Physician",
-      experience: 8,
+      name: "General Medicine Department",
+      specialty: "General Medicine",
+      department: "Primary Care",
+      description: "Fever clinic, diabetes, hypertension, preventive health checks, and family medicine are coming soon.",
+      experience: 0,
       rating: 4.6,
-      available: true
+      available: false,
+      status: "Coming Soon"
     }
   ];
 
@@ -172,12 +202,18 @@ export default function BookAppointmentPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8 px-4">
+    <div className="min-h-screen bg-[#f7f9f8] py-8 px-4">
       <div className="max-w-6xl mx-auto">
         {/* Header */}
-        <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">Book an Appointment</h1>
-          <p className="text-gray-500">Consult with top doctors in 3 simple steps</p>
+        <div className="text-center mb-8 rounded-[28px] border border-emerald-100 bg-white px-6 py-10 shadow-[0_20px_60px_rgba(15,23,42,0.06)]">
+          <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-emerald-200 bg-emerald-50 px-4 py-1.5 text-sm font-bold text-emerald-700">
+            <Sparkles className="h-4 w-4" />
+            Dental Clinic Active Now
+          </div>
+          <h1 className="text-3xl md:text-5xl font-extrabold text-gray-900 mb-3">Book an Appointment</h1>
+          <p className="text-gray-500 max-w-2xl mx-auto">
+            The previous 3-step booking flow is preserved. Dental appointments are currently available; other specialties are listed as upcoming services.
+          </p>
         </div>
 
         {/* Progress Steps */}
@@ -219,25 +255,37 @@ export default function BookAppointmentPage() {
               {doctors.map((doctor) => (
                 <div
                   key={doctor.id}
-                  className={`bg-white rounded-xl border p-5 cursor-pointer transition-all hover:shadow-md ${
-                    selectedDoctor?.id === doctor.id ? "border-teal-500 bg-teal-50" : "border-gray-200"
+                  className={`bg-white rounded-2xl border p-5 transition-all ${
+                    doctor.available ? "cursor-pointer hover:-translate-y-1 hover:shadow-xl" : "cursor-not-allowed opacity-85"
+                  } ${
+                    selectedDoctor?.id === doctor.id ? "border-teal-500 bg-teal-50 shadow-lg" : "border-gray-200"
                   }`}
-                  onClick={() => setSelectedDoctor(doctor)}
+                  onClick={() => doctor.available && setSelectedDoctor(doctor)}
                 >
                   <div className="flex items-start gap-4">
                     <div className="w-14 h-14 bg-teal-100 rounded-full flex items-center justify-center">
                       <Stethoscope className="w-7 h-7 text-teal-600" />
                     </div>
                     <div className="flex-1">
-                      <h3 className="font-bold text-gray-900">{doctor.name}</h3>
-                      <p className="text-sm text-teal-600">{doctor.specialty}</p>
+                      <div className="flex flex-wrap items-center gap-2">
+                        <h3 className="font-bold text-gray-900">{doctor.name}</h3>
+                        <span className={`rounded-full px-2.5 py-1 text-[11px] font-bold ${
+                          doctor.available ? "bg-emerald-100 text-emerald-700" : "bg-amber-100 text-amber-700"
+                        }`}>
+                          {doctor.status}
+                        </span>
+                      </div>
+                      <p className="text-sm font-semibold text-teal-600">{doctor.specialty}</p>
+                      <p className="mt-2 text-xs leading-5 text-gray-500">{doctor.description}</p>
                       <div className="flex items-center gap-2 mt-1">
                         <div className="flex items-center">
                           <Star className="w-3 h-3 fill-yellow-400 text-yellow-400" />
                           <span className="text-xs ml-1">{doctor.rating}</span>
                         </div>
                         <span className="text-xs text-gray-400">•</span>
-                        <span className="text-xs text-gray-500">{doctor.experience} years</span>
+                        <span className="text-xs text-gray-500">
+                          {doctor.available ? `${doctor.experience}+ years` : "Waitlist opening soon"}
+                        </span>
                       </div>
                     </div>
                     {selectedDoctor?.id === doctor.id && (

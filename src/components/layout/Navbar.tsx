@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { useState, useRef, useEffect } from "react";
 import Image from "next/image";
 import {
@@ -8,7 +9,6 @@ import {
   MessageCircle,
   ChevronDown,
   Heart,
-  Stethoscope,
   Microscope,
   Pill,
   Ambulance,
@@ -17,9 +17,6 @@ import {
   Menu,
   X,
   Clock,
-  MapPin,
-  Mail,
-  Award,
   Shield,
   Users,
   Activity,
@@ -27,10 +24,11 @@ import {
   Brain,
   Eye,
   Baby,
-  Droplets,
   Sparkles,
   Star,
+  LogIn,
 } from "lucide-react";
+import { AUTH_ROUTES } from "@/src/lib/auth/constants";
 
 interface NavItem {
   name: string;
@@ -47,6 +45,7 @@ interface NavItem {
 }
 
 export function Navbar() {
+  const pathname = usePathname();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [openDropdown, setOpenDropdown] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState("/");
@@ -195,8 +194,8 @@ export function Navbar() {
   }, []);
 
   useEffect(() => {
-    setActiveTab(window.location.pathname);
-  }, []);
+    setActiveTab(pathname);
+  }, [pathname]);
 
   const handleEnquirySubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -206,10 +205,10 @@ export function Navbar() {
   };
 
   return (
-    <div ref={menuRef} className="fixed top-0 left-0 w-full z-50">
+    <div ref={menuRef} className="fixed top-0 left-0 right-0 z-50 w-full min-w-0">
       {/* Top Bar */}
       <div className="w-full bg-gradient-to-r from-teal-900 to-teal-800 text-white text-xs border-b border-teal-700/50">
-        <div className="max-w-7xl mx-auto px-4 py-2">
+        <div className="w-full px-4 py-2 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between gap-2">
             <div className="hidden sm:flex items-center gap-3 text-[12px]">
               <span className="flex items-center gap-1.5">
@@ -260,7 +259,7 @@ export function Navbar() {
 
       {/* Main Navbar */}
       <nav className="w-full bg-white/95 backdrop-blur-md border-b shadow-lg">
-        <div className="max-w-7xl mx-auto px-4">
+        <div className="w-full min-w-0 px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             {/* Logo */}
             <Link
@@ -474,6 +473,14 @@ export function Navbar() {
                 )}
               </div>
 
+              <Link
+                href={AUTH_ROUTES.login}
+                className="hidden md:flex items-center gap-2 px-4 py-2 rounded-xl font-medium text-sm bg-teal-50 text-teal-700 hover:bg-teal-100 transition-all duration-200"
+              >
+                <LogIn className="w-4 h-4" />
+                Login
+              </Link>
+
               {/* Book Appointment Button */}
               <Link
                 href="/book-appointment"
@@ -566,12 +573,20 @@ export function Navbar() {
             </div>
           ))}
           <Link
+            href={AUTH_ROUTES.login}
+            onClick={() => setMobileMenuOpen(false)}
+            className="flex items-center justify-center gap-2 bg-teal-50 text-teal-700 px-5 py-3 rounded-xl mt-4 w-full font-medium"
+          >
+            <LogIn className="w-4 h-4" />
+            Login
+          </Link>
+          <Link
             href="/book-appointment"
             onClick={() => {
               setActiveTab("/book-appointment");
               setMobileMenuOpen(false);
             }}
-            className="flex items-center justify-center gap-2 bg-gradient-to-r from-teal-600 to-teal-700 text-white px-5 py-3 rounded-xl shadow-md mt-4 w-full font-medium"
+            className="flex items-center justify-center gap-2 bg-gradient-to-r from-teal-600 to-teal-700 text-white px-5 py-3 rounded-xl shadow-md mt-3 w-full font-medium"
           >
             <Calendar className="w-4 h-4" />
             Book Appointment

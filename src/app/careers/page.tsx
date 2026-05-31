@@ -298,8 +298,8 @@ export default function CareersPage() {
               <span className="text-teal-300"> Healthcare</span>
             </h1>
             <p className="text-lg text-gray-200 mb-8 leading-relaxed">
-              Join India's leading healthcare network and make a difference in millions of lives. 
-              We're looking for passionate professionals to join our growing family.
+              Join India&apos;s leading healthcare network and make a difference in millions of lives. 
+              We&apos;re looking for passionate professionals to join our growing family.
             </p>
             <div className="flex flex-wrap gap-4">
               <a
@@ -386,7 +386,7 @@ export default function CareersPage() {
               </h2>
               <p className="text-gray-600 mb-6 leading-relaxed">
                 At ABDHind MediCare, we believe that happy employees provide better patient care. 
-                We've created a culture that values innovation, collaboration, and personal growth.
+                We&apos;ve created a culture that values innovation, collaboration, and personal growth.
               </p>
               <div className="space-y-4">
                 {culturePoints.map((point, index) => (
@@ -666,7 +666,7 @@ export default function CareersPage() {
                 ))}
               </div>
               <p className="text-gray-600 mb-4">
-                "Best workplace I've ever been part of. Great work culture, supportive management, and endless learning opportunities."
+                &quot;Best workplace I&apos;ve ever been part of. Great work culture, supportive management, and endless learning opportunities.&quot;
               </p>
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 rounded-full bg-teal-100 flex items-center justify-center">
@@ -685,7 +685,7 @@ export default function CareersPage() {
                 ))}
               </div>
               <p className="text-gray-600 mb-4">
-                "The organization truly cares about employee growth. Regular training sessions and clear career progression paths."
+                &quot;The organization truly cares about employee growth. Regular training sessions and clear career progression paths.&quot;
               </p>
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 rounded-full bg-teal-100 flex items-center justify-center">
@@ -704,7 +704,7 @@ export default function CareersPage() {
                 ))}
               </div>
               <p className="text-gray-600 mb-4">
-                "Amazing place to work! The benefits are great, and the team feels like family. Proud to be part of this organization."
+                &quot;Amazing place to work! The benefits are great, and the team feels like family. Proud to be part of this organization.&quot;
               </p>
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 rounded-full bg-teal-100 flex items-center justify-center">

@@ -711,8 +711,8 @@ export default function Page() {
                   across clinical care, diagnostics, manufacturing, and future
                   healthcare innovations —{" "}
                   <span style={{ color: "#FF0000", fontWeight: 600 }}>
-                    "Your problem, our care — restoring natural health with
-                    satisfaction".
+                    &quot;Your problem, our care — restoring natural health with
+                    satisfaction&quot;.
                   </span>
                 </p>
                 <div
@@ -1474,10 +1474,7 @@ export default function Page() {
 
             {/* Description */}
             <p className="founder-hero-description">
-              Founded by Dr. Ekhlaq Ahmed, Abd Hind MediCare Group is a
-              multi-dimensional healthcare organization focused on advanced
-              clinical care, precision diagnostics, medical manufacturing, and
-              future healthcare innovations.
+              Inspired by my father’s unwavering dedication, resilience, and visionary spirit, Abd Hind MediCare Group was founded on the principles of integrity, compassion, perseverance, and excellence. His tireless commitment to serving people laid the foundation of our journey and continues to inspire us in advancing clinical care, precision diagnostics, medical manufacturing, and future healthcare innovations — all driven by a mission to build a healthier tomorrow.
             </p>
 
             {/* Doctor Highlight */}
@@ -1488,7 +1485,7 @@ export default function Page() {
             {/* Stats (SEO-friendly with semantic markup) */}
             <div className="founder-hero-stats">
               {[
-                ["5000+", "Procedures"],
+                ["48K+", "Procedures (MR Dental Clinic)"],
                 ["10+", "Years Experience"],
                 ["5.0★", "Google Rating"],
               ].map(([value, label]) => (
@@ -1591,7 +1588,7 @@ export default function Page() {
               {
                 icon: Stethoscope,
                 title: "Dental Care",
-                desc: "Complete dental solutions — implants, orthodontics, cosmetic dentistry, and routine checkups.",
+                desc: "*Complete dental solutions* — implants, orthodontics, cosmetic dentistry, root canals, teeth cleaning, smile designing, pediatric care, and routine checkups.",
                 accent: "#059669",
                 bg: "#f0fdf4",
                 delay: "0s",
@@ -1786,7 +1783,7 @@ export default function Page() {
             {/* ABOUT */}
             <p style={{ fontSize: "15px", color: "#4b5563", lineHeight: 1.7 }}>
               Dr. Ekhlaq Ahmed is a highly experienced dental professional with
-              over 9 years of expertise in modern and regenerative dentistry. A
+              over 10 years of expertise in modern and regenerative dentistry. A
               graduate from Jamia Millia Islamia, he has worked across leading
               hospitals and clinics, mastering both advanced and aesthetic
               dental procedures.
