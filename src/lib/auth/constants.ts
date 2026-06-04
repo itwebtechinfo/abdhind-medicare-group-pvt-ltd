@@ -5,25 +5,26 @@ export const MOCK_ROLE_CREDENTIALS: Record<
   string,
   { password: string; role: UserRole }
 > = {
-  system_admin: { password: "admin", role: "system_admin" },
-  admin: { password: "admin", role: "admin" },
-  account: { password: "account", role: "account" },
-  doctor: { password: "doctor", role: "doctor" },
-  reception: { password: "reception", role: "reception" },
-  patient: { password: "patient", role: "patient" },
-  pharmacy: { password: "pharmacy", role: "pharmacy" },
-  lab: { password: "lab", role: "lab" },
+  system_admin: { password: "admin1", role: "system_admin" },
+  admin: { password: "admin1", role: "admin" },
+  account: { password: "account1", role: "account" },
+  doctor: { password: "doctor1", role: "doctor" },
+  reception: { password: "reception1", role: "reception" },
+  patient: { password: "patient1", role: "patient" },
+  pharmacy: { password: "pharmacy1", role: "pharmacy" },
+  lab: { password: "lab1", role: "lab" },
 };
 
 /** @deprecated Use MOCK_ROLE_CREDENTIALS — kept for backward compatibility */
 export const TEMP_CREDENTIALS = {
   username: "admin",
-  password: "admin",
+  password: "admin1",
 } as const;
 
 export const AUTH_STORAGE_KEYS = {
   session: "abdhind_auth_session",
   remember: "abdhind_auth_remember",
+  rememberedUsername: "abdhind_auth_username",
   accessToken: "abdhind_access_token",
   refreshToken: "abdhind_refresh_token",
   theme: "abdhind_theme",
@@ -54,3 +55,6 @@ export function isErpPath(pathname: string): boolean {
 
 /** Mock access token TTL — 8 hours (ready for JWT expiry parity) */
 export const ACCESS_TOKEN_TTL_MS = 8 * 60 * 60 * 1000;
+
+/** Remembered sessions stay signed in for 30 days in the mock auth layer. */
+export const REMEMBERED_ACCESS_TOKEN_TTL_MS = 30 * 24 * 60 * 60 * 1000;

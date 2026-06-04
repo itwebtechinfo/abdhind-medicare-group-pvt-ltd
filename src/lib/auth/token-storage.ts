@@ -21,6 +21,10 @@ export const tokenStorage = {
     if (tokens.refreshToken) {
       storage.setItem(AUTH_STORAGE_KEYS.refreshToken, tokens.refreshToken);
     }
+
+    const fallback = getBackend(!persistent);
+    fallback?.removeItem(AUTH_STORAGE_KEYS.accessToken);
+    fallback?.removeItem(AUTH_STORAGE_KEYS.refreshToken);
   },
 
   load(persistent: boolean): TokenPair | null {

@@ -18,6 +18,7 @@ export const sessionStorageLayer = {
     if (!storage) return;
 
     storage.setItem(AUTH_STORAGE_KEYS.session, JSON.stringify(session));
+    getStorage(!persistent)?.removeItem(AUTH_STORAGE_KEYS.session);
 
     if (persistent) {
       localStorage.setItem(AUTH_STORAGE_KEYS.remember, "true");

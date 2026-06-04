@@ -28,14 +28,16 @@ export function EnterpriseLoader({
       <div className="flex w-full max-w-sm flex-col items-center gap-4">
         <div className="relative flex h-16 w-16 items-center justify-center rounded-2xl border border-border bg-card shadow-sm">
           <span className="absolute inset-0 rounded-2xl bg-primary/10 animate-ping" />
-          <Image
-            src="/logo.png"
-            alt="Abd Hind MediCare"
-            width={42}
-            height={42}
-            className="relative z-10 object-contain"
-            priority={compact}
-          />
+          <span className="relative z-10 block h-[42px] w-[42px]">
+            <Image
+              src="/logo.png"
+              alt="Abd Hind MediCare"
+              fill
+              className="object-contain"
+              sizes="42px"
+              priority={compact}
+            />
+          </span>
         </div>
         <div>
           <div className="flex items-center justify-center gap-2 text-sm font-semibold text-primary">

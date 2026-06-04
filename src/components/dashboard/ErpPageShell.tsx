@@ -36,23 +36,7 @@ export function ErpPageShell({
         </CardContent>
       </Card>
 
-      {children ?? (
-        <Card>
-          <CardContent
-            className={cn(
-              "flex flex-col items-center justify-center border-dashed py-16 text-center"
-            )}
-          >
-            <p className="text-sm font-medium text-foreground">
-              Module workspace ready
-            </p>
-            <p className="mt-2 max-w-md text-sm text-muted-foreground">
-              Connect your existing backend APIs to populate this view. Navigation,
-              RBAC, and permissions are already enforced.
-            </p>
-          </CardContent>
-        </Card>
-      )}
+      
     </div>
   );
 }

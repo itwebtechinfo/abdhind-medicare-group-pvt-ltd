@@ -2,6 +2,7 @@ import {
   ACCESS_TOKEN_TTL_MS,
   AUTH_ROUTES,
   MOCK_ROLE_CREDENTIALS,
+  REMEMBERED_ACCESS_TOKEN_TTL_MS,
 } from "./constants";
 import { sessionStorageLayer } from "./session-storage";
 import { tokenStorage } from "./token-storage";
@@ -16,12 +17,13 @@ import type {
   UserRole,
 } from "./types";
 
-function createMockTokens(): TokenPair {
+function createMockTokens(rememberMe = false): TokenPair {
   const now = Date.now();
+  const ttl = rememberMe ? REMEMBERED_ACCESS_TOKEN_TTL_MS : ACCESS_TOKEN_TTL_MS;
   return {
     accessToken: `mock_access_${now}`,
     refreshToken: `mock_refresh_${now}`,
-    expiresAt: now + ACCESS_TOKEN_TTL_MS,
+    expiresAt: now + ttl,
     tokenType: "Bearer",
   };
 }
@@ -38,7 +40,7 @@ const DISPLAY_NAMES: Record<UserRole, string> = {
 };
 
 function buildSession(role: UserRole, username: string, rememberMe: boolean): AuthSession {
-  const tokens = createMockTokens();
+  const tokens = createMockTokens(rememberMe);
   return {
     user: {
       id: `usr_${role}_001`,
@@ -102,8 +104,10 @@ export const authService = {
       return null;
     }
 
-    const tokens =
-      tokenStorage.load(session.rememberMe) ?? session.tokens;
+    const storedTokens = tokenStorage.load(session.rememberMe);
+    const tokens = storedTokens
+      ? { ...session.tokens, ...storedTokens }
+      : session.tokens;
 
     const role = session.user.role;
     return {
@@ -135,7 +139,7 @@ export const authService = {
     const session = sessionStorageLayer.load();
     if (!session?.tokens.refreshToken) return null;
 
-    const refreshed = createMockTokens();
+    const refreshed = createMockTokens(session.rememberMe);
     const updated: AuthSession = {
       ...session,
       tokens: {
