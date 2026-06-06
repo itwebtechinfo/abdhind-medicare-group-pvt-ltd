@@ -21,6 +21,7 @@ const globalSlice = createSlice({
       state.theme = action.payload;
     },
   },
+  
 });
 
 export const { toggleSidebar, setTheme } = globalSlice.actions;
