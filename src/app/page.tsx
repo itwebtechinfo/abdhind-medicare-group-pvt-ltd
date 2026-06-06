@@ -1474,7 +1474,14 @@ export default function Page() {
 
             {/* Description */}
             <p className="founder-hero-description">
-              Inspired by my father’s unwavering dedication, resilience, and visionary spirit, Abd Hind MediCare Group was founded on the principles of integrity, compassion, perseverance, and excellence. His tireless commitment to serving people laid the foundation of our journey and continues to inspire us in advancing clinical care, precision diagnostics, medical manufacturing, and future healthcare innovations — all driven by a mission to build a healthier tomorrow.
+              Inspired by my father’s unwavering dedication, resilience, and
+              visionary spirit, Abd Hind MediCare Group was founded on the
+              principles of integrity, compassion, perseverance, and excellence.
+              His tireless commitment to serving people laid the foundation of
+              our journey and continues to inspire us in advancing clinical
+              care, precision diagnostics, medical manufacturing, and future
+              healthcare innovations — all driven by a mission to build a
+              healthier tomorrow.
             </p>
 
             {/* Doctor Highlight */}
@@ -1776,9 +1783,57 @@ export default function Page() {
             </p>
 
             {/* Rating */}
-            <p style={{ fontSize: "15px", fontWeight: 700, color: "#f59e0b" }}>
-              ⭐ Google 5.0 Rating
-            </p>
+            <div
+              style={{
+                display: "inline-flex",
+                alignItems: "center",
+                gap: 10,
+                background: "#fff",
+                border: "0.5px solid #e5e7eb",
+                borderRadius: 12,
+                padding: "2px 5px",
+                // marginTop: 5,
+                // marginBottom: 1,
+                // boxShadow: "0 2px 8px rgba(0,0,0,0.06)",
+              }}
+            >
+              <img
+                src="https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_%22G%22_logo.svg"
+                alt="Google"
+                style={{ width: 24, height: 24 }}
+              />
+
+              <div>
+                <div
+                  style={{
+                    fontSize: 15,
+                    fontWeight: 700,
+                    color: "#111827",
+                  }}
+                >
+                  Google Reviews
+                </div>
+
+                <div
+                  style={{
+                    fontSize: 14,
+                    fontWeight: 700,
+                    color: "#f59e0b",
+                  }}
+                >
+                  ★★★★★ 5.0
+                </div>
+
+                <div
+                  style={{
+                    fontSize: 12,
+                    color: "#6b7280",
+                  }}
+                >
+                  Excellent | Based on Reviews
+                </div>
+              </div>
+            </div>
 
             {/* ABOUT */}
             <p style={{ fontSize: "15px", color: "#4b5563", lineHeight: 1.7 }}>
