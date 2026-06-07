@@ -728,9 +728,9 @@ export default function Page() {
                 >
                   {[
                     ["Division", "Abd Hind MediCare"],
-                    ["Address", "New Delhi, India"],
-                    ["GST No.", "07AAACA1234B1Z"],
-                    ["Reg. ID", "NABH/2024/12345"],
+                    ["Address", "Jama Masjid, Delhi"],
+                    ["GST No.", "07ABFCA1118C1ZC"],
+                    ["CIN. No.", "U86100DC2026PTC469435"],
                   ].map(([k, v]) => (
                     <div key={k}>
                       <p
