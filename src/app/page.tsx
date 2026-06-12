@@ -716,46 +716,53 @@ export default function Page() {
                   </span>
                 </p>
                 <div
-                  style={{
-                    display: "grid",
-                    gridTemplateColumns: "repeat(4, 1fr)",
-                    gap: "10px",
-                    background: "#f8fffe",
-                    borderRadius: 14,
-                    padding: "12px 14px",
-                    textAlign: "left",
-                  }}
-                >
-                  {[
-                    ["Division", "Abd Hind MediCare"],
-                    ["Address", "Jama Masjid, Delhi"],
-                    ["GST No.", "07ABFCA1118C1ZC"],
-                    ["CIN. No.", "U86100DC2026PTC469435"],
-                  ].map(([k, v]) => (
-                    <div key={k}>
-                      <p
-                        style={{
-                          fontSize: "8px",
-                          color: "#9ca3af",
-                          textTransform: "uppercase",
-                          margin: "0 0 2px",
-                        }}
-                      >
-                        {k}
-                      </p>
-                      <p
-                        style={{
-                          fontSize: "9px",
-                          color: "#374151",
-                          fontWeight: 600,
-                          margin: 0,
-                        }}
-                      >
-                        {v}
-                      </p>
-                    </div>
-                  ))}
-                </div>
+  style={{
+    display: "grid",
+    gridTemplateColumns: "repeat(auto-fit, minmax(90px, 1fr))",
+    gap: "10px",
+    background: "#f8fffe",
+    borderRadius: 14,
+    padding: "12px 14px",
+    textAlign: "left",
+  }}
+>
+  {[
+    ["Division", "Abd Hind MediCare"],
+    ["Address", "Jama Masjid, Delhi"],
+    ["GST No.", "07ABFCA1118C1ZC"],
+    ["CIN. No.", "U86100DC2026PTC469435"],
+  ].map(([k, v]) => (
+    <div 
+      key={k} 
+      style={{ 
+        wordBreak: "break-word", 
+        overflowWrap: "anywhere" 
+      }}
+    >
+      <p
+        style={{
+          fontSize: "8px",
+          color: "#9ca3af",
+          textTransform: "uppercase",
+          margin: "0 0 2px",
+        }}
+      >
+        {k}
+      </p>
+      <p
+        style={{
+          fontSize: "9px",
+          color: "#374151",
+          fontWeight: 600,
+          margin: 0,
+          lineHeight: "1.2",
+        }}
+      >
+        {v}
+      </p>
+    </div>
+  ))}
+</div>
               </div>
             </div>
 
@@ -1114,48 +1121,98 @@ export default function Page() {
                   <span className="tag tag-amber">IDA Member</span>
                 </div>
 
-                {/* Footer */}
-                <div
-                  style={{
-                    display: "flex",
-                    justifyContent: "space-between",
-                    alignItems: "center", // 🔥 vertical alignment fix
-                    paddingTop: 10,
-                    borderTop: "1px solid #e5e7eb",
-                  }}
-                >
-                  {/* Location */}
-                  <div
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      gap: 4,
-                      fontSize: "11px",
-                      color: "#6b7280",
-                    }}
-                  >
-                    <MapPin
-                      style={{ width: 12, height: 12, color: "#9ca3af" }}
-                    />
-                    <span>Jama Masjid, Delhi</span>
-                  </div>
+{/* Footer */}
+<div
+  style={{
+    display: "flex",
+    justifyContent: "space-between",
+    alignItems: "center",
+    paddingTop: 12,
+    borderTop: "1px solid #e5e7eb",
+    gap: "6px",
+  }}
+>
+  {/* Location */}
+  <div
+    style={{
+      display: "flex",
+      alignItems: "center",
+      gap: 3,
+      fontSize: "10px",
+      color: "#6b7280",
+      flexShrink: 0,
+    }}
+  >
+    <MapPin style={{ width: 11, height: 11, color: "#9ca3af" }} />
+    <span>Jama Masjid, Delhi</span>
+  </div>
 
-                  {/* CTA */}
-                  <a
-                    href="https://www.mrdentalclinic.com"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    style={{
-                      fontSize: "11px",
-                      fontWeight: 600,
-                      color: "#1976d2",
-                      textDecoration: "none",
-                      whiteSpace: "nowrap", // 🔥 break hone se bachata hai
-                    }}
-                  >
-                    Visit →
-                  </a>
-                </div>
+  {/* CTA Buttons Block - Bright Logo Color Matched */}
+  <div
+    style={{
+      display: "flex",
+      alignItems: "center",
+      gap: "5px",
+      flexShrink: 0,
+    }}
+  >
+    {/* Visit Text */}
+    <span
+      style={{
+        fontSize: "10px",
+        fontWeight: 700,
+        color: "#4b5563",
+        letterSpacing: "0.2px",
+      }}
+    >
+      Visit:
+    </span>
+
+    {/* Website Button - Bright Light Cyan Blue (Matches Left Side of Logo) */}
+    <a
+      href="https://www.mrdentalclinic.com"
+      target="_blank"
+      rel="noopener noreferrer"
+      style={{
+        fontSize: "10px",
+        fontWeight: 700, // Strong text for high readability on light colors
+        color: "white",
+        background: "#00a2e8", // Perfect Bright Light Logo Blue
+        padding: "5px 12px",
+        borderRadius: "6px",
+        textDecoration: "none",
+        whiteSpace: "nowrap",
+        transition: "background 0.2s ease",
+      }}
+      onMouseOver={(e) => (e.currentTarget.style.background = "#008ecb")}
+      onMouseOut={(e) => (e.currentTarget.style.background = "#00a2e8")}
+    >
+      Website
+    </a>
+
+    {/* Clinic Button - Bright Leaf Green (Matches Top Roof of Logo) */}
+    <a
+      href="https://maps.app.goo.gl/zKRihRAZZ7xuxRCq8?g_st=awb"
+      target="_blank"
+      rel="noopener noreferrer"
+      style={{
+        fontSize: "10px",
+        fontWeight: 700,
+        color: "white",
+        background: "#22c55e", // Pure Vibrant Logo Green
+        padding: "5px 12px",
+        borderRadius: "6px",
+        textDecoration: "none",
+        whiteSpace: "nowrap",
+        transition: "background 0.2s ease",
+      }}
+      onMouseOver={(e) => (e.currentTarget.style.background = "#16a34a")}
+      onMouseOut={(e) => (e.currentTarget.style.background = "#22c55e")}
+    >
+      Clinic
+    </a>
+  </div>
+</div>
               </div>
               {/* ================= Multi-Speciality Healthcare ================= */}
               <div className="child-card purple card-lift">
