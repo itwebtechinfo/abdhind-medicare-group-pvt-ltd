@@ -2081,12 +2081,12 @@ export default function Page() {
             {
               t: "Ultra Soft",
               d: "Micro-split structural fiber configurations meticulously safeguard sensitive gums.",
-              e: "☁️",
+              e: "🪶",
             },
             {
               t: "Sustainable Choice",
               d: "100% conscious cyclical rapid forestry cropping architecture lifecycle.",
-              e: "🌍",
+              e: "🌍💚",
             },
             {
               t: "Biodegradable Handle",
@@ -2096,7 +2096,7 @@ export default function Page() {
             {
               t: "Better for You, Better for Earth",
               d: "A sustainable toothbrush designed for healthier oral care while protecting our planet for future generations.",
-              e: "🌍",
+              e: "♻️🌍",
             },
           ].map((item, index) => (
             <div
