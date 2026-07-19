@@ -1969,7 +1969,7 @@ export default function Page() {
                       color: "#dc2626",
                     }}
                   >
-                    ₹99
+                    ₹44
                   </span>
                   <span
                     style={{
@@ -1978,7 +1978,7 @@ export default function Page() {
                       textDecoration: "line-through",
                     }}
                   >
-                    ₹249
+                    ₹99
                   </span>
                 </div>
               </div>
@@ -1992,7 +1992,7 @@ export default function Page() {
                   fontWeight: 700,
                 }}
               >
-                Save 60%
+                Save 55%
               </span>
             </div>
 
