@@ -6,16 +6,14 @@ import {
   Mail,
   Phone,
   MapPin,
-  Heart,
   Clock,
-  Award,
 } from "lucide-react";
 
 export function Footer() {
   return (
     <footer className="w-full min-w-0 bg-gray-900 text-gray-300">
-      {/* Main Footer */}
-      <div className="w-full px-4 py-12 sm:px-6 md:py-16 lg:px-8">
+      {/* Main Footer - Bottom padding reduced here (pb-4 / md:pb-6) */}
+      <div className="w-full px-4 pt-12 pb-4 sm:px-6 md:pt-16 md:pb-6 lg:px-8">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-12">
           {/* Company Info with Logo */}
           <div>
@@ -24,7 +22,7 @@ export function Footer() {
               <div className="relative w-11 h-11">
                 <Image
                   src="/logo.png"
-                  alt="ABDHind MediCare Logo"
+                  alt="Abd Hind MediCare Logo"
                   fill
                   sizes="44px"
                   className="object-contain transition-transform group-hover:scale-105"
@@ -158,7 +156,7 @@ export function Footer() {
               </li>
               <li className="flex items-center gap-3">
                 <Phone className="w-4 h-4 text-green-400 flex-shrink-0" />
-                <a href="tel:+911234567890" className="hover:text-green-400 transition-colors">
+                <a href="tel:+919540929832" className="hover:text-green-400 transition-colors">
                   +91 95409 29832
                 </a>
               </li>
@@ -173,7 +171,6 @@ export function Footer() {
                 <span>24/7 Emergency Services</span>
               </li>
             </ul>
-         
           </div>
         </div>
 
@@ -185,13 +182,13 @@ export function Footer() {
               <p className="text-sm text-gray-400">Get expert health tips and latest updates</p>
             </div>
             <div>
-              <form className="flex flex-col sm:flex-row gap-3">
+              <form className="flex flex-col sm:flex-row gap-3" onSubmit={(e) => e.preventDefault()}>
                 <input
                   type="email"
                   placeholder="Enter your email"
-                  className="flex-1 px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-green-500"
+                  className="flex-1 px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-green-500 text-sm"
                 />
-                <button className="px-6 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg font-medium transition-colors">
+                <button className="px-6 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg font-medium transition-colors text-sm">
                   Subscribe
                 </button>
               </form>
@@ -199,39 +196,46 @@ export function Footer() {
           </div>
         </div>
 
-        {/* Bottom Bar */}
+        {/* Bottom Bar - Improved, Centered & Space-Optimized */}
         <div className="border-t border-gray-800 pt-6">
-          <div className="flex flex-col md:flex-row justify-between items-center gap-4 text-xs text-gray-400">
-            <div className="flex gap-4">
-              <Link href="/privacy" className="hover:text-green-400 transition-colors">
+          <div className="flex flex-col items-center gap-4 text-xs text-gray-400 text-center">
+            
+            {/* Policies Links */}
+            <nav className="flex flex-wrap justify-center gap-x-6 gap-y-1">
+              <Link href="/privacy" className="hover:text-green-400 transition-colors py-0.5">
                 Privacy Policy
               </Link>
-              <Link href="/terms" className="hover:text-green-400 transition-colors">
+              <Link href="/terms" className="hover:text-green-400 transition-colors py-0.5">
                 Terms of Service
               </Link>
-              <Link href="/cancellation" className="hover:text-green-400 transition-colors">
+              <Link href="/cancellation" className="hover:text-green-400 transition-colors py-0.5">
                 Cancellation Policy
               </Link>
-            </div>
-            <div className="flex flex-col items-center gap-1">
-              <div className="flex items-center gap-2">
-                <span>© 2024 ABDHind MediCare Pvt. Ltd.</span>
-                <span className="w-1 h-1 bg-gray-600 rounded-full"></span>
+            </nav>
+
+            {/* Copyright & Dev Credit Container */}
+            <div className="flex flex-col items-center gap-1.5">
+              {/* Copyright Text */}
+              <div className="flex flex-col sm:flex-row flex-wrap items-center justify-center gap-1 sm:gap-2">
+                <span>© {new Date().getFullYear()} Abd Hind MediCare Pvt. Ltd.</span>
+                <span className="hidden sm:inline-block w-1 h-1 bg-gray-600 rounded-full"></span>
                 <span>All rights reserved.</span>
               </div>
-              {/* IT WEB TECH SOLUTION Credit */}
-              <div className="text-[10px] text-gray-500">
+              
+              {/* IT WEB TECH SOLUTION Credit - Perfectly Centered */}
+              <div className="text-[11px] text-gray-500">
                 Designed & Developed by{" "}
                 <a 
                   href="https://www.itwebtech.in" 
                   target="_blank" 
                   rel="noopener noreferrer"
-                  className="text-green-400 hover:text-green-300 transition-colors hover:underline"
+                  className="text-green-400 hover:text-green-300 transition-colors hover:underline font-medium"
                 >
                   IT WEB TECH SOLUTION
                 </a>
               </div>
             </div>
+
           </div>
         </div>
       </div>

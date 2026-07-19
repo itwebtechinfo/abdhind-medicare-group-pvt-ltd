@@ -103,6 +103,12 @@ export default function Page() {
   const [trustRef, trustIn] = useInView(0.1);
   const [ctaRef, ctaIn] = useInView(0.1);
 
+  const [launchRef, launchIn] = useInView(0.1);
+  const [offerRef, offerIn] = useInView(0.1);
+  const [productsRef, productsIn] = useInView(0.1);
+  const [whyRef, whyIn] = useInView(0.1);
+  const [bottomCtaRef, bottomCtaIn] = useInView(0.1);
+
   return (
     <div
       style={{
@@ -131,11 +137,11 @@ export default function Page() {
         <div className="marquee-track">
           ⭐{" "}
           <span style={{ color: "#f59e0b", fontWeight: 700 }}>5.0 Rated</span>{" "}
-          by Patients • 👨‍⚕️{" "}
-          <span style={{ color: "#059669" }}>Expert-Led Care</span> • 🦷
-          Advanced & Regenerative Treatments • 🛡{" "}
-          <span style={{ color: "#2563eb" }}>Strict Safety</span> • 💬 WhatsApp
-          Support • 📞{" "}
+          by Patients • 🌿{" "}
+          <span style={{ color: "#059669" }}>Expert-Led Healthcare</span> • ❤️
+          Patient-First Care • 🛡{" "}
+          <span style={{ color: "#2563eb" }}>Strict Safety & Hygiene</span> • 💬
+          WhatsApp Support • 📞{" "}
           <span style={{ color: "#dc2626", fontWeight: 700 }}>Call Now</span>:
           +91 95409 29832
         </div>
@@ -716,53 +722,53 @@ export default function Page() {
                   </span>
                 </p>
                 <div
-  style={{
-    display: "grid",
-    gridTemplateColumns: "repeat(auto-fit, minmax(90px, 1fr))",
-    gap: "10px",
-    background: "#f8fffe",
-    borderRadius: 14,
-    padding: "12px 14px",
-    textAlign: "left",
-  }}
->
-  {[
-    ["Division", "Abd Hind MediCare"],
-    ["Address", "Jama Masjid, Delhi"],
-    ["GST No.", "07ABFCA1118C1ZC"],
-    ["CIN. No.", "U86100DC2026PTC469435"],
-  ].map(([k, v]) => (
-    <div 
-      key={k} 
-      style={{ 
-        wordBreak: "break-word", 
-        overflowWrap: "anywhere" 
-      }}
-    >
-      <p
-        style={{
-          fontSize: "8px",
-          color: "#9ca3af",
-          textTransform: "uppercase",
-          margin: "0 0 2px",
-        }}
-      >
-        {k}
-      </p>
-      <p
-        style={{
-          fontSize: "9px",
-          color: "#374151",
-          fontWeight: 600,
-          margin: 0,
-          lineHeight: "1.2",
-        }}
-      >
-        {v}
-      </p>
-    </div>
-  ))}
-</div>
+                  style={{
+                    display: "grid",
+                    gridTemplateColumns: "repeat(auto-fit, minmax(90px, 1fr))",
+                    gap: "10px",
+                    background: "#f8fffe",
+                    borderRadius: 14,
+                    padding: "12px 14px",
+                    textAlign: "left",
+                  }}
+                >
+                  {[
+                    ["Division", "Abd Hind MediCare"],
+                    ["Address", "Jama Masjid, Delhi"],
+                    ["GST No.", "07ABFCA1118C1ZC"],
+                    ["CIN. No.", "U86100DC2026PTC469435"],
+                  ].map(([k, v]) => (
+                    <div
+                      key={k}
+                      style={{
+                        wordBreak: "break-word",
+                        overflowWrap: "anywhere",
+                      }}
+                    >
+                      <p
+                        style={{
+                          fontSize: "8px",
+                          color: "#9ca3af",
+                          textTransform: "uppercase",
+                          margin: "0 0 2px",
+                        }}
+                      >
+                        {k}
+                      </p>
+                      <p
+                        style={{
+                          fontSize: "9px",
+                          color: "#374151",
+                          fontWeight: 600,
+                          margin: 0,
+                          lineHeight: "1.2",
+                        }}
+                      >
+                        {v}
+                      </p>
+                    </div>
+                  ))}
+                </div>
               </div>
             </div>
 
@@ -1121,98 +1127,108 @@ export default function Page() {
                   <span className="tag tag-amber">IDA Member</span>
                 </div>
 
-{/* Footer */}
-<div
-  style={{
-    display: "flex",
-    justifyContent: "space-between",
-    alignItems: "center",
-    paddingTop: 12,
-    borderTop: "1px solid #e5e7eb",
-    gap: "6px",
-  }}
->
-  {/* Location */}
-  <div
-    style={{
-      display: "flex",
-      alignItems: "center",
-      gap: 3,
-      fontSize: "10px",
-      color: "#6b7280",
-      flexShrink: 0,
-    }}
-  >
-    <MapPin style={{ width: 11, height: 11, color: "#9ca3af" }} />
-    <span>Jama Masjid, Delhi</span>
-  </div>
+                {/* Footer */}
+                <div
+                  style={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                    paddingTop: 12,
+                    borderTop: "1px solid #e5e7eb",
+                    gap: "6px",
+                  }}
+                >
+                  {/* Location */}
+                  <div
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: 3,
+                      fontSize: "10px",
+                      color: "#6b7280",
+                      flexShrink: 0,
+                    }}
+                  >
+                    <MapPin
+                      style={{ width: 11, height: 11, color: "#9ca3af" }}
+                    />
+                    <span>Jama Masjid, Delhi</span>
+                  </div>
 
-  {/* CTA Buttons Block - Bright Logo Color Matched */}
-  <div
-    style={{
-      display: "flex",
-      alignItems: "center",
-      gap: "5px",
-      flexShrink: 0,
-    }}
-  >
-    {/* Visit Text */}
-    <span
-      style={{
-        fontSize: "10px",
-        fontWeight: 700,
-        color: "#4b5563",
-        letterSpacing: "0.2px",
-      }}
-    >
-      Visit:
-    </span>
+                  {/* CTA Buttons Block - Bright Logo Color Matched */}
+                  <div
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "5px",
+                      flexShrink: 0,
+                    }}
+                  >
+                    {/* Visit Text */}
+                    <span
+                      style={{
+                        fontSize: "10px",
+                        fontWeight: 700,
+                        color: "#4b5563",
+                        letterSpacing: "0.2px",
+                      }}
+                    >
+                      Visit:
+                    </span>
 
-    {/* Website Button - Bright Light Cyan Blue (Matches Left Side of Logo) */}
-    <a
-      href="https://www.mrdentalclinic.com"
-      target="_blank"
-      rel="noopener noreferrer"
-      style={{
-        fontSize: "10px",
-        fontWeight: 700, // Strong text for high readability on light colors
-        color: "white",
-        background: "#00a2e8", // Perfect Bright Light Logo Blue
-        padding: "5px 12px",
-        borderRadius: "6px",
-        textDecoration: "none",
-        whiteSpace: "nowrap",
-        transition: "background 0.2s ease",
-      }}
-      onMouseOver={(e) => (e.currentTarget.style.background = "#008ecb")}
-      onMouseOut={(e) => (e.currentTarget.style.background = "#00a2e8")}
-    >
-      Website
-    </a>
+                    {/* Website Button - Bright Light Cyan Blue (Matches Left Side of Logo) */}
+                    <a
+                      href="https://www.mrdentalclinic.com"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      style={{
+                        fontSize: "10px",
+                        fontWeight: 700, // Strong text for high readability on light colors
+                        color: "white",
+                        background: "#00a2e8", // Perfect Bright Light Logo Blue
+                        padding: "5px 12px",
+                        borderRadius: "6px",
+                        textDecoration: "none",
+                        whiteSpace: "nowrap",
+                        transition: "background 0.2s ease",
+                      }}
+                      onMouseOver={(e) =>
+                        (e.currentTarget.style.background = "#008ecb")
+                      }
+                      onMouseOut={(e) =>
+                        (e.currentTarget.style.background = "#00a2e8")
+                      }
+                    >
+                      Website
+                    </a>
 
-    {/* Clinic Button - Bright Leaf Green (Matches Top Roof of Logo) */}
-    <a
-      href="https://maps.app.goo.gl/zKRihRAZZ7xuxRCq8?g_st=awb"
-      target="_blank"
-      rel="noopener noreferrer"
-      style={{
-        fontSize: "10px",
-        fontWeight: 700,
-        color: "white",
-        background: "#22c55e", // Pure Vibrant Logo Green
-        padding: "5px 12px",
-        borderRadius: "6px",
-        textDecoration: "none",
-        whiteSpace: "nowrap",
-        transition: "background 0.2s ease",
-      }}
-      onMouseOver={(e) => (e.currentTarget.style.background = "#16a34a")}
-      onMouseOut={(e) => (e.currentTarget.style.background = "#22c55e")}
-    >
-      Clinic
-    </a>
-  </div>
-</div>
+                    {/* Clinic Button - Bright Leaf Green (Matches Top Roof of Logo) */}
+                    <a
+                      href="https://maps.app.goo.gl/zKRihRAZZ7xuxRCq8?g_st=awb"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      style={{
+                        fontSize: "10px",
+                        fontWeight: 700,
+                        color: "white",
+                        background: "#22c55e", // Pure Vibrant Logo Green
+                        padding: "5px 12px",
+                        borderRadius: "6px",
+                        textDecoration: "none",
+                        whiteSpace: "nowrap",
+                        transition: "background 0.2s ease",
+                      }}
+                      onMouseOver={(e) =>
+                        (e.currentTarget.style.background = "#16a34a")
+                      }
+                      onMouseOut={(e) =>
+                        (e.currentTarget.style.background = "#22c55e")
+                      }
+                    >
+                      Clinic
+                    </a>
+                  </div>
+                </div>
               </div>
               {/* ================= Multi-Speciality Healthcare ================= */}
               <div className="child-card purple card-lift">
@@ -1593,7 +1609,6 @@ export default function Page() {
           </div>
         </div>
       </section>
-      {/* ========= END FIXED SECTION ========= */}
 
       {/* SERVICES SECTION */}
       <section
@@ -1738,6 +1753,406 @@ export default function Page() {
         </div>
       </section>
 
+      {/* ================================================================================= */}
+      {/* CONSOLIDATED SECTION: HERO PRODUCT LAUNCH & LIVE OFFER (E-COMMERCE OPTIMIZED)     */}
+      {/* ================================================================================= */}
+      <section
+        ref={launchRef}
+        style={{
+          width: "100%",
+          padding:
+            "30px max(15px, calc((100% - 1200px) / 2)) 10px max(15px, calc((100% - 1200px) / 2))",
+          background:
+            "radial-gradient(circle at 50% 0%, rgba(16, 185, 129, 0.04), transparent 50%), #ffffff",
+          overflow: "hidden",
+        }}
+      >
+        <style>{`
+          .ecommerce-vertical-layout {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            width: 100%;
+            align-items: center;
+          }
+          .premium-images-row {
+            display: flex;
+            flex-direction: row;
+            justify-content: center;
+            align-items: center;
+            gap: 16px;
+            width: 100%;
+            max-width: 900px;
+            margin: 0 auto;
+          }
+          .image-wrapper-box {
+            flex: 1;
+            max-width: 420px;
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+          }
+          @media (max-width: 600px) {
+            .premium-images-row {
+              flex-direction: column;
+              gap: 12px;
+              padding: 0 10px;
+            }
+            .image-wrapper-box {
+              width: 100%;
+              max-width: 100%; /* Mobile par fully standard proportion width hold karega */
+            }
+          }
+        `}</style>
+
+        <div className="ecommerce-vertical-layout">
+          {/* TOP BLOCK: Original Dimension Proportional Images */}
+          <div className="premium-images-row">
+            {/* Image 1: Product Specs Poster */}
+            <div
+              className="image-wrapper-box"
+              style={{ border: "1px solid #e2e8f0" }}
+            >
+              <img
+                src="/products/bamboo-toothbrush.jpeg"
+                alt="Product Details Showcase"
+                style={{
+                  width: "100%",
+                  height: "auto",
+                  objectFit:
+                    "contain" /* Ensure full image visibility without any structural crops */,
+                  display: "block",
+                }}
+              />
+            </div>
+
+            {/* Image 2: Offer Package Poster */}
+            <div
+              className="image-wrapper-box"
+              style={{ border: "1px solid #fecaca" }}
+            >
+              <img
+                src="/products/limited-offer.jpeg"
+                alt="Exclusive Offer Matrix"
+                style={{
+                  width: "100%",
+                  height: "auto",
+                  objectFit:
+                    "contain" /* Ensure full image visibility without any structural crops */,
+                  display: "block",
+                }}
+              />
+            </div>
+          </div>
+
+          {/* BOTTOM BLOCK: Text Framework Layout */}
+          <div
+            className={launchIn ? "anim" : ""}
+            style={{
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              textAlign: "center",
+              opacity: launchIn ? 1 : 0,
+              width: "100%",
+              maxWidth: "750px",
+              margin: "0 auto",
+            }}
+          >
+            <div
+              style={{
+                display: "flex",
+                flexWrap: "wrap",
+                justifyContent: "center",
+                gap: "6px",
+                marginBottom: "12px",
+              }}
+            >
+              <span
+                style={{
+                  background: "rgba(16, 185, 129, 0.08)",
+                  border: "1px solid rgba(16, 185, 129, 0.2)",
+                  padding: "4px 12px",
+                  borderRadius: "999px",
+                  color: "#047857",
+                  fontSize: "11px",
+                  fontWeight: 700,
+                }}
+              >
+                🌿 NEW PRODUCT LAUNCH
+              </span>
+              <span
+                style={{
+                  background: "#dc2626",
+                  padding: "4px 12px",
+                  borderRadius: "999px",
+                  color: "#ffffff",
+                  fontSize: "11px",
+                  fontWeight: 700,
+                }}
+              >
+                💥 UP TO 60% OFF
+              </span>
+            </div>
+
+            <h2
+              style={{
+                fontSize: "clamp(22px, 3.5vw, 36px)",
+                fontWeight: 800,
+                lineHeight: 1.2,
+                letterSpacing: "-0.02em",
+                color: "#0f172a",
+                margin: "0 0 6px 0",
+              }}
+            >
+              MR Dental{" "}
+              <span
+                className="serif"
+                style={{
+                  fontStyle: "italic",
+                  fontWeight: 400,
+                  background: "linear-gradient(90deg, #059669, #10b981)",
+                  WebkitBackgroundClip: "text",
+                  WebkitTextFillColor: "transparent",
+                }}
+              >
+                Bamboo Toothbrush
+              </span>
+            </h2>
+
+            <p
+              style={{
+                fontSize: "14px",
+                color: "#64748b",
+                lineHeight: 1.5,
+                marginBottom: "16px",
+                maxWidth: "600px",
+              }}
+            >
+              Premium bamboo toothbrush crafted with organic charcoal-infused
+              ultra soft bristles. Eco-friendly, completely plastic-free oral
+              hygiene layout engineered by dental surgeons.
+            </p>
+
+            {/* Pricing Tag Component */}
+            <div
+              style={{
+                background: "linear-gradient(145deg, #fff5f5, #ffffff)",
+                border: "1.5px solid #fecaca",
+                borderRadius: "14px",
+                padding: "12px 20px",
+                width: "100%",
+                maxWidth: "400px",
+                marginBottom: "16px",
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+              }}
+            >
+              <div style={{ textAlign: "left" }}>
+                <span
+                  style={{ fontSize: "9px", fontWeight: 700, color: "#94a3b8" }}
+                >
+                  LAUNCH PRICE
+                </span>
+                <div
+                  style={{
+                    display: "flex",
+                    alignItems: "baseline",
+                    gap: "6px",
+                  }}
+                >
+                  <span
+                    style={{
+                      fontSize: "22px",
+                      fontWeight: 800,
+                      color: "#dc2626",
+                    }}
+                  >
+                    ₹99
+                  </span>
+                  <span
+                    style={{
+                      fontSize: "13px",
+                      color: "#94a3b8",
+                      textDecoration: "line-through",
+                    }}
+                  >
+                    ₹249
+                  </span>
+                </div>
+              </div>
+              <span
+                style={{
+                  background: "#fee2e2",
+                  color: "#991b1b",
+                  padding: "4px 8px",
+                  borderRadius: "6px",
+                  fontSize: "11px",
+                  fontWeight: 700,
+                }}
+              >
+                Save 60%
+              </span>
+            </div>
+
+            <button
+              style={{
+                background: "linear-gradient(135deg, #059669, #10b981)",
+                color: "white",
+                padding: "14px 44px",
+                borderRadius: "12px",
+                fontSize: "15px",
+                fontWeight: 700,
+                border: "none",
+                width: "100%",
+                maxWidth: "400px",
+                cursor: "pointer",
+                boxShadow: "0 8px 20px rgba(16,185,129,0.15)",
+              }}
+            >
+              Buy Now (Launch Discount)
+            </button>
+          </div>
+        </div>
+      </section>
+
+      {/* ================================================================================= */}
+      {/* SECTION 4: WHY BAMBOO?                                                            */}
+      {/* ================================================================================= */}
+      <section
+        ref={whyRef}
+        style={{
+          width: "100%",
+          padding:
+            "20px max(15px, calc((100% - 1200px) / 2)) 60px max(15px, calc((100% - 1200px) / 2))",
+          background: "linear-gradient(180deg, #ffffff 0%, #f4faf7 100%)",
+        }}
+      >
+        <div style={{ textAlign: "center", marginBottom: "32px" }}>
+          <div className="divider" style={{ margin: "0 auto 12px" }} />
+          <h2
+            style={{
+              fontSize: "clamp(24px, 3.5vw, 34px)",
+              fontWeight: 800,
+              color: "#0f172a",
+              letterSpacing: "-0.02em",
+            }}
+          >
+            Why Switch to{" "}
+            <span
+              className="serif"
+              style={{ fontStyle: "italic", color: "#059669", fontWeight: 700 }}
+            >
+              Bamboo?
+            </span>
+          </h2>
+        </div>
+
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))",
+            gap: "16px",
+            width: "100%",
+          }}
+        >
+          {[
+            {
+              t: "Natural Bamboo",
+              d: "Organic clinical-grade solid antibacterial bamboo core platform layer.",
+              e: "🎋",
+            },
+            {
+              t: "Eco Friendly",
+              d: "Substantially coordinates drop reductions across global plastic waste dumps.",
+              e: "🌱",
+            },
+            {
+              t: "Plastic Free",
+              d: "Constructed completely void of petrochemical toxins or trace BPA chemical agents.",
+              e: "❌",
+            },
+            {
+              t: "Charcoal Bristles",
+              d: "Naturally structures stain target extraction while managing volatile mouth odors.",
+              e: "🪨",
+            },
+            {
+              t: "Ultra Soft",
+              d: "Micro-split structural fiber configurations meticulously safeguard sensitive gums.",
+              e: "☁️",
+            },
+            {
+              t: "Sustainable Choice",
+              d: "100% conscious cyclical rapid forestry cropping architecture lifecycle.",
+              e: "🌍",
+            },
+            {
+              t: "Biodegradable Handle",
+              d: "Naturally biodegradable bamboo handle that helps reduce plastic waste and supports a cleaner environment.",
+              e: "♻️",
+            },
+            {
+              t: "Better for You, Better for Earth",
+              d: "A sustainable toothbrush designed for healthier oral care while protecting our planet for future generations.",
+              e: "🌍",
+            },
+          ].map((item, index) => (
+            <div
+              key={index}
+              style={{
+                background: "#ffffff",
+                border: "1px solid #e5f0eb",
+                borderRadius: "16px",
+                padding: "20px",
+                boxShadow: "0 4px 20px rgba(0, 0, 0, 0.01)",
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "flex-start",
+              }}
+            >
+              <div
+                style={{
+                  fontSize: "20px",
+                  background: "#f0fdf4",
+                  width: "42px",
+                  height: "42px",
+                  borderRadius: "12px",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  marginBottom: "14px",
+                  border: "1px solid #d1fae5",
+                }}
+              >
+                {item.e}
+              </div>
+              <h3
+                style={{
+                  fontSize: "16px",
+                  fontWeight: 700,
+                  color: "#1e293b",
+                  marginBottom: "6px",
+                }}
+              >
+                {item.t}
+              </h3>
+              <p
+                style={{
+                  fontSize: "13.5px",
+                  color: "#64748b",
+                  lineHeight: 1.5,
+                  margin: 0,
+                }}
+              >
+                {item.d}
+              </p>
+            </div>
+          ))}
+        </div>
+      </section>
+
       {/* DOCTOR SECTION */}
       <section
         ref={docRef}
@@ -1786,7 +2201,6 @@ export default function Page() {
             </div>
           </div>
 
-          {/* 🔥 RIGHT: CONTENT */}
           <div style={{ flex: 1, minWidth: 300 }}>
             {/* Name */}
             <h2
