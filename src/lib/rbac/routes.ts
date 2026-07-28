@@ -19,6 +19,15 @@ export const ROUTE_ACCESS_RULES: RouteAccessRule[] = [
   { path: "/settings", permissions: "settings:view", prefix: true },
   { path: "/profile", permissions: "dashboard:view" },
   {
+    // Checked before the generic /admin rule below (rules are matched
+    // longest-path-first) — a role only needs users:view/manage here,
+    // not admin:view/manage, so User Management can be granted to
+    // roles that otherwise have no /admin access at all.
+    path: "/admin/users",
+    permissions: ["users:view", "users:manage"],
+    prefix: true,
+  },
+  {
     path: "/admin",
     permissions: ["admin:view", "admin:manage"],
     prefix: true,

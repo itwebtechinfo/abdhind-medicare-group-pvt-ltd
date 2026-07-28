@@ -10,7 +10,11 @@ export type UserRole =
 
 export type PermissionAction = "view" | "create" | "edit" | "delete" | "manage";
 
-/** Matches the backend's documented permission module list exactly. */
+/**
+ * Matches the backend's documented permission module list, plus "users"
+ * (User Management) — not yet in the backend's module list, see the
+ * backend change request for what needs to be added server-side.
+ */
 export type PermissionModule =
   | "dashboard"
   | "appointments"
@@ -22,7 +26,8 @@ export type PermissionModule =
   | "admin"
   | "pharmacy"
   | "lab"
-  | "enquiry";
+  | "enquiry"
+  | "users";
 
 export type Permission = `${PermissionModule}:${PermissionAction}`;
 
