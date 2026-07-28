@@ -43,15 +43,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [status, setStatus] = useState<AuthStatus>("loading");
   const [session, setSession] = useState<AuthSession | null>(null);
 
-  const hydrate = useCallback(() => {
-    const restored = authService.restoreSession();
+  const hydrate = useCallback(async () => {
+    const restored = await authService.restoreSession();
     setSession(restored);
     setStatus(restored ? "authenticated" : "unauthenticated");
   }, []);
 
   useEffect(() => {
-    const frame = window.requestAnimationFrame(hydrate);
-    return () => window.cancelAnimationFrame(frame);
+    hydrate();
   }, [hydrate]);
 
   const login = useCallback(async (credentials: LoginCredentials) => {

@@ -134,11 +134,9 @@ export function userHasPermission(
   permission: Permission
 ): boolean {
   if (permissions.includes(permission)) return true;
-  const [module, action] = permission.split(":");
-  if (action !== "view" && permissions.includes(`${module}:manage` as Permission)) {
-    return true;
-  }
-  return false;
+  // "module:manage" is a wildcard — implies view/create/edit/delete too.
+  const [module] = permission.split(":");
+  return permissions.includes(`${module}:manage` as Permission);
 }
 
 export function userCan(

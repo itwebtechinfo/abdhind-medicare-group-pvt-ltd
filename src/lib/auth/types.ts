@@ -10,39 +10,21 @@ export type UserRole =
 
 export type PermissionAction = "view" | "create" | "edit" | "delete" | "manage";
 
-export type Permission =
-  | "dashboard:view"
-  | "appointments:view"
-  | "appointments:create"
-  | "appointments:edit"
-  | "appointments:delete"
-  | "appointments:manage"
-  | "patients:view"
-  | "patients:create"
-  | "patients:edit"
-  | "patients:delete"
-  | "patients:manage"
-  | "doctors:view"
-  | "doctors:create"
-  | "doctors:edit"
-  | "doctors:delete"
-  | "doctors:manage"
-  | "reports:view"
-  | "reports:create"
-  | "reports:edit"
-  | "billing:view"
-  | "billing:create"
-  | "billing:edit"
-  | "settings:view"
-  | "settings:manage"
-  | "admin:view"
-  | "admin:manage"
-  | "pharmacy:view"
-  | "pharmacy:manage"
-  | "lab:view"
-  | "lab:manage"
-  | "enquiry:view"
-  | "enquiry:manage";
+/** Matches the backend's documented permission module list exactly. */
+export type PermissionModule =
+  | "dashboard"
+  | "appointments"
+  | "patients"
+  | "doctors"
+  | "reports"
+  | "billing"
+  | "settings"
+  | "admin"
+  | "pharmacy"
+  | "lab"
+  | "enquiry";
+
+export type Permission = `${PermissionModule}:${PermissionAction}`;
 
 export interface AuthUser {
   id: string;
@@ -75,7 +57,8 @@ export interface LoginCredentials {
 }
 
 export interface AuthError {
-  code: "INVALID_CREDENTIALS" | "SESSION_EXPIRED" | "UNAUTHORIZED" | "UNKNOWN";
+  /** Backend's `error` field (e.g. "Unauthorized") — free-form, not a fixed set */
+  code: string;
   message: string;
 }
 
