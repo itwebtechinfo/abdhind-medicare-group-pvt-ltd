@@ -1,6 +1,7 @@
 import axios, { AxiosError, type InternalAxiosRequestConfig } from "axios";
 import { authService } from "@/src/lib/auth/auth-service";
 import { env } from "@/src/config/env";
+import { toast } from "@/src/lib/toast";
 import type { ApiErrorResponse } from "@/src/types/api";
 
 type RetryableRequestConfig = InternalAxiosRequestConfig & { _retry?: boolean };
@@ -48,8 +49,22 @@ apiClient.interceptors.response.use(
       }
 
       authService.logout();
+      toast.error("Session expired", "Please sign in again to continue.");
+      return Promise.reject(normalizeApiError(error));
     }
 
-    return Promise.reject(normalizeApiError(error));
+    const normalized = normalizeApiError(error);
+
+    // Network failures and server errors are unexpected infra problems —
+    // toast them automatically. 4xx errors (validation, bad request, etc.)
+    // are left for the calling form/component to show inline, same as the
+    // login form's wrong-credentials error.
+    const isNetworkError = !error.response;
+    const isServerError = (error.response?.status ?? 0) >= 500;
+    if (isNetworkError || isServerError) {
+      toast.error(isNetworkError ? "Network error" : "Server error", normalized.error.message);
+    }
+
+    return Promise.reject(normalized);
   }
 );

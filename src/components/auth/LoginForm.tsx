@@ -28,6 +28,7 @@ import { Card, CardContent, CardHeader } from "@/src/components/ui/card";
 import { cn } from "@/src/lib/utils";
 import { AUTH_STORAGE_KEYS } from "@/src/lib/auth/constants";
 import { loginSchema, type LoginFormValues } from "@/src/features/auth/login-schema";
+import { toast } from "@/src/lib/toast";
 
 // Feature card component for reusability
 const FeatureCard = ({
@@ -322,13 +323,12 @@ export function LoginForm() {
                   </label>
                   <button
                     type="button"
-                    onClick={() => {
-                      clearErrors("root");
-                      // TODO: swap for the real Toast system once it's built (Step 4)
-                      const message = "Contact your administrator to reset password";
-                      setError("root", { message });
-                      setTimeout(() => clearErrors("root"), 5000);
-                    }}
+                    onClick={() =>
+                      toast.info(
+                        "Forgot your password?",
+                        "Contact your administrator to reset it."
+                      )
+                    }
                     className="text-sm text-emerald-700 transition-colors hover:text-emerald-800 hover:underline focus:outline-none focus:ring-2 focus:ring-emerald-500"
                   >
                     Forgot password?

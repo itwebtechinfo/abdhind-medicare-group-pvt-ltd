@@ -4,6 +4,7 @@ import { SiteLayout } from "../components/layout/SiteLayout";
 import { ThemeProvider } from "../components/theme/ThemeProvider";
 import { ThemeScript } from "../components/theme/ThemeScript";
 import { Providers } from "@/src/lib/Providers";
+import { Toaster } from "@/src/components/ui/sonner";
 
 import "./globals.css";
 
@@ -82,6 +83,7 @@ export default function RootLayout({
           <AuthProvider>
             <ThemeProvider>
               <SiteLayout>{children}</SiteLayout>
+              <Toaster />
             </ThemeProvider>
           </AuthProvider>
         </Providers>
