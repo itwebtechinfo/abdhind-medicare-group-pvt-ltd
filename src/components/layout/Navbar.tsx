@@ -123,7 +123,7 @@ export function Navbar() {
               name: "Delhi - Main",
               href: "/clinics/delhi",
               icon: <Building2 className="w-5 h-5" />,
-              description: "Sector 44, Noida",
+              description: "Jama Masjid, Delhi",
             },
             {
               name: "Kushinagar",
@@ -142,6 +142,11 @@ export function Navbar() {
         {
           title: "Specialties",
           items: [
+            {
+              name: "General Physicians",
+              href: "/doctors/general-physicians",
+              icon: <Heart className="w-5 h-5" />,
+            },
             {
               name: "Cardiologists",
               href: "/doctors/cardiology",
@@ -163,8 +168,24 @@ export function Navbar() {
               icon: <Eye className="w-5 h-5" />,
             },
             {
+              name: "Dermatologist",
+              href: "/doctors/dermatologist",
+              icon: <Baby className="w-5 h-5" />,
+            },
+             {
+              name: "Gynecologists",
+              href: "/doctors/gynecology",
+              icon: <Baby className="w-5 h-5" />,
+            },
+            {
               name: "Pediatricians",
               href: "/doctors/pediatrics",
+              icon: <Baby className="w-5 h-5" />,
+            },
+           
+            {
+              name: "Dentist and Dental Surgeon",
+              href: "/doctors/dental",
               icon: <Baby className="w-5 h-5" />,
             },
           ],
@@ -173,8 +194,8 @@ export function Navbar() {
     },
     { name: "About", href: "/about" },
     { name: "Contact", href: "/contact" },
-    { name: "Blog", href: "/blog" },
-    { name: "Careers", href: "/careers" },
+    { name: "Products", href: "/products" },
+    // { name: "Careers", href: "/careers" },
   ];
 
   const handleDropdown = (dropdown: string) => {

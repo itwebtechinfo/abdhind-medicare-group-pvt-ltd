@@ -31,18 +31,18 @@ export const hospitalServices: HospitalService[] = [
     slug: "dental",
     href: "/services/dental",
     title: "Dental Clinic",
-    status: "active",
-    badge: "Available Now",
+    status: "coming-soon",
+    badge: "Coming Soon",
     icon: Smile,
     description:
-      "Currently running with advanced regenerative dentistry, painless root canal treatment, zirconia crowns, dental implants, pediatric dental care, and smile design.",
+      "Currently running with advanced regenerative dentistry, painless root canal treatment, zirconia crowns & all fixed dental prostheses, dental surgical procedures, dental implants, pediatric dental care, and smile design.",
     highlights: [
       "Dr. Ekhlaq Ahmed, Founder & Lead Dental Surgeon",
       "Appointments open Monday to Saturday",
       "RCT, implants, crowns, aligners, whitening and child dental care",
       "Digital X-ray planning and transparent treatment estimates",
     ],
-    doctors: ["Dr. Ekhlaq Ahmed", "Dental assistant team", "Oral hygiene counsellor"],
+    doctors: ["Dr. Ekhlaq Ahmed", "Dr. Rashiqa", "Oral hygiene counsellor"],
   },
   {
     slug: "cardiology",
