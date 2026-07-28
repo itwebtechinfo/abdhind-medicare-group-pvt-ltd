@@ -39,14 +39,14 @@ const DISPLAY_NAMES: Record<UserRole, string> = {
   lab: "Lab Technician",
 };
 
-function buildSession(role: UserRole, username: string, rememberMe: boolean): AuthSession {
+function buildSession(role: UserRole, phone: string, rememberMe: boolean): AuthSession {
   const tokens = createMockTokens(rememberMe);
   return {
     user: {
       id: `usr_${role}_001`,
-      username,
+      phone,
       displayName: DISPLAY_NAMES[role],
-      email: `${username}@abdhindmedicare.com`,
+      email: `${role}@abdhindmedicare.com`,
       role,
       permissions: ROLE_PERMISSIONS[role],
     },
@@ -56,8 +56,8 @@ function buildSession(role: UserRole, username: string, rememberMe: boolean): Au
   };
 }
 
-function resolveRole(username: string, password: string): UserRole | null {
-  const key = username.trim().toLowerCase();
+function resolveRole(phone: string, password: string): UserRole | null {
+  const key = phone.trim();
   const entry = MOCK_ROLE_CREDENTIALS[key];
   if (!entry || entry.password !== password) return null;
   return entry.role;
@@ -72,20 +72,20 @@ export const authService = {
   ): Promise<{ session: AuthSession } | { error: AuthError }> {
     await new Promise((r) => setTimeout(r, 500));
 
-    const username = credentials.username.trim();
+    const phone = credentials.phone.trim();
     const password = credentials.password;
-    const role = resolveRole(username, password);
+    const role = resolveRole(phone, password);
 
     if (!role) {
       return {
         error: {
           code: "INVALID_CREDENTIALS",
-          message: "Invalid username or password. Please try again.",
+          message: "Invalid phone number or password. Please try again.",
         },
       };
     }
 
-    const session = buildSession(role, username.toLowerCase(), Boolean(credentials.rememberMe));
+    const session = buildSession(role, phone, Boolean(credentials.rememberMe));
     this.persistSession(session);
     return { session };
   },

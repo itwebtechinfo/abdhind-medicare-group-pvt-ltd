@@ -1,18 +1,22 @@
 import type { UserRole } from "./types";
 
-/** Mock credentials per role — replace with API auth later */
+/**
+ * Mock credentials per role, keyed by demo phone number — replace with API auth later.
+ * Login is phone-based, so each role gets a fake 10-digit number instead of a
+ * role-name login id.
+ */
 export const MOCK_ROLE_CREDENTIALS: Record<
   string,
   { password: string; role: UserRole }
 > = {
-  system_admin: { password: "admin1", role: "system_admin" },
-  admin: { password: "admin1", role: "admin" },
-  account: { password: "account1", role: "account" },
-  doctor: { password: "doctor1", role: "doctor" },
-  reception: { password: "reception1", role: "reception" },
-  patient: { password: "patient1", role: "patient" },
-  pharmacy: { password: "pharmacy1", role: "pharmacy" },
-  lab: { password: "lab1", role: "lab" },
+  "9999900001": { password: "admin1", role: "system_admin" },
+  "9999900002": { password: "admin1", role: "admin" },
+  "9999900003": { password: "account1", role: "account" },
+  "9999900004": { password: "doctor1", role: "doctor" },
+  "9999900005": { password: "reception1", role: "reception" },
+  "9999900006": { password: "patient1", role: "patient" },
+  "9999900007": { password: "pharmacy1", role: "pharmacy" },
+  "9999900008": { password: "lab1", role: "lab" },
 };
 
 /** @deprecated Use MOCK_ROLE_CREDENTIALS — kept for backward compatibility */
@@ -24,7 +28,7 @@ export const TEMP_CREDENTIALS = {
 export const AUTH_STORAGE_KEYS = {
   session: "abdhind_auth_session",
   remember: "abdhind_auth_remember",
-  rememberedUsername: "abdhind_auth_username",
+  rememberedPhone: "abdhind_auth_phone",
   accessToken: "abdhind_access_token",
   refreshToken: "abdhind_refresh_token",
   theme: "abdhind_theme",

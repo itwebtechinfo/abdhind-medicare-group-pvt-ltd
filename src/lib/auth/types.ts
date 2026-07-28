@@ -46,7 +46,7 @@ export type Permission =
 
 export interface AuthUser {
   id: string;
-  username: string;
+  phone: string;
   displayName: string;
   email?: string;
   role: UserRole;
@@ -69,7 +69,7 @@ export interface AuthSession {
 }
 
 export interface LoginCredentials {
-  username: string;
+  phone: string;
   password: string;
   rememberMe?: boolean;
 }

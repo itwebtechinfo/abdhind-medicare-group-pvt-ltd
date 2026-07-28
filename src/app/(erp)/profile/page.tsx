@@ -29,9 +29,9 @@ export default function ProfilePage() {
           <div className="grid gap-4 sm:grid-cols-2">
             <div>
               <p className="text-xs font-medium uppercase text-muted-foreground">
-                Username
+                Phone Number
               </p>
-              <p className="font-medium">{user?.username}</p>
+              <p className="font-medium">{user?.phone}</p>
             </div>
             <div>
               <p className="text-xs font-medium uppercase text-muted-foreground">
