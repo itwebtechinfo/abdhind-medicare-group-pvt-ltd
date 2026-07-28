@@ -30,7 +30,11 @@ export async function authFetch(
     const refreshed = await authService.refreshTokens();
     if (!refreshed) {
       authService.logout();
+      return response;
     }
+
+    const retried = await authRequestInterceptor(init);
+    return fetch(input, retried);
   }
 
   return response;
