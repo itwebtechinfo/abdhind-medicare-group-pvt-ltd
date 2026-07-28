@@ -4,6 +4,7 @@ import {
   Bone,
   Brain,
   Ear,
+  Eye,
   HeartPulse,
   Microscope,
   Pill,
@@ -11,6 +12,7 @@ import {
   Smile,
   Sparkles,
   Stethoscope,
+  Venus,
   Video,
 } from "lucide-react";
 
@@ -93,6 +95,42 @@ export const hospitalServices: HospitalService[] = [
     doctors: ["Pediatric consultant panel under onboarding"],
   },
   {
+    slug: "general-physicians",
+    href: "/doctors/general-physicians",
+    title: "General Physicians",
+    status: "coming-soon",
+    badge: "Coming Soon",
+    icon: Stethoscope,
+    description:
+      "A general physician OPD is being prepared for everyday illness, fever, infections, routine health checks, and specialist referrals.",
+    highlights: ["Walk-in and appointment OPD", "Routine health checks", "Referral coordination", "Preventive care guidance"],
+    doctors: ["General physician panel under onboarding"],
+  },
+  {
+    slug: "ophthalmology",
+    href: "/doctors/ophthalmology",
+    title: "Ophthalmology",
+    status: "coming-soon",
+    badge: "Coming Soon",
+    icon: Eye,
+    description:
+      "Eye care services are planned for vision testing, cataract screening, routine eye check-ups, and specialist consultation.",
+    highlights: ["Vision testing", "Cataract screening", "Eye check-up packages", "Specialist referral"],
+    doctors: ["Ophthalmology consultant panel under onboarding"],
+  },
+  {
+    slug: "gynecology",
+    href: "/doctors/gynecology",
+    title: "Gynecology",
+    status: "coming-soon",
+    badge: "Coming Soon",
+    icon: Venus,
+    description:
+      "Women's health services are planned for prenatal care, routine gynecological check-ups, and specialist consultation.",
+    highlights: ["Prenatal care planning", "Routine gynecological check-ups", "Specialist consultation", "Patient counselling"],
+    doctors: ["Gynecology consultant panel under onboarding"],
+  },
+  {
     slug: "general-medicine",
     href: "/services/multi-speciality",
     title: "General Medicine",
@@ -118,7 +156,7 @@ export const hospitalServices: HospitalService[] = [
   },
   {
     slug: "dermatology",
-    href: "/services/telemedicine",
+    href: "/doctors/dermatologist",
     title: "Dermatology",
     status: "coming-soon",
     badge: "Coming Soon",
