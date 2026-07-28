@@ -23,6 +23,7 @@ import {
   ShieldCheck,
 } from "lucide-react";
 import { useState, useEffect, useRef, RefObject } from "react";
+import Image from "next/image";
 
 const useInView = (
   threshold = 0.1,
@@ -58,9 +59,11 @@ const NodeLogo = ({
 
   if (src && !imgError) {
     return (
-      <img
+      <Image
         src={src}
         alt="logo"
+        width={size}
+        height={size}
         style={{
           display: "block",
           width: "auto",
@@ -1580,10 +1583,13 @@ export default function Page() {
           {/* RIGHT CONTENT - IMAGE */}
           <div className="founder-hero-right">
             <div className="founder-hero-image-wrapper">
-              <img
+              <Image
                 src="/heroSection.jpeg"
                 alt="Abd Hind MediCare - Founder-led healthcare ecosystem"
                 className="founder-hero-image"
+                width={2114}
+                height={1418}
+                style={{ width: "100%", height: "auto" }}
                 loading="lazy"
               />
               {/* Overlay */}
@@ -1813,9 +1819,11 @@ export default function Page() {
               className="image-wrapper-box"
               style={{ border: "1px solid #e2e8f0" }}
             >
-              <img
+              <Image
                 src="/products/bamboo-toothbrush.jpeg"
                 alt="Product Details Showcase"
+                width={966}
+                height={1600}
                 style={{
                   width: "100%",
                   height: "auto",
@@ -1831,9 +1839,11 @@ export default function Page() {
               className="image-wrapper-box"
               style={{ border: "1px solid #fecaca" }}
             >
-              <img
+              <Image
                 src="/products/limited-offer.jpeg"
                 alt="Exclusive Offer Matrix"
+                width={972}
+                height={1588}
                 style={{
                   width: "100%",
                   height: "auto",
@@ -2173,9 +2183,11 @@ export default function Page() {
         >
           {/* 🔥 LEFT: IMAGE */}
           <div style={{ flex: "0 0 280px", textAlign: "center" }}>
-            <img
+            <Image
               src="/dr-img-abdHind.jpeg"
               alt="Dr. Ekhlaq Ahmed"
+              width={957}
+              height={1137}
               style={{
                 width: 180,
                 height: 180,
@@ -2437,9 +2449,11 @@ export default function Page() {
               boxShadow: "0 20px 60px rgba(0,0,0,0.15)",
             }}
           >
-            <img
+            <Image
               src="/ypocr.png"
               alt="Healthcare Vision"
+              width={1774}
+              height={887}
               style={{
                 width: "100%",
                 height: "auto",
