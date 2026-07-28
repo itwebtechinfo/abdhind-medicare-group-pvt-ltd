@@ -220,7 +220,6 @@ export function Navbar() {
 
   const handleEnquirySubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    console.log("Enquiry submitted:", enquiryForm);
     setEnquiryForm({ name: "", phone: "", time: "Morning" });
     setEnquiryOpen(false);
   };

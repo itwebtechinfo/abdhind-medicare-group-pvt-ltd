@@ -19,12 +19,6 @@ export const MOCK_ROLE_CREDENTIALS: Record<
   "9999900008": { password: "lab1", role: "lab" },
 };
 
-/** @deprecated Use MOCK_ROLE_CREDENTIALS — kept for backward compatibility */
-export const TEMP_CREDENTIALS = {
-  username: "admin",
-  password: "admin1",
-} as const;
-
 export const AUTH_STORAGE_KEYS = {
   session: "abdhind_auth_session",
   remember: "abdhind_auth_remember",
