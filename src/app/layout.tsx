@@ -3,6 +3,7 @@ import { AuthProvider } from "../contexts/AuthProvider";
 import { SiteLayout } from "../components/layout/SiteLayout";
 import { ThemeProvider } from "../components/theme/ThemeProvider";
 import { ThemeScript } from "../components/theme/ThemeScript";
+import { Providers } from "@/src/lib/Providers";
 
 import "./globals.css";
 
@@ -77,11 +78,13 @@ export default function RootLayout({
         <ThemeScript />
       </head>
       <body className="flex min-h-screen flex-col antialiased">
-        <AuthProvider>
-          <ThemeProvider>
-            <SiteLayout>{children}</SiteLayout>
-          </ThemeProvider>
-        </AuthProvider>
+        <Providers>
+          <AuthProvider>
+            <ThemeProvider>
+              <SiteLayout>{children}</SiteLayout>
+            </ThemeProvider>
+          </AuthProvider>
+        </Providers>
       </body>
     </html>
   );
