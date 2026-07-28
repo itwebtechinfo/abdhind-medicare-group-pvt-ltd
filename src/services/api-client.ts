@@ -2,6 +2,7 @@ import axios, { AxiosError, type InternalAxiosRequestConfig } from "axios";
 import { authService } from "@/src/lib/auth/auth-service";
 import { AUTH_ROUTES } from "@/src/lib/auth/constants";
 import { env } from "@/src/config/env";
+import { API_ENDPOINTS } from "@/src/config/endpoints";
 import { toast } from "@/src/lib/toast";
 import type { NormalizedApiError } from "@/src/types/api";
 
@@ -47,7 +48,7 @@ apiClient.interceptors.response.use(
     // The logout call is best-effort cleanup fired after we've already
     // cleared the local session — a 401 here is expected/harmless, not a
     // real session-expiry event. Don't retry or redirect for it.
-    if (originalRequest?.url?.includes("/auth/logout")) {
+    if (originalRequest?.url?.includes(API_ENDPOINTS.auth.logout)) {
       return Promise.reject(normalizeApiError(error));
     }
 

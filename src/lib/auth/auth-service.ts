@@ -3,8 +3,9 @@ import { AUTH_ROUTES } from "./constants";
 import { sessionStorageLayer } from "./session-storage";
 import { tokenStorage } from "./token-storage";
 import { getDashboardPathForRole, ROLE_LABELS } from "@/src/lib/rbac/roles";
-import { apiClient, publicApiClient, normalizeApiError } from "@/src/services/api-client";
-import type { ApiEnvelope } from "@/src/types/api";
+import { http, publicHttp } from "@/src/services/http";
+import { normalizeApiError } from "@/src/services/api-client";
+import { API_ENDPOINTS } from "@/src/config/endpoints";
 import type {
   AuthError,
   AuthSession,
@@ -67,14 +68,15 @@ export const authService = {
     credentials: LoginCredentials
   ): Promise<{ session: AuthSession } | { error: AuthError }> {
     try {
-      const response = await publicApiClient.post<
-        ApiEnvelope<{ user: ApiUser; tokens: ApiTokens }>
-      >("/api/v1/auth/login", {
-        phone_number: credentials.phone.trim(),
-        password: credentials.password,
-      });
+      const envelope = await publicHttp.post<{ user: ApiUser; tokens: ApiTokens }>(
+        API_ENDPOINTS.auth.login,
+        {
+          phone_number: credentials.phone.trim(),
+          password: credentials.password,
+        }
+      );
 
-      const { user, tokens } = response.data.data;
+      const { user, tokens } = envelope.data;
       const session: AuthSession = {
         user: mapApiUser(user),
         tokens: mapApiTokens(tokens),
@@ -100,9 +102,7 @@ export const authService = {
     if (!stored) return null;
 
     try {
-      const response = await apiClient.get<ApiEnvelope<{ user: ApiUser }>>(
-        "/api/v1/auth/me"
-      );
+      const envelope = await http.get<{ user: ApiUser }>(API_ENDPOINTS.auth.me);
       // Re-read from storage instead of reusing `stored`: the request above
       // may have silently refreshed the access token via the response
       // interceptor, and persisting `stored`'s pre-call tokens here would
@@ -110,7 +110,7 @@ export const authService = {
       const latest = sessionStorageLayer.load() ?? stored;
       const session: AuthSession = {
         ...latest,
-        user: mapApiUser(response.data.data.user),
+        user: mapApiUser(envelope.data.user),
       };
       this.persistSession(session);
       return session;
@@ -122,7 +122,7 @@ export const authService = {
 
   /** User-initiated logout: best-effort server cleanup, then clear locally. */
   logout(): void {
-    apiClient.post("/api/v1/auth/logout").catch(() => {});
+    http.post(API_ENDPOINTS.auth.logout).catch(() => {});
     this.clearSession();
   },
 
@@ -147,14 +147,13 @@ export const authService = {
     if (!session?.tokens.refreshToken) return null;
 
     try {
-      const response = await publicApiClient.post<ApiEnvelope<ApiTokens>>(
-        "/api/v1/auth/refresh",
-        { refresh_token: session.tokens.refreshToken }
-      );
+      const envelope = await publicHttp.post<ApiTokens>(API_ENDPOINTS.auth.refresh, {
+        refresh_token: session.tokens.refreshToken,
+      });
 
       const updated: AuthSession = {
         ...session,
-        tokens: mapApiTokens(response.data.data, session.tokens.refreshToken),
+        tokens: mapApiTokens(envelope.data, session.tokens.refreshToken),
       };
       this.persistSession(updated);
       return updated;
