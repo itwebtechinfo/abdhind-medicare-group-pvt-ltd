@@ -1,7 +1,19 @@
+"use client";
+
+import { useState } from "react";
 import Link from "next/link";
-import { Building2, Stethoscope, BarChart3 } from "lucide-react";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { Building2, Stethoscope, BarChart3, Plus } from "lucide-react";
 import { ErpPageShell } from "@/src/components/dashboard/ErpPageShell";
+import { ErpDataTable } from "@/src/components/erp/ErpDataTable";
+import { Can } from "@/src/components/rbac/PermissionGate";
+import { Button } from "@/src/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/src/components/ui/card";
+import { toast } from "@/src/lib/toast";
+import type { NormalizedApiError } from "@/src/types/api";
+import { departmentService } from "@/src/features/departments/department";
+import { DepartmentFormDialog } from "@/src/features/departments/DepartmentFormDialog";
+import type { CreateDepartmentPayload } from "@/src/features/departments/department";
 
 const adminLinks = [
   {
@@ -24,9 +36,27 @@ const adminLinks = [
   },
 ];
 
-export const metadata = { title: "Admin | MediCare ERP" };
+const DEPARTMENTS_QUERY_KEY = ["departments"] as const;
 
 export default function AdminPage() {
+  const queryClient = useQueryClient();
+  const [formOpen, setFormOpen] = useState(false);
+
+  const { data: departments = [], isLoading } = useQuery({
+    queryKey: DEPARTMENTS_QUERY_KEY,
+    queryFn: async () => (await departmentService.list()).data.departments,
+  });
+
+  const createMutation = useMutation({
+    mutationFn: (values: CreateDepartmentPayload) => departmentService.create(values),
+    onSuccess: (res) => {
+      toast.success(res.msg);
+      setFormOpen(false);
+      queryClient.invalidateQueries({ queryKey: DEPARTMENTS_QUERY_KEY });
+    },
+    onError: (err: NormalizedApiError) => toast.error(err.error, err.msg),
+  });
+
   return (
     <ErpPageShell
       title="Administration"
@@ -55,6 +85,36 @@ export default function AdminPage() {
           );
         })}
       </div>
+
+      <div className="mt-8">
+        <div className="mb-3 flex items-center justify-between">
+          <h2 className="text-base font-semibold">Departments</h2>
+          <Can module="admin" action="create">
+            <Button size="sm" className="gap-2" onClick={() => setFormOpen(true)}>
+              <Plus className="h-4 w-4" />
+              Add Department
+            </Button>
+          </Can>
+        </div>
+        <ErpDataTable
+          data={departments}
+          isLoading={isLoading}
+          searchPlaceholder="Search departments…"
+          emptyMessage="No departments found."
+          columns={[
+            { key: "name", header: "Name", render: (r) => r.name },
+            { key: "description", header: "Description", render: (r) => r.description ?? "—" },
+            { key: "created_at", header: "Created", render: (r) => r.created_at },
+          ]}
+        />
+      </div>
+
+      <DepartmentFormDialog
+        open={formOpen}
+        onOpenChange={setFormOpen}
+        isSubmitting={createMutation.isPending}
+        onCreate={(values) => createMutation.mutate(values)}
+      />
     </ErpPageShell>
   );
 }

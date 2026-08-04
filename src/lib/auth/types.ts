@@ -8,12 +8,13 @@ export type UserRole =
   | "pharmacy"
   | "lab";
 
-export type PermissionAction = "view" | "create" | "edit" | "delete" | "manage";
+export type PermissionAction = "view" | "create" | "edit" | "delete" | "manage" | "reply" | "broadcast";
 
 /**
- * Matches the backend's documented permission module list, plus "users"
- * (User Management) — not yet in the backend's module list, see the
- * backend change request for what needs to be added server-side.
+ * Matches the backend's documented permission module list. "users" is
+ * system_admin-only per the API reference (admin can POST /users but holds
+ * no "users" permission, so it can't view/edit the list — intentional
+ * backend asymmetry, not a bug).
  */
 export type PermissionModule =
   | "dashboard"
@@ -27,7 +28,8 @@ export type PermissionModule =
   | "pharmacy"
   | "lab"
   | "enquiry"
-  | "users";
+  | "users"
+  | "whatsapp_inbox";
 
 export type Permission = `${PermissionModule}:${PermissionAction}`;
 
@@ -38,6 +40,12 @@ export interface AuthUser {
   email?: string;
   role: UserRole;
   permissions: Permission[];
+  profileImage?: string | null;
+  age?: number | null;
+  gender?: string | null;
+  state?: string | null;
+  district?: string | null;
+  address?: string | null;
 }
 
 export interface TokenPair {

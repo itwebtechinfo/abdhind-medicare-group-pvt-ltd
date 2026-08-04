@@ -1,10 +1,14 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
 import { AuthProvider } from "../contexts/AuthProvider";
 import { SiteLayout } from "../components/layout/SiteLayout";
 import { ThemeProvider } from "../components/theme/ThemeProvider";
 import { ThemeScript } from "../components/theme/ThemeScript";
 import { Providers } from "@/src/lib/Providers";
 import { Toaster } from "@/src/components/ui/sonner";
+import { TopProgressBar } from "@/src/components/common/TopProgressBar";
+import { RouteChangeProgress } from "@/src/components/common/RouteChangeProgress";
+import { ActivityPill } from "@/src/components/common/ActivityPill";
 
 import "./globals.css";
 
@@ -80,6 +84,11 @@ export default function RootLayout({
       </head>
       <body className="flex min-h-screen flex-col antialiased">
         <Providers>
+          <TopProgressBar />
+          <ActivityPill />
+          <Suspense fallback={null}>
+            <RouteChangeProgress />
+          </Suspense>
           <AuthProvider>
             <ThemeProvider>
               <SiteLayout>{children}</SiteLayout>

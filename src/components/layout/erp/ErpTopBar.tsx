@@ -3,7 +3,6 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
-  Bell,
   ChevronDown,
   LogOut,
   Maximize2,
@@ -16,6 +15,7 @@ import {
 import { memo, useRef, useState, useEffect } from "react";
 import { useAuth } from "@/src/hooks/useAuth";
 import { useErpLayout } from "@/src/contexts/ErpLayoutContext";
+import { NotificationBell } from "@/src/features/notifications/NotificationBell";
 import { AUTH_ROUTES } from "@/src/lib/auth/constants";
 import { ROLE_LABELS } from "@/src/lib/rbac/roles";
 import { ThemeToggle } from "@/src/components/theme/ThemeToggle";
@@ -119,16 +119,7 @@ function ErpTopBarComponent() {
           <Search className="h-[18px] w-[18px]" />
         </Button>
 
-        <Button
-          type="button"
-          variant="ghost"
-          size="icon"
-          className="relative"
-          aria-label="Notifications"
-        >
-          <Bell className="h-[18px] w-[18px]" />
-          <span className="absolute right-2 top-2 h-2 w-2 rounded-full bg-destructive ring-2 ring-card" />
-        </Button>
+        <NotificationBell />
 
         <ThemeToggle />
 

@@ -4,6 +4,7 @@ import type {
   PaginationState,
   Row,
   SortingState,
+  VisibilityState,
 } from "@tanstack/react-table";
 import type { ReactNode } from "react";
 
@@ -81,4 +82,6 @@ export interface DataTableProps<TData> {
   emptyMessage?: string;
   toolbar?: ReactNode;
   className?: string;
+  /** Columns hidden by default (by column id) — the user can still show them via the Columns menu. */
+  initialColumnVisibility?: VisibilityState;
 }

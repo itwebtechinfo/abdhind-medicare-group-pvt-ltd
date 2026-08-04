@@ -1,6 +1,5 @@
 "use client";
 
-import { usePathname } from "next/navigation";
 import { ShieldAlert } from "lucide-react";
 import { useRequireAuth } from "@/src/hooks/useRequireAuth";
 import { EnterpriseLoader } from "@/src/components/common/EnterpriseLoader";
@@ -17,8 +16,7 @@ export function ProtectedRoute({
   guard,
   fallback,
 }: ProtectedRouteProps) {
-  const pathname = usePathname();
-  const { isLoading, isAuthorized } = useRequireAuth(guard);
+  const { isLoading, isAuthorized, guard: guardResult } = useRequireAuth(guard);
 
   if (isLoading) {
     return (
@@ -32,12 +30,17 @@ export function ProtectedRoute({
   }
 
   if (!isAuthorized) {
+    const isSignedOut =
+      guardResult.reason === "unauthenticated" || guardResult.reason === "expired";
+
     return (
       fallback ?? (
         <div className="flex min-h-[50vh] flex-col items-center justify-center gap-2 px-4 text-center">
           <ShieldAlert className="h-10 w-10 text-amber-500" />
           <p className="text-sm text-gray-600">
-            Redirecting — unauthorized access to {pathname}
+            {isSignedOut
+              ? "Please sign in to continue — redirecting…"
+              : "Redirecting — you don't have access to this page."}
           </p>
         </div>
       )

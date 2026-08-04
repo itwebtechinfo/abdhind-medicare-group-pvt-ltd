@@ -12,9 +12,9 @@ import {
   ArrowUpDown,
   ChevronLeft,
   ChevronRight,
+  Columns3,
   Download,
   Inbox,
-  MoreHorizontal,
   Search,
   X,
 } from "lucide-react";
@@ -24,8 +24,8 @@ import { Button } from "@/src/components/ui/button";
 import { Card, CardContent } from "@/src/components/ui/card";
 import {
   DropdownMenu,
+  DropdownMenuCheckboxItem,
   DropdownMenuContent,
-  DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
@@ -172,6 +172,7 @@ export function DataTable<TData>({
   emptyMessage = "Try adjusting your search or filters.",
   toolbar,
   className,
+  initialColumnVisibility,
 }: DataTableProps<TData>) {
   const tableColumns = useMemo<ColumnDef<TData, unknown>[]>(() => {
     const next: ColumnDef<TData, unknown>[] = [];
@@ -212,7 +213,7 @@ export function DataTable<TData>({
         id: "actions",
         enableHiding: false,
         enableSorting: false,
-        header: "",
+        header: "Actions",
         cell: ({ row }) => {
           const actions = rowActions.filter((action) =>
             actionIsVisible(action, row.original)
@@ -220,29 +221,27 @@ export function DataTable<TData>({
           if (!actions.length) return null;
 
           return (
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="icon" className="h-8 w-8">
-                  <MoreHorizontal className="h-4 w-4" />
-                  <span className="sr-only">Open row actions</span>
+            <div className="flex items-center justify-end gap-1">
+              {actions.map((action) => (
+                <Button
+                  key={action.label}
+                  type="button"
+                  variant="ghost"
+                  size="icon"
+                  title={action.label}
+                  aria-label={action.label}
+                  disabled={action.disabled?.(row.original)}
+                  className={cn(
+                    "h-8 w-8",
+                    action.destructive &&
+                      "text-destructive hover:bg-destructive/10 hover:text-destructive"
+                  )}
+                  onClick={() => action.onClick(row.original)}
+                >
+                  {action.icon}
                 </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-44">
-                <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                <DropdownMenuSeparator />
-                {actions.map((action) => (
-                  <DropdownMenuItem
-                    key={action.label}
-                    disabled={action.disabled?.(row.original)}
-                    className={cn(action.destructive && "text-destructive focus:text-destructive")}
-                    onClick={() => action.onClick(row.original)}
-                  >
-                    {action.icon}
-                    {action.label}
-                  </DropdownMenuItem>
-                ))}
-              </DropdownMenuContent>
-            </DropdownMenu>
+              ))}
+            </div>
           );
         },
       });
@@ -279,6 +278,7 @@ export function DataTable<TData>({
     initialPageSize,
     enableRowSelection,
     getRowId,
+    initialColumnVisibility,
   });
 
   const handleExport = useCallback(() => {
@@ -300,6 +300,7 @@ export function DataTable<TData>({
   const { pageIndex, pageSize } = table.getState().pagination;
   const currentPage = pageIndex + 1;
   const rows = table.getRowModel().rows;
+  const hideableColumns = table.getAllLeafColumns().filter((column) => column.getCanHide());
   const firstRecord = totalRows === 0 ? 0 : pageIndex * pageSize + 1;
   const lastRecord = Math.min(totalRows, pageIndex * pageSize + rows.length);
   const hasFilters = Boolean(
@@ -323,6 +324,32 @@ export function DataTable<TData>({
 
             <div className="flex flex-wrap items-center gap-2">
               {toolbar}
+              {hideableColumns.length > 0 && (
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button type="button" variant="outline" size="sm" className="gap-2">
+                      <Columns3 className="h-4 w-4" />
+                      Columns
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="w-52">
+                    <DropdownMenuLabel>Toggle columns</DropdownMenuLabel>
+                    <DropdownMenuSeparator />
+                    {hideableColumns.map((column) => (
+                      <DropdownMenuCheckboxItem
+                        key={column.id}
+                        checked={column.getIsVisible()}
+                        onCheckedChange={(checked) => column.toggleVisibility(checked)}
+                        onSelect={(event) => event.preventDefault()}
+                      >
+                        {typeof column.columnDef.header === "string"
+                          ? column.columnDef.header
+                          : column.id}
+                      </DropdownMenuCheckboxItem>
+                    ))}
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              )}
               <Button
                 type="button"
                 variant="outline"
@@ -438,7 +465,14 @@ export function DataTable<TData>({
               {table.getHeaderGroups().map((headerGroup) => (
                 <TableRow key={headerGroup.id} className="hover:bg-transparent">
                   {headerGroup.headers.map((header) => (
-                    <TableHead key={header.id} className="whitespace-nowrap">
+                    <TableHead
+                      key={header.id}
+                      className={cn(
+                        "whitespace-nowrap",
+                        header.column.id === "actions" &&
+                          "sticky right-0 z-20 bg-muted/95 text-right backdrop-blur shadow-[-8px_0_8px_-8px_rgba(0,0,0,0.15)] supports-[backdrop-filter]:bg-muted/80"
+                      )}
+                    >
                       {header.isPlaceholder ? null : header.column.getCanSort() ? (
                         <button
                           type="button"
@@ -469,9 +503,20 @@ export function DataTable<TData>({
                 ))
               ) : rows.length ? (
                 rows.map((row) => (
-                  <TableRow key={row.id} data-state={row.getIsSelected() && "selected"}>
+                  <TableRow
+                    key={row.id}
+                    data-state={row.getIsSelected() && "selected"}
+                    className="group"
+                  >
                     {row.getVisibleCells().map((cell) => (
-                      <TableCell key={cell.id} className="whitespace-nowrap">
+                      <TableCell
+                        key={cell.id}
+                        className={cn(
+                          "whitespace-nowrap",
+                          cell.column.id === "actions" &&
+                            "sticky right-0 z-10 bg-card text-right shadow-[-8px_0_8px_-8px_rgba(0,0,0,0.15)] group-hover:bg-muted/50 group-data-[state=selected]:bg-muted"
+                        )}
+                      >
                         {flexRender(cell.column.columnDef.cell, cell.getContext())}
                       </TableCell>
                     ))}

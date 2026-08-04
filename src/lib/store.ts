@@ -2,11 +2,13 @@ import { configureStore } from "@reduxjs/toolkit";
 import { TypedUseSelectorHook, useDispatch, useSelector } from "react-redux";
 import globalReducer from "@/src/components/dashboard/globalSlice";
 import authReducer from "@/src/lib/authSlice";
+import loaderReducer from "@/src/lib/loaderSlice";
 
 export const store = configureStore({
   reducer: {
     global: globalReducer,
     auth: authReducer,
+    loader: loaderReducer,
   },
 });
 

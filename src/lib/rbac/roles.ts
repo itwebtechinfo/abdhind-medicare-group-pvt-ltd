@@ -27,3 +27,6 @@ export const ROLE_DASHBOARD_PATH: Record<UserRole, string> = {
 export function getDashboardPathForRole(role: UserRole): string {
   return ROLE_DASHBOARD_PATH[role] ?? AUTH_ROUTES.dashboard;
 }
+
+/** All assignable roles, derived from ROLE_LABELS so it can't drift out of sync. */
+export const ALL_USER_ROLES = Object.keys(ROLE_LABELS) as UserRole[];

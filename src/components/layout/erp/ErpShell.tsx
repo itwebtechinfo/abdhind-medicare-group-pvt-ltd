@@ -3,6 +3,7 @@
 import { ErpLayoutProvider, useErpLayout } from "@/src/contexts/ErpLayoutContext";
 import { ErpSidebar } from "@/src/components/layout/erp/ErpSidebar";
 import { ErpTopBar } from "@/src/components/layout/erp/ErpTopBar";
+import { WhatsAppActivityWatcher } from "@/src/features/whatsapp/WhatsAppActivityWatcher";
 import { cn } from "@/src/lib/utils";
 
 function ErpShellInner({ children }: { children: React.ReactNode }) {
@@ -10,6 +11,9 @@ function ErpShellInner({ children }: { children: React.ReactNode }) {
 
   return (
     <div className="min-h-screen w-full min-w-0 bg-erp-canvas">
+      {/* Renders nothing — polls for WhatsApp template/broadcast activity
+          and toasts it, regardless of which ERP page is open. */}
+      <WhatsAppActivityWatcher />
       <ErpSidebar />
       <div
         className={cn(

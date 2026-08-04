@@ -10,6 +10,7 @@ import {
   type Row,
   type RowSelectionState,
   type SortingState,
+  type VisibilityState,
 } from "@tanstack/react-table";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import type {
@@ -37,6 +38,7 @@ interface UseDataTableOptions<TData> {
   enableRowSelection?: boolean;
   getRowId?: (originalRow: TData, index: number, parent?: Row<TData>) => string;
   searchDebounceMs?: number;
+  initialColumnVisibility?: VisibilityState;
 }
 
 const EMPTY_FILTER_CONFIG: DataTableFilterConfig<never>[] = [];
@@ -149,6 +151,7 @@ export function useDataTable<TData>({
   enableRowSelection = true,
   getRowId,
   searchDebounceMs = 350,
+  initialColumnVisibility,
 }: UseDataTableOptions<TData>) {
   const [internalFilters, setInternalFilters] = useState<DataTableFilters>(() =>
     compactFilters(filters ?? {})
@@ -158,6 +161,9 @@ export function useDataTable<TData>({
   );
   const [internalSorting, setInternalSorting] = useState<SortingState>([]);
   const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
+  const [columnVisibility, setColumnVisibility] = useState<VisibilityState>(
+    () => initialColumnVisibility ?? {}
+  );
   const [internalPagination, setInternalPagination] = useState<PaginationState>({
     pageIndex: 0,
     pageSize: initialPageSize,
@@ -247,6 +253,7 @@ export function useDataTable<TData>({
       sorting: sortingState,
       pagination: paginationState,
       rowSelection,
+      columnVisibility,
     },
     pageCount: serverSide
       ? Math.ceil((totalCount ?? data.length) / paginationState.pageSize)
@@ -256,6 +263,7 @@ export function useDataTable<TData>({
     enableRowSelection,
     getRowId,
     onRowSelectionChange: setRowSelection,
+    onColumnVisibilityChange: setColumnVisibility,
     onSortingChange: onSortingChange ?? setInternalSorting,
     onPaginationChange: onPaginationChange ?? setInternalPagination,
     getCoreRowModel: getCoreRowModel(),

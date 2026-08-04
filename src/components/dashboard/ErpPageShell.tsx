@@ -36,7 +36,7 @@ export function ErpPageShell({
         </CardContent>
       </Card>
 
-      
+      {children}
     </div>
   );
 }

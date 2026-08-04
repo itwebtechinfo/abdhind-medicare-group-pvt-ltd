@@ -7,6 +7,7 @@ import {
   FileText,
   FlaskConical,
   LayoutDashboard,
+  MessageCircle,
   MessageSquare,
   Pill,
   Settings,
@@ -90,6 +91,34 @@ export const ERP_NAV_SECTIONS: ErpNavSection[] = [
         icon: MessageSquare,
         permissions: ["enquiry:view", "enquiry:manage"],
       },
+      {
+        // Collapsed by default (unlike Clinical Records) so it doesn't push
+        // Laboratory/User Management/Settings below the fold — the user
+        // asked for Inbox/Broadcast/Request Template to live here instead
+        // of a button on the Inbox page, same accordion pattern as Clinical
+        // Records above.
+        name: "WhatsApp",
+        href: "/whatsapp",
+        icon: MessageCircle,
+        permissions: ["whatsapp_inbox:view", "whatsapp_inbox:manage"],
+        children: [
+          {
+            name: "Inbox",
+            href: "/whatsapp",
+            permissions: ["whatsapp_inbox:view", "whatsapp_inbox:manage"],
+          },
+          {
+            name: "Broadcast",
+            href: "/whatsapp/broadcast",
+            permissions: ["whatsapp_inbox:broadcast", "whatsapp_inbox:manage"],
+          },
+          {
+            name: "Templates",
+            href: "/whatsapp/templates",
+            permissions: ["whatsapp_inbox:broadcast", "whatsapp_inbox:manage"],
+          },
+        ],
+      },
     ],
   },
   {
@@ -109,13 +138,13 @@ export const ERP_NAV_SECTIONS: ErpNavSection[] = [
       },
       {
         name: "Pharmacy",
-        href: "/reports?section=pharmacy",
+        href: "/pharmacy",
         icon: Pill,
         permissions: ["pharmacy:view", "pharmacy:manage"],
       },
       {
         name: "Laboratory",
-        href: "/reports?section=lab",
+        href: "/lab",
         icon: FlaskConical,
         permissions: ["lab:view", "lab:manage"],
       },

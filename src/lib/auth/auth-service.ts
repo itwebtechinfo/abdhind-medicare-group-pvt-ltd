@@ -6,6 +6,7 @@ import { getDashboardPathForRole, ROLE_LABELS } from "@/src/lib/rbac/roles";
 import { http, publicHttp } from "@/src/services/http";
 import { normalizeApiError } from "@/src/services/api-client";
 import { API_ENDPOINTS } from "@/src/config/endpoints";
+import type { ApiUser } from "@/src/features/users/user";
 import type {
   AuthError,
   AuthSession,
@@ -16,20 +17,24 @@ import type {
   UserRole,
 } from "./types";
 
-interface ApiUser {
-  id: string;
-  full_name: string;
-  phone_number: string;
-  email?: string;
-  role: string;
-  permissions: string[];
-}
-
 interface ApiTokens {
   access_token: string;
   refresh_token?: string;
   token_type?: string;
   expires_in?: number;
+}
+
+export interface PatientSignupPayload {
+  phone_number: string;
+  password: string;
+  full_name: string;
+  otp: string;
+  state: string;
+  district: string;
+  email?: string;
+  age?: number;
+  gender?: string;
+  address?: string;
 }
 
 function mapApiUser(raw: ApiUser): AuthUser {
@@ -42,6 +47,12 @@ function mapApiUser(raw: ApiUser): AuthUser {
     // "admin") — normalize defensively rather than trust exact casing.
     role: raw.role.toLowerCase() as UserRole,
     permissions: (raw.permissions ?? []) as Permission[],
+    profileImage: raw.profile_image,
+    age: raw.age,
+    gender: raw.gender,
+    state: raw.state,
+    district: raw.district,
+    address: raw.address,
   };
 }
 
@@ -91,6 +102,23 @@ export const authService = {
     }
   },
 
+  /**
+   * Public self-signup (patients only) — creates the account only. Doesn't
+   * persist a session; the patient logs in afterwards with their new
+   * credentials via the regular `login()` flow.
+   */
+  async signup(payload: PatientSignupPayload): Promise<{ success: true } | { error: AuthError }> {
+    try {
+      await publicHttp.post<{ user: ApiUser; tokens: ApiTokens }>(
+        API_ENDPOINTS.patients.signup,
+        payload
+      );
+      return { success: true };
+    } catch (err) {
+      return { error: toAuthError(err) };
+    }
+  },
+
   persistSession(session: AuthSession): void {
     sessionStorageLayer.save(session);
     tokenStorage.save(session.tokens, session.rememberMe);
@@ -121,8 +149,12 @@ export const authService = {
   },
 
   /** User-initiated logout: best-effort server cleanup, then clear locally. */
-  logout(): void {
-    http.post(API_ENDPOINTS.auth.logout).catch(() => {});
+  async logout(): Promise<void> {
+    // Must await before clearing: the request interceptor reads the token
+    // from storage as a microtask, so clearing synchronously right after
+    // firing the request would race it and send the logout call without
+    // an Authorization header.
+    await http.post(API_ENDPOINTS.auth.logout).catch(() => {});
     this.clearSession();
   },
 

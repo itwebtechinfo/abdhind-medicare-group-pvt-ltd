@@ -11,6 +11,8 @@ export const AUTH_ROUTES = {
   login: "/login",
   dashboard: "/dashboard",
   unauthorized: "/unauthorized",
+  /** Where a visitor with no/expired session gets bounced from a protected page. */
+  home: "/",
 } as const;
 
 /** Route prefixes that require authentication */
@@ -22,6 +24,9 @@ export const PROTECTED_ROUTE_PREFIXES = [
   "/reports",
   "/settings",
   "/profile",
+  "/pharmacy",
+  "/lab",
+  "/whatsapp",
 ] as const;
 
 export function isErpPath(pathname: string): boolean {

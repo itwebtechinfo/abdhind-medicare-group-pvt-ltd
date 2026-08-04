@@ -8,7 +8,8 @@ import {
   useState,
   type ReactNode,
 } from "react";
-import { authService } from "@/src/lib/auth/auth-service";
+import { authService, type PatientSignupPayload } from "@/src/lib/auth/auth-service";
+import { authEvents } from "@/src/lib/auth/auth-events";
 import type {
   AuthError,
   AuthSession,
@@ -29,6 +30,10 @@ export interface AuthContextValue {
   isLoading: boolean;
   login: (
     credentials: LoginCredentials
+  ) => Promise<{ success: true } | { success: false; error: AuthError }>;
+  /** Public self-signup (patients only) — creates the account and logs in immediately. */
+  signup: (
+    payload: PatientSignupPayload
   ) => Promise<{ success: true } | { success: false; error: AuthError }>;
   logout: () => void;
   refreshSession: () => Promise<void>;
@@ -53,6 +58,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     hydrate();
   }, [hydrate]);
 
+  // The axios layer clears storage on a dead refresh token, but that alone
+  // doesn't update this component's state — without this, a stale
+  // `session` would keep passing route guards until a hard reload.
+  useEffect(() => {
+    return authEvents.onSessionEnded(() => {
+      setSession(null);
+      setStatus("unauthenticated");
+    });
+  }, []);
+
   const login = useCallback(async (credentials: LoginCredentials) => {
     setStatus("loading");
     const result = await authService.login(credentials);
@@ -64,6 +79,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     setSession(result.session);
     setStatus("authenticated");
+    return { success: true as const };
+  }, []);
+
+  // Doesn't authenticate — just creates the account. The patient logs in
+  // afterwards with their new credentials via the regular `login` flow.
+  const signup = useCallback(async (payload: PatientSignupPayload) => {
+    const result = await authService.signup(payload);
+    if ("error" in result) {
+      return { success: false as const, error: result.error };
+    }
     return { success: true as const };
   }, []);
 
@@ -91,6 +116,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       isAuthenticated: status === "authenticated" && Boolean(session),
       isLoading: status === "loading",
       login,
+      signup,
       logout,
       refreshSession,
       checkPermission: (permission) => hasPermission(session, permission),
@@ -100,7 +126,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       },
       checkRole: (role) => hasRole(session, role),
     }),
-    [status, session, login, logout, refreshSession]
+    [status, session, login, signup, logout, refreshSession]
   );
 
   return (

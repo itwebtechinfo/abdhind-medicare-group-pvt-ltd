@@ -1,9 +1,10 @@
 import axios, { AxiosError, type InternalAxiosRequestConfig } from "axios";
 import { authService } from "@/src/lib/auth/auth-service";
-import { AUTH_ROUTES } from "@/src/lib/auth/constants";
+import { authEvents } from "@/src/lib/auth/auth-events";
 import { env } from "@/src/config/env";
 import { API_ENDPOINTS } from "@/src/config/endpoints";
 import { toast } from "@/src/lib/toast";
+import { loaderController } from "@/src/lib/loader/loader-controller";
 import type { NormalizedApiError } from "@/src/types/api";
 
 type RetryableRequestConfig = InternalAxiosRequestConfig & { _retry?: boolean };
@@ -14,8 +15,10 @@ export const apiClient = axios.create({
 });
 
 /**
- * No interceptors on purpose — used for login/refresh, which must never
+ * No auth interceptors on purpose — used for login/refresh, which must never
  * trigger the 401-refresh-retry logic below on themselves (that would recurse).
+ * It still gets the loader-tracking interceptors below so login/signup/refresh
+ * show the global loader too.
  */
 export const publicApiClient = axios.create({
   baseURL: env.apiBaseUrl,
@@ -29,6 +32,33 @@ apiClient.interceptors.request.use((config) => {
   }
   return config;
 });
+
+// Loader tracking — one counted request per outgoing call, on both clients,
+// independent of the auth/retry logic below. A retried request (after a
+// token refresh) re-enters this same pair, so the loader correctly stays
+// visible across the whole refresh+retry chain.
+for (const instance of [apiClient, publicApiClient]) {
+  instance.interceptors.request.use(
+    (config) => {
+      loaderController.requestStart();
+      return config;
+    },
+    (error) => {
+      loaderController.requestEnd();
+      return Promise.reject(error);
+    }
+  );
+  instance.interceptors.response.use(
+    (response) => {
+      loaderController.requestEnd();
+      return response;
+    },
+    (error) => {
+      loaderController.requestEnd();
+      return Promise.reject(error);
+    }
+  );
+}
 
 export function normalizeApiError(error: AxiosError): NormalizedApiError {
   const data = error.response?.data as Partial<NormalizedApiError> | undefined;
@@ -63,13 +93,14 @@ apiClient.interceptors.response.use(
 
       // Refresh token itself is dead — the whole session is over. Clear
       // locally (not authService.logout(), which would call the API and
-      // could recurse back into this same 401 branch) and force a full
-      // reload to /login so all app/component state resets cleanly.
+      // could recurse back into this same 401 branch) and notify
+      // AuthProvider so it drops its in-memory session immediately — the
+      // route guards react to that and redirect on their own. A hard
+      // `window.location.assign` here used to race that same client-side
+      // redirect, which is what caused the repeated reload/flicker loop.
       authService.clearSession();
       toast.error("Session expired", "Please sign in again to continue.");
-      if (typeof window !== "undefined") {
-        window.location.assign(AUTH_ROUTES.login);
-      }
+      authEvents.emitSessionEnded();
       return Promise.reject(normalizeApiError(error));
     }
 

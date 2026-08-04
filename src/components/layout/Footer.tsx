@@ -202,7 +202,7 @@ export function Footer() {
             
             {/* Policies Links */}
             <nav className="flex flex-wrap justify-center gap-x-6 gap-y-1">
-              <Link href="/privacy" className="hover:text-green-400 transition-colors py-0.5">
+              <Link href="/privacy-policy" className="hover:text-green-400 transition-colors py-0.5">
                 Privacy Policy
               </Link>
               <Link href="/terms" className="hover:text-green-400 transition-colors py-0.5">
