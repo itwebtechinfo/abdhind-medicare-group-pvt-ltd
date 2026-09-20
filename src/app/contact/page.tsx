@@ -27,7 +27,7 @@ export default function ContactPage() {
         {/* Contact Cards Grid */}
         <section className="mt-6 grid gap-5 md:grid-cols-3">
           {[
-            { icon: Phone, title: "Appointments", text: "+91 95409 29832", href: "tel:+919540929832", isExternal: false },
+            { icon: Phone, title: "Appointments", text: "+91 95409 29832", href: "tel:+919540929800", isExternal: false },
             { icon: Mail, title: "Email", text: "info@abdhindmedicare.com", href: "mailto:info@abdhindmedicare.com", isExternal: false },
             { icon: MapPin, title: "Clinic", text: "Jama Masjid, New Delhi 110006", href: mapShareUrl, isExternal: true },
           ].map((item) => {

@@ -121,7 +121,7 @@ export default async function CareerApplyPage({ params }: PageProps) {
               Email Resume
             </a>
             <a
-              href="tel:+919540929832"
+              href="tel:+919540929800"
               className="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-gray-300 px-5 py-3 text-sm font-semibold text-gray-700 transition hover:border-teal-600 hover:text-teal-700"
             >
               <Phone className="h-4 w-4" />

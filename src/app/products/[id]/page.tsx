@@ -172,7 +172,7 @@ export default async function ProductDetailPage({ params }: PageProps) {
 
             <div className="mt-5 grid gap-2 sm:grid-cols-2">
               <a
-                href={available ? "tel:+919540929832" : "/contact"}
+                href={available ? "tel:+919540929800" : "/contact"}
                 className={`inline-flex h-12 items-center justify-center gap-2 rounded-lg px-4 text-sm font-black transition ${
                   available
                     ? "bg-amber-400 text-slate-950 hover:bg-amber-300"
@@ -187,7 +187,7 @@ export default async function ProductDetailPage({ params }: PageProps) {
                 {available ? "Order Now" : "Join Waitlist"}
               </a>
               <a
-                href="https://wa.me/919540929832"
+                href="https://wa.me/919540929800"
                 className="inline-flex h-12 items-center justify-center gap-2 rounded-lg border border-teal-200 bg-teal-50 px-4 text-sm font-black text-teal-800 transition hover:border-teal-500 hover:bg-white"
               >
                 <MessageCircle className="h-4 w-4" />
@@ -292,7 +292,7 @@ export default async function ProductDetailPage({ params }: PageProps) {
               </div>
             </div>
             <a
-              href="tel:+919540929832"
+              href="tel:+919540929800"
               className="mt-4 inline-flex h-11 w-full items-center justify-center gap-2 rounded-lg bg-teal-600 px-4 text-sm font-black text-white transition hover:bg-teal-700"
             >
               <Phone className="h-4 w-4" />

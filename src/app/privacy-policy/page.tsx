@@ -397,7 +397,7 @@ export default function PrivacyPolicyPage() {
               <li className="flex items-center gap-3">
                 <Phone className="h-4 w-4 flex-shrink-0 text-emerald-700" />
                 <a
-                  href="tel:+919540929832"
+                  href="tel:+919540929800"
                   className="hover:text-emerald-700 hover:underline"
                 >
                   +91 95409 29832

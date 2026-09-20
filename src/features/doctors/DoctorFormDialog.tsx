@@ -215,7 +215,7 @@ export function DoctorFormDialog({
               <label htmlFor="phone" className="mb-1.5 block text-sm font-medium">
                 Phone
               </label>
-              <Input id="phone" placeholder="+91-9540929832" {...register("phone")} />
+              <Input id="phone" placeholder="+91-9540929800" {...register("phone")} />
               {errors.phone && <p className="mt-1 text-xs text-destructive">{errors.phone.message}</p>}
             </div>
           </div>
