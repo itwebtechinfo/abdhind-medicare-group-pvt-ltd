@@ -75,6 +75,10 @@ export interface ApiConversation {
   phone: string;
   patient_id: string | null;
   patient_name: string | null;
+  /** The sender's own WhatsApp display name (from Meta's webhook `contacts`
+   * payload) — set even when they're not a registered patient. Use as the
+   * fallback display name before falling back further to `phone`. */
+  contact_name: string | null;
   last_message_preview: string;
   /** Pre-formatted IST display string. */
   last_message_time: string;

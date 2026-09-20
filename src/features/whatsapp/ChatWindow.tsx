@@ -42,6 +42,10 @@ const PAGE_SIZE = 30;
 const POLL_MS = 4000;
 const NEAR_BOTTOM_PX = 80;
 
+function displayName(conversation: Pick<ApiConversation, "patient_name" | "contact_name">): string | null {
+  return conversation.patient_name ?? conversation.contact_name;
+}
+
 function initials(name: string | null, phone: string): string {
   const trimmed = name?.trim();
   if (trimmed) {
@@ -271,10 +275,10 @@ export function ChatWindow({ conversation, onBack }: ChatWindowProps) {
             </Button>
           )}
           <Avatar>
-            <AvatarFallback>{initials(conversation.patient_name, conversation.phone)}</AvatarFallback>
+            <AvatarFallback>{initials(displayName(conversation), conversation.phone)}</AvatarFallback>
           </Avatar>
           <div className="min-w-0">
-            <p className="truncate text-sm font-semibold">{conversation.patient_name ?? conversation.phone}</p>
+            <p className="truncate text-sm font-semibold">{displayName(conversation) ?? conversation.phone}</p>
             <p className="truncate text-xs text-muted-foreground">{conversation.phone}</p>
           </div>
           <Badge variant={humanMode ? "warning" : "secondary"} className="shrink-0 gap-1">

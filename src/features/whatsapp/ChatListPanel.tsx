@@ -20,6 +20,10 @@ const HANDLER_FILTERS: { value: boolean | undefined; label: string }[] = [
   { value: true, label: "Human" },
 ];
 
+function displayName(conversation: Pick<ApiConversation, "patient_name" | "contact_name">): string | null {
+  return conversation.patient_name ?? conversation.contact_name;
+}
+
 function initials(name: string | null, phone: string): string {
   const trimmed = name?.trim();
   if (trimmed) {
@@ -135,12 +139,12 @@ export function ChatListPanel({ selectedPhone, onSelect }: ChatListPanelProps) {
             )}
           >
             <Avatar>
-              <AvatarFallback>{initials(conversation.patient_name, conversation.phone)}</AvatarFallback>
+              <AvatarFallback>{initials(displayName(conversation), conversation.phone)}</AvatarFallback>
             </Avatar>
             <div className="min-w-0 flex-1">
               <div className="flex items-center justify-between gap-2">
                 <span className="truncate text-sm font-medium">
-                  {conversation.patient_name ?? conversation.phone}
+                  {displayName(conversation) ?? conversation.phone}
                 </span>
                 <span className="shrink-0 text-[11px] text-muted-foreground">
                   {displayTimeOnly(conversation.last_message_time)}
