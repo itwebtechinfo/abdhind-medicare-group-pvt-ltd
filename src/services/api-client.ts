@@ -6,6 +6,7 @@ import { API_ENDPOINTS } from "@/src/config/endpoints";
 import { toast } from "@/src/lib/toast";
 import { loaderController } from "@/src/lib/loader/loader-controller";
 import type { NormalizedApiError } from "@/src/types/api";
+import type { AuthSession } from "@/src/lib/auth/types";
 
 type RetryableRequestConfig = InternalAxiosRequestConfig & { _retry?: boolean };
 
@@ -60,6 +61,30 @@ for (const instance of [apiClient, publicApiClient]) {
   );
 }
 
+// Single-flight guard: concurrent 401s (e.g. a dashboard firing several
+// authenticated requests on mount) must not each call POST /auth/refresh
+// independently. If the backend single-uses/rotates the refresh token,
+// only the first of those parallel calls would succeed and the rest would
+// come back invalid — incorrectly reading as "session expired" even though
+// the session is fine. All 401s that land while a refresh is already in
+// flight instead await that same promise and share its result.
+// NOTE: this only fixes the client-side race. It still assumes the
+// backend's refresh endpoint is safe to call concurrently with an access
+// token that's merely near/at expiry — please confirm with backend whether
+// /auth/refresh rotates or invalidates the refresh token on use, and
+// whether permission (RBAC) failures return 403 rather than 401 (a 401 on
+// a permission failure would still be misread here as an expired session).
+let refreshPromise: Promise<AuthSession | null> | null = null;
+
+function refreshSessionOnce(): Promise<AuthSession | null> {
+  if (!refreshPromise) {
+    refreshPromise = authService.refreshTokens().finally(() => {
+      refreshPromise = null;
+    });
+  }
+  return refreshPromise;
+}
+
 export function normalizeApiError(error: AxiosError): NormalizedApiError {
   const data = error.response?.data as Partial<NormalizedApiError> | undefined;
 
@@ -85,7 +110,7 @@ apiClient.interceptors.response.use(
     if (error.response?.status === 401 && originalRequest && !originalRequest._retry) {
       originalRequest._retry = true;
 
-      const refreshed = await authService.refreshTokens();
+      const refreshed = await refreshSessionOnce();
       if (refreshed) {
         originalRequest.headers.set("Authorization", `Bearer ${refreshed.tokens.accessToken}`);
         return apiClient(originalRequest);

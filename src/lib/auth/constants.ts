@@ -8,10 +8,11 @@ export const AUTH_STORAGE_KEYS = {
 } as const;
 
 export const AUTH_ROUTES = {
+  /** Single source of truth for "not authenticated" bounces from a protected page. */
   login: "/login",
   dashboard: "/dashboard",
   unauthorized: "/unauthorized",
-  /** Where a visitor with no/expired session gets bounced from a protected page. */
+  /** The public marketing homepage — not used as a logged-out redirect target. */
   home: "/",
 } as const;
 

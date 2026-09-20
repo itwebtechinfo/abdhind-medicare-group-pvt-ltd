@@ -25,6 +25,20 @@ export function useRequireAuth(options: RouteGuardOptions = {}) {
 
   const guard = evaluateRouteGuard(pathname, session, mergedOptions);
 
+  // Computed synchronously here — in the same render the session goes
+  // null (e.g. right after logout clears it) — so `isLoading` already
+  // reflects the pending redirect before the browser ever paints. Setting
+  // a "redirecting" flag from inside the effect below instead would still
+  // leave one committed frame with isLoading=false/isAuthorized=false,
+  // which is exactly what flashes ProtectedRoute's "not authorized"
+  // fallback for a moment during logout. Permission/role redirects are
+  // deliberately excluded — that fallback's "you don't have access"
+  // message is informative there, not a flash to suppress.
+  const isSignOutRedirect =
+    !guard.allowed &&
+    !!guard.redirectTo &&
+    (guard.reason === "unauthenticated" || guard.reason === "expired");
+
   useEffect(() => {
     if (isLoading) return;
 
@@ -34,7 +48,7 @@ export function useRequireAuth(options: RouteGuardOptions = {}) {
   }, [isLoading, guard.allowed, guard.redirectTo, router]);
 
   return {
-    isLoading,
+    isLoading: isLoading || isSignOutRedirect,
     isAuthenticated,
     isAuthorized: guard.allowed,
     guard,

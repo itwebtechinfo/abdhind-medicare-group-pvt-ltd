@@ -35,7 +35,7 @@ export interface AuthContextValue {
   signup: (
     payload: PatientSignupPayload
   ) => Promise<{ success: true } | { success: false; error: AuthError }>;
-  logout: () => void;
+  logout: () => Promise<void>;
   refreshSession: () => Promise<void>;
   checkPermission: (permission: Permission) => boolean;
   checkModuleAction: (module: string, action: PermissionAction) => boolean;
@@ -92,8 +92,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return { success: true as const };
   }, []);
 
-  const logout = useCallback(() => {
-    authService.logout();
+  // "loggingOut" first (treated as a loading state by consumers) so any
+  // mounted ProtectedRoute shows its loader instead of flashing the
+  // "unauthenticated" fallback while the server call + storage clear are
+  // still in flight. Awaiting authService.logout() (instead of firing it
+  // and forgetting) means session/storage are actually cleared before we
+  // flip to "unauthenticated" and route guards act on it.
+  const logout = useCallback(async () => {
+    setStatus("loggingOut");
+    await authService.logout();
     setSession(null);
     setStatus("unauthenticated");
   }, []);
@@ -114,7 +121,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       session,
       user: session?.user ?? null,
       isAuthenticated: status === "authenticated" && Boolean(session),
-      isLoading: status === "loading",
+      isLoading: status === "loading" || status === "loggingOut",
       login,
       signup,
       logout,

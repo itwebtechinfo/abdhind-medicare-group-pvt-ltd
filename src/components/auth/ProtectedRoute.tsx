@@ -2,6 +2,7 @@
 
 import { ShieldAlert } from "lucide-react";
 import { useRequireAuth } from "@/src/hooks/useRequireAuth";
+import { useAuth } from "@/src/hooks/useAuth";
 import { EnterpriseLoader } from "@/src/components/common/EnterpriseLoader";
 import type { RouteGuardOptions } from "@/src/lib/auth/route-guard";
 
@@ -17,15 +18,19 @@ export function ProtectedRoute({
   fallback,
 }: ProtectedRouteProps) {
   const { isLoading, isAuthorized, guard: guardResult } = useRequireAuth(guard);
+  const { status } = useAuth();
 
   if (isLoading) {
     return (
-      fallback ?? (
+      fallback ??
+      (status === "loggingOut" ? (
+        <EnterpriseLoader label="Signing you out" sublabel="Ending your session securely" />
+      ) : (
         <EnterpriseLoader
           label="Verifying session"
           sublabel="Checking role access and dashboard permissions"
         />
-      )
+      ))
     );
   }
 

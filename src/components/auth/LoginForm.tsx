@@ -27,6 +27,7 @@ import { authService } from "@/src/lib/auth/auth-service";
 import { Button } from "@/src/components/ui/button";
 import { Input } from "@/src/components/ui/input";
 import { Card, CardContent, CardHeader } from "@/src/components/ui/card";
+import { InfoTooltip } from "@/src/components/ui/info-tooltip";
 import {
   Dialog,
   DialogContent,
@@ -407,6 +408,7 @@ export function LoginForm() {
                       {...register("rememberMe")}
                     />
                     <span>Remember me</span>
+                    <InfoTooltip text="Unchecked, you'll stay signed in only in this browser tab — closing it or opening a new tab/window signs you out. Check this on your own device to stay signed in across browser restarts." />
                   </label>
                   <button
                     type="button"

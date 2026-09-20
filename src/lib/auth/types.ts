@@ -75,4 +75,12 @@ export interface AuthError {
   message: string;
 }
 
-export type AuthStatus = "idle" | "loading" | "authenticated" | "unauthenticated";
+export type AuthStatus =
+  | "idle"
+  | "loading"
+  | "authenticated"
+  | "unauthenticated"
+  /** Logout in flight — session is still technically valid but about to be
+   * torn down. Treated as a loading state so route guards show a loader
+   * instead of an "unauthenticated" fallback while this settles. */
+  | "loggingOut";

@@ -1,7 +1,6 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import {
   ChevronDown,
   LogOut,
@@ -16,7 +15,6 @@ import { memo, useRef, useState, useEffect } from "react";
 import { useAuth } from "@/src/hooks/useAuth";
 import { useErpLayout } from "@/src/contexts/ErpLayoutContext";
 import { NotificationBell } from "@/src/features/notifications/NotificationBell";
-import { AUTH_ROUTES } from "@/src/lib/auth/constants";
 import { ROLE_LABELS } from "@/src/lib/rbac/roles";
 import { ThemeToggle } from "@/src/components/theme/ThemeToggle";
 import { Button } from "@/src/components/ui/button";
@@ -33,7 +31,6 @@ import {
 import { cn } from "@/src/lib/utils";
 
 function ErpTopBarComponent() {
-  const router = useRouter();
   const { user, logout } = useAuth();
   const {
     sidebarCollapsed,
@@ -47,9 +44,11 @@ function ErpTopBarComponent() {
     if (searchOpen) searchRef.current?.focus();
   }, [searchOpen]);
 
+  // Just clear the session — useRequireAuth's own redirect (fired once the
+  // route guard sees the cleared session) handles navigation to /login.
+  // A second explicit router.replace() here used to race that redirect.
   const handleLogout = () => {
     logout();
-    router.replace(AUTH_ROUTES.login);
   };
 
   const initials =

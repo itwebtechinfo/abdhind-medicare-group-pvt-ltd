@@ -21,9 +21,13 @@ import {
   CheckCircle2,
   Activity,
   ShieldCheck,
+  Loader2,
 } from "lucide-react";
 import { useState, useEffect, useRef, RefObject } from "react";
+import { useRouter } from "next/navigation";
 import Image from "next/image";
+import { useAuth } from "@/src/hooks/useAuth";
+import { authService } from "@/src/lib/auth/auth-service";
 
 const useInView = (
   threshold = 0.1,
@@ -100,6 +104,18 @@ const NodeLogo = ({
 };
 
 export default function Page() {
+  const router = useRouter();
+  const { isAuthenticated, isLoading, session } = useAuth();
+
+  // A logged-in user hitting the marketing homepage directly (e.g. typing
+  // the bare domain in a fresh tab) should land on their dashboard, not
+  // this public landing page — send them straight there.
+  useEffect(() => {
+    if (!isLoading && isAuthenticated && session) {
+      router.replace(authService.getLoginRedirect(session));
+    }
+  }, [isLoading, isAuthenticated, session, router]);
+
   const [heroRef, heroIn] = useInView(0.05);
   const [servRef, servIn] = useInView(0.1);
   const [docRef, docIn] = useInView(0.1);
@@ -111,6 +127,15 @@ export default function Page() {
   const [productsRef, productsIn] = useInView(0.1);
   const [whyRef, whyIn] = useInView(0.1);
   const [bottomCtaRef, bottomCtaIn] = useInView(0.1);
+
+  // Avoid flashing the full marketing page while the redirect above kicks in.
+  if (!isLoading && isAuthenticated) {
+    return (
+      <div className="flex min-h-screen items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-emerald-600" />
+      </div>
+    );
+  }
 
   return (
     <div

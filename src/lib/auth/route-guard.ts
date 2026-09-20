@@ -40,7 +40,7 @@ export function evaluateRouteGuard(
     return {
       allowed: false,
       reason: "unauthenticated",
-      redirectTo: AUTH_ROUTES.home,
+      redirectTo: AUTH_ROUTES.login,
     };
   }
 
@@ -48,7 +48,7 @@ export function evaluateRouteGuard(
     return {
       allowed: false,
       reason: "expired",
-      redirectTo: AUTH_ROUTES.home,
+      redirectTo: AUTH_ROUTES.login,
     };
   }
 
