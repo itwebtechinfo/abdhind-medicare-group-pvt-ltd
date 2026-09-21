@@ -9,6 +9,8 @@ import {
 } from "@/src/lib/auth/route-guard";
 import { getRouteGuardForPath } from "@/src/lib/rbac/access";
 import { AUTH_ROUTES } from "@/src/lib/auth/constants";
+import { authService } from "@/src/lib/auth/auth-service";
+import { authEvents } from "@/src/lib/auth/auth-events";
 
 export function useRequireAuth(options: RouteGuardOptions = {}) {
   const { session, isLoading, isAuthenticated } = useAuth();
@@ -43,9 +45,19 @@ export function useRequireAuth(options: RouteGuardOptions = {}) {
     if (isLoading) return;
 
     if (!guard.allowed && guard.redirectTo) {
+      // A locally-detected expired token doesn't by itself clear
+      // AuthProvider's session — without this, `isAuthenticated` there
+      // stays stuck true, so /login's own "already signed in, go to
+      // dashboard" redirect (LoginForm) immediately bounces back here,
+      // which immediately redirects to /login again: an infinite
+      // /dashboard <-> /login loop once the access token goes stale.
+      if (guard.reason === "expired") {
+        authService.clearSession();
+        authEvents.emitSessionEnded();
+      }
       router.replace(guard.redirectTo);
     }
-  }, [isLoading, guard.allowed, guard.redirectTo, router]);
+  }, [isLoading, guard.allowed, guard.redirectTo, guard.reason, router]);
 
   return {
     isLoading: isLoading || isSignOutRedirect,
