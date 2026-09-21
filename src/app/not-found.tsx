@@ -92,7 +92,7 @@ export default function NotFound() {
               </Link>
             </div>
             <p className="mt-6 text-sm text-gray-500">
-              Need help now? Call +91 95409 29832.
+              Need help now? Call +91 95409 29800.
             </p>
           </div>
         </div>

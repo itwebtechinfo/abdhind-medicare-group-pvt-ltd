@@ -400,7 +400,7 @@ export default function PrivacyPolicyPage() {
                   href="tel:+919540929800"
                   className="hover:text-emerald-700 hover:underline"
                 >
-                  +91 95409 29832
+                  +91 95409 29800
                 </a>
               </li>
               <li className="flex items-center gap-3">

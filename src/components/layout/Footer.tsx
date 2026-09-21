@@ -157,7 +157,7 @@ export function Footer() {
               <li className="flex items-center gap-3">
                 <Phone className="w-4 h-4 text-green-400 flex-shrink-0" />
                 <a href="tel:+919540929800" className="hover:text-green-400 transition-colors">
-                  +91 95409 29832
+                  +91 95409 29800
                 </a>
               </li>
               <li className="flex items-center gap-3">
@@ -222,16 +222,16 @@ export function Footer() {
                 <span>All rights reserved.</span>
               </div>
               
-              {/* IT WEB TECH SOLUTION Credit - Perfectly Centered */}
+              {/* AVIGRONIX TECHNOLOGIES Credit - Perfectly Centered */}
               <div className="text-[11px] text-gray-500">
                 Designed & Developed by{" "}
                 <a 
-                  href="https://www.itwebtech.in" 
+                  href="https://avigronix.com/" 
                   target="_blank" 
                   rel="noopener noreferrer"
                   className="text-green-400 hover:text-green-300 transition-colors hover:underline font-medium"
                 >
-                  IT WEB TECH SOLUTION
+                  AVIGRONIX TECHNOLOGIES
                 </a>
               </div>
             </div>
