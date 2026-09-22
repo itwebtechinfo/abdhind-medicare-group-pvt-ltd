@@ -155,7 +155,9 @@ export default function AdminDoctorsPage() {
               r.linked_user ? (
                 <div className="flex flex-col gap-0.5">
                   <div className="flex items-center gap-2">
-                    <Badge variant="success">Linked</Badge>
+                    <Badge variant={r.linked_user.is_verified ? "success" : "warning"}>
+                      {r.linked_user.is_verified ? "Linked" : "Unverified"}
+                    </Badge>
                     <span className="font-medium">{r.linked_user.full_name}</span>
                   </div>
                   <span className="text-xs text-muted-foreground">{r.linked_user.phone_number}</span>
@@ -164,6 +166,7 @@ export default function AdminDoctorsPage() {
                 <Badge variant="warning">Not linked</Badge>
               ),
           },
+          { key: "created_at", header: "Joined On", render: (r) => r.created_at },
         ]}
       />
 

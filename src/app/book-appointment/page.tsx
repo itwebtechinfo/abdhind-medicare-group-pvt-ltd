@@ -125,7 +125,10 @@ export default function BookAppointmentPage() {
         otp,
       }),
     onSuccess: (res) => {
-      setBookingId(res.data.appointment.id);
+      // Prefer the human-friendly reference_code (e.g. "MRD-2026-00001") over
+      // the raw Mongo _id; fall back to the id if it's ever missing so this
+      // screen never shows a blank Booking ID.
+      setBookingId(res.data.appointment.reference_code ?? res.data.appointment.id);
     },
     onError: (err: NormalizedApiError) => toast.error(err.error, err.msg),
   });

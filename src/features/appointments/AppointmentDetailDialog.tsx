@@ -28,6 +28,7 @@ import { DispenseDialog } from "@/src/features/pharmacy/DispenseDialog";
 import { LabOrdersSection } from "@/src/features/lab/LabOrdersSection";
 import { RescheduleDialog } from "./RescheduleDialog";
 import { ConfirmAppointmentDialog } from "./ConfirmAppointmentDialog";
+import { CancelAppointmentDialog } from "./CancelAppointmentDialog";
 import { appointmentService } from "./appointment";
 import type { AppointmentStatus, ApiAppointment } from "./appointment";
 
@@ -61,6 +62,7 @@ export function AppointmentDetailDialog({
   const [dispenseOpen, setDispenseOpen] = useState(false);
   const [rescheduleOpen, setRescheduleOpen] = useState(false);
   const [confirmOpen, setConfirmOpen] = useState(false);
+  const [cancelOpen, setCancelOpen] = useState(false);
 
   const { data: auditLog = [] } = useQuery({
     queryKey: ["appointments", current?.id, "audit-log"],
@@ -98,13 +100,14 @@ export function AppointmentDetailDialog({
   // they cancel through the newer PATCH endpoint instead, scoped server-side
   // to their own/booked-by-them appointments. Staff keep the original path.
   const cancelMutation = useMutation({
-    mutationFn: () =>
+    mutationFn: (reason?: string) =>
       isPatient
-        ? appointmentService.update(current?.id as string, { status: "CANCELLED" })
-        : appointmentService.cancel(current?.id as string),
+        ? appointmentService.update(current?.id as string, { status: "CANCELLED", reason })
+        : appointmentService.cancel(current?.id as string, reason),
     onSuccess: (res) => {
       toast.success(res.msg);
       mergeIn(res.data.appointment);
+      setCancelOpen(false);
       invalidateList();
     },
     onError: (err: NormalizedApiError) => toast.error(err.error, err.msg),
@@ -130,6 +133,16 @@ export function AppointmentDetailDialog({
 
   if (!current) return null;
 
+  // Only the pieces that are actually present — an old record missing
+  // address/gender just shows fewer segments instead of a blank/"null".
+  const patientDetails = [
+    current.patient?.age != null ? `${current.patient.age}y` : null,
+    current.patient?.gender || null,
+    current.patient?.address || null,
+  ]
+    .filter(Boolean)
+    .join(" · ");
+
   return (
     <>
       <Dialog open={open} onOpenChange={onOpenChange}>
@@ -139,6 +152,9 @@ export function AppointmentDetailDialog({
             {current.patient?.full_name ?? "Appointment"}
             <Badge variant={STATUS_VARIANT[current.status]}>{current.status}</Badge>
           </DialogTitle>
+          {patientDetails && (
+            <p className="text-xs text-muted-foreground">{patientDetails}</p>
+          )}
           <DialogDescription>
             {current.doctor?.full_name ?? "—"} · {current.appointment_datetime.replace("T", " ")} ·
             Source: {current.source}
@@ -194,7 +210,7 @@ export function AppointmentDetailDialog({
               variant="outline"
               className="gap-1.5"
               disabled={cancelMutation.isPending}
-              onClick={() => cancelMutation.mutate()}
+              onClick={() => setCancelOpen(true)}
             >
               {cancelMutation.isPending ? (
                 <Loader2 className="h-4 w-4 animate-spin" />
@@ -290,6 +306,14 @@ export function AppointmentDetailDialog({
         appointment={current}
         isSubmitting={confirmMutation.isPending}
         onSubmit={(slotId) => confirmMutation.mutate(slotId)}
+      />
+
+      <CancelAppointmentDialog
+        open={cancelOpen}
+        onOpenChange={setCancelOpen}
+        appointment={current}
+        isSubmitting={cancelMutation.isPending}
+        onSubmit={(reason) => cancelMutation.mutate(reason)}
       />
     </>
   );

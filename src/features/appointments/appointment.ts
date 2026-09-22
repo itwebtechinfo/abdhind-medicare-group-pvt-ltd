@@ -19,6 +19,10 @@ export interface RawJoinedPerson {
   phone?: string;
   /** Raw epoch-ms — sub-documents pulled in via a join keep the unformatted timestamp. */
   created_at?: number;
+  /** Patient-only demographics — absent on the joined `doctor` object. */
+  age?: number | null;
+  gender?: string | null;
+  address?: string | null;
 }
 
 export interface RawBookedBy {
@@ -53,6 +57,13 @@ export interface RawApiAppointment {
   doctor?: RawJoinedPerson;
   booked_by_user_id?: string | null;
   booked_by?: RawBookedBy | null;
+  /** Short human-friendly booking id, e.g. "MRD-2026-00001". Always set on
+   * insert (see generate_appointment_reference_code in routes/whatsapp.py),
+   * so this is only optional here for older/edge-case docs missing it. */
+  reference_code?: string | null;
+  /** Only ever populated when the patient cancels via the WhatsApp bot's
+   * reason prompt today — staff-initiated cancels may not set this. */
+  cancellation_reason?: string | null;
 }
 
 export interface ApiAppointment {
@@ -75,6 +86,8 @@ export interface ApiAppointment {
   doctor?: RawJoinedPerson;
   booked_by_user_id: string | null;
   booked_by: BookedBy | null;
+  reference_code: string | null;
+  cancellation_reason: string | null;
 }
 
 export interface AppointmentListFilters {
@@ -86,8 +99,9 @@ export interface AppointmentListFilters {
   scope?: "mine" | "booked_by_me" | "all";
 }
 
-/** PATCH /appointments/{id} — reschedule (slot_id) or cancel (status), never both. */
-export type UpdateAppointmentPayload = { slot_id: string } | { status: "CANCELLED" };
+/** PATCH /appointments/{id} — reschedule (slot_id) or cancel (status), never both.
+ * `reason` is optional free text, only meaningful alongside status: "CANCELLED". */
+export type UpdateAppointmentPayload = { slot_id: string } | { status: "CANCELLED"; reason?: string };
 
 export interface CreateAppointmentPayload {
   patient_phone: string;
@@ -181,6 +195,8 @@ export function mapAppointment(raw: RawApiAppointment): ApiAppointment {
     booked_by: raw.booked_by
       ? { id: raw.booked_by._id, full_name: raw.booked_by.full_name, phone_number: raw.booked_by.phone_number }
       : null,
+    reference_code: raw.reference_code ?? null,
+    cancellation_reason: raw.cancellation_reason ?? null,
   };
 }
 
@@ -230,9 +246,12 @@ export const appointmentService = {
     return { ...res, data: { appointment: mapAppointment(res.data.appointment) } };
   },
 
-  cancel: async (id: string) => {
+  /** `reason` is optional free text explaining the cancellation; omit it
+   * (or pass undefined) and this behaves exactly as before. */
+  cancel: async (id: string, reason?: string) => {
     const res = await http.post<{ appointment: RawApiAppointment }>(
-      API_ENDPOINTS.appointments.cancel(id)
+      API_ENDPOINTS.appointments.cancel(id),
+      reason ? { reason } : undefined
     );
     return { ...res, data: { appointment: mapAppointment(res.data.appointment) } };
   },

@@ -14,6 +14,7 @@ import {
   Pill,
   Users,
   Wallet,
+  XCircle,
 } from "lucide-react";
 import { memo, useMemo } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -40,12 +41,14 @@ function deriveTodayStats(today: DashboardToday): DashboardStat[] {
   const pending = today.status_wise.PENDING ?? 0;
   const approved = today.status_wise.APPROVED ?? 0;
   const completed = today.status_wise.COMPLETED ?? 0;
+  const cancelled = today.status_wise.CANCELLED ?? 0;
   const pct = (n: number) => (today.total > 0 ? Math.round((n / today.total) * 100) : 0);
   return [
     { title: "Today's Appointments", value: String(today.total), subtitle: today.date, progress: 100 },
     { title: "Pending", value: String(pending), subtitle: "Awaiting approval", progress: pct(pending) },
     { title: "Approved", value: String(approved), subtitle: "Confirmed visits", progress: pct(approved) },
     { title: "Completed", value: String(completed), subtitle: "Seen today", progress: pct(completed) },
+    { title: "Cancelled", value: String(cancelled), subtitle: "Cancelled today", progress: pct(cancelled) },
   ];
 }
 
@@ -91,6 +94,7 @@ const STAT_ICONS = [
   Users,
   DollarSign,
   AlertTriangle,
+  XCircle,
 ] as const;
 
 function RoleDashboardComponent() {
@@ -152,7 +156,11 @@ function RoleDashboardComponent() {
         </p>
       </div>
 
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+      <div
+        className={`grid grid-cols-1 gap-4 sm:grid-cols-2 ${
+          stats.length >= 5 ? "xl:grid-cols-5" : "xl:grid-cols-4"
+        }`}
+      >
         {stats.map((stat, index) => {
           const Icon = STAT_ICONS[index % STAT_ICONS.length];
           return (
