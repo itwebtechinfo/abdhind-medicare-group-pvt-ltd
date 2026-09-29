@@ -13,6 +13,7 @@ import { Input } from "@/src/components/ui/input";
 import type { DataTableRowAction } from "@/src/components/common/data-table/types";
 import { usePermission } from "@/src/hooks/usePermission";
 import { toast } from "@/src/lib/toast";
+import { formatEpochMs } from "@/src/lib/format";
 import type { NormalizedApiError } from "@/src/types/api";
 import { doctorService } from "@/src/features/doctors/doctor";
 import { appointmentService } from "@/src/features/appointments/appointment";
@@ -421,7 +422,14 @@ export default function AppointmentsPage() {
           {
             key: "no_show_flagged",
             header: "No-show",
-            render: (r) => (r.no_show_flagged ? <Badge variant="destructive">Yes</Badge> : "—"),
+            render: (r) =>
+              r.no_show_flagged ? (
+                <span title={r.no_show_flagged_at ? `Flagged ${formatEpochMs(r.no_show_flagged_at)}` : undefined}>
+                  <Badge variant="destructive">Yes</Badge>
+                </span>
+              ) : (
+                "—"
+              ),
           },
           {
             key: "reference_code",

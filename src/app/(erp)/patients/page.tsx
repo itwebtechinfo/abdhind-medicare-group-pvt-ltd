@@ -9,6 +9,7 @@ import { Can } from "@/src/components/rbac/PermissionGate";
 import { Button } from "@/src/components/ui/button";
 import type { DataTableRowAction } from "@/src/components/common/data-table/types";
 import { toast } from "@/src/lib/toast";
+import { languageLabel } from "@/src/lib/format";
 import type { NormalizedApiError } from "@/src/types/api";
 import { patientService } from "@/src/features/patients/patient";
 import { PatientFormDialog } from "@/src/features/patients/PatientFormDialog";
@@ -114,6 +115,11 @@ export default function PatientsPage() {
           { key: "age", header: "Age", render: (r) => r.age ?? "—" },
           { key: "gender", header: "Gender", render: (r) => r.gender ?? "—" },
           { key: "address", header: "Address", render: (r) => r.address ?? "—" },
+          {
+            key: "preferred_language",
+            header: "WhatsApp Language",
+            render: (r) => languageLabel(r.preferred_language),
+          },
           { key: "created_at", header: "Registered", render: (r) => r.created_at },
         ]}
       />

@@ -11,6 +11,7 @@ import {
   MessageSquare,
   Pill,
   Settings,
+  ShoppingBag,
   Stethoscope,
   UserCog,
   Users,
@@ -141,6 +142,12 @@ export const ERP_NAV_SECTIONS: ErpNavSection[] = [
         href: "/pharmacy",
         icon: Pill,
         permissions: ["pharmacy:view", "pharmacy:manage"],
+      },
+      {
+        name: "Product Orders",
+        href: "/orders",
+        icon: ShoppingBag,
+        permissions: ["orders:view", "orders:manage"],
       },
       {
         name: "Laboratory",

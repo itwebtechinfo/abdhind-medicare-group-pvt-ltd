@@ -110,7 +110,29 @@ apiClient.interceptors.response.use(
     if (error.response?.status === 401 && originalRequest && !originalRequest._retry) {
       originalRequest._retry = true;
 
-      const refreshed = await refreshSessionOnce();
+      // The backend keeps only the latest access token per session, so a
+      // request still in flight with the old token when a refresh lands comes
+      // back 401. If storage already holds a newer token, just retry with it —
+      // refreshing again would rotate the token under the requests that were
+      // just retried with it and fail those instead.
+      const sentToken = originalRequest.headers.get("Authorization")?.toString().replace(/^Bearer /, "");
+      const currentToken = authService.getAccessToken();
+      if (currentToken && currentToken !== sentToken) {
+        originalRequest.headers.set("Authorization", `Bearer ${currentToken}`);
+        return apiClient(originalRequest);
+      }
+
+      let refreshed: AuthSession | null;
+      try {
+        refreshed = await refreshSessionOnce();
+      } catch (refreshError) {
+        // Couldn't reach the refresh endpoint (network/timeout/5xx) — the
+        // session may be perfectly fine, so fail just this request and keep
+        // the user signed in; the next request will try refreshing again.
+        const normalized = normalizeApiError(refreshError as AxiosError);
+        toast.error(normalized.status ? "Server error" : "Network error", normalized.msg);
+        return Promise.reject(normalized);
+      }
       if (refreshed) {
         originalRequest.headers.set("Authorization", `Bearer ${refreshed.tokens.accessToken}`);
         return apiClient(originalRequest);

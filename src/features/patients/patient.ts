@@ -17,6 +17,8 @@ export interface RawApiPatient {
   age: number | null;
   gender: string | null;
   address: string | null;
+  /** WhatsApp bot language ("hi"/"en"); absent on records the bot never touched. */
+  preferred_language?: string | null;
   created_at: string;
 }
 
@@ -29,6 +31,7 @@ export interface ApiPatient {
   age: number | null;
   gender: string | null;
   address: string | null;
+  preferred_language: string | null;
   created_at: string;
 }
 
@@ -172,6 +175,7 @@ function mapPatient(raw: RawApiPatient): ApiPatient {
     age: raw.age,
     gender: raw.gender,
     address: raw.address,
+    preferred_language: raw.preferred_language ?? null,
     created_at: raw.created_at,
   };
 }

@@ -29,7 +29,8 @@ export type PermissionModule =
   | "lab"
   | "enquiry"
   | "users"
-  | "whatsapp_inbox";
+  | "whatsapp_inbox"
+  | "orders";
 
 export type Permission = `${PermissionModule}:${PermissionAction}`;
 

@@ -11,11 +11,25 @@ import { usePermission } from "@/src/hooks/usePermission";
 import { doctorService } from "@/src/features/doctors/doctor";
 import { reportsService } from "@/src/features/reports/reports";
 
+/** YYYY-MM-DD in the browser's local time — toISOString() is UTC, which in
+ * IST reads as "yesterday" between midnight and 05:30. */
+function toLocalDateString(date: Date) {
+  const pad = (n: number) => String(n).padStart(2, "0");
+  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
+}
+
 function last30Days() {
   const end = new Date();
   const start = new Date();
   start.setDate(end.getDate() - 30);
-  return { start: start.toISOString().slice(0, 10), end: end.toISOString().slice(0, 10) };
+  return { start: toLocalDateString(start), end: toLocalDateString(end) };
+}
+
+/** "2026-09-01" -> "1 Sep 2026" for the period label. */
+function formatDay(value: string) {
+  const [y, m, d] = value.split("-").map(Number);
+  if (!y || !m || !d) return value;
+  return new Date(y, m - 1, d).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" });
 }
 
 export default function ReportsPage() {
@@ -33,30 +47,47 @@ export default function ReportsPage() {
     enabled: canAction("doctors", "view"),
   });
 
+  // The backend rejects start > end with a 400; don't fire the queries at
+  // all for that (or a half-cleared date input) and say why instead.
+  const rangeError =
+    !startDate || !endDate
+      ? "Select both a start and an end date."
+      : startDate > endDate
+        ? "Start date cannot be after end date."
+        : null;
+  const rangeValid = rangeError === null;
   const range = { start_date: startDate, end_date: endDate };
 
   const { data: noShow } = useQuery({
     queryKey: ["reports", "no-show-rate", range, doctorId],
     queryFn: async () =>
       (await reportsService.noShowRate({ ...range, doctor_id: doctorId || undefined })).data,
+    enabled: rangeValid,
   });
 
   const { data: doctorLoad } = useQuery({
     queryKey: ["reports", "doctor-load", range, doctorId],
     queryFn: async () =>
       (await reportsService.doctorLoad({ ...range, doctor_id: doctorId || undefined })).data,
+    enabled: rangeValid,
   });
 
   const { data: followUp } = useQuery({
     queryKey: ["reports", "follow-up-conversion", range, doctorId],
     queryFn: async () =>
       (await reportsService.followUpConversion({ ...range, doctor_id: doctorId || undefined })).data,
+    enabled: rangeValid,
   });
 
   const { data: feedback = [] } = useQuery({
-    queryKey: ["feedback", doctorId],
-    queryFn: async () => (await reportsService.feedback(doctorId || undefined)).data.feedback,
+    queryKey: ["feedback", range, doctorId],
+    queryFn: async () => (await reportsService.feedback(doctorId || undefined, range)).data.feedback,
+    enabled: rangeValid,
   });
+
+  // The period the backend actually applied (it can default a blank bound),
+  // taken from whichever report has answered.
+  const period = noShow ?? followUp ?? doctorLoad;
 
   return (
     <ErpPageShell
@@ -89,6 +120,16 @@ export default function ReportsPage() {
           </select>
         </div>
       </div>
+
+      {rangeError ? (
+        <p className="mb-4 text-sm text-destructive">{rangeError}</p>
+      ) : (
+        period && (
+          <p className="mb-4 text-xs text-muted-foreground">
+            Showing {formatDay(period.start_date)} – {formatDay(period.end_date)}
+          </p>
+        )
+      )}
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
         <Card>
@@ -157,8 +198,18 @@ export default function ReportsPage() {
           searchPlaceholder="Search feedback…"
           emptyMessage="No feedback in this range."
           columns={[
-            { key: "patient", header: "Patient", render: (r) => r.patient.full_name },
-            { key: "doctor", header: "Doctor", render: (r) => r.doctor.full_name },
+            {
+              key: "reference_code",
+              header: "Booking ID",
+              render: (r) => <span className="font-mono text-xs">{r.reference_code ?? "—"}</span>,
+            },
+            { key: "patient", header: "Patient", render: (r) => r.patient?.full_name ?? "—" },
+            { key: "doctor", header: "Doctor", render: (r) => r.doctor?.full_name ?? "—" },
+            {
+              key: "appointment_datetime",
+              header: "Visit",
+              render: (r) => r.appointment_datetime?.replace("T", " ") ?? "—",
+            },
             {
               key: "rating",
               header: "Rating",
@@ -170,7 +221,7 @@ export default function ReportsPage() {
               ),
             },
             { key: "comment", header: "Comment", render: (r) => r.comment ?? "—" },
-            { key: "created_at", header: "Date", render: (r) => r.created_at },
+            { key: "created_at", header: "Submitted", render: (r) => r.created_at },
           ]}
         />
       </div>

@@ -6,6 +6,7 @@ import { Badge } from "@/src/components/ui/badge";
 import { Button } from "@/src/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/src/components/ui/card";
 import { toast } from "@/src/lib/toast";
+import { formatEpochMs } from "@/src/lib/format";
 import type { NormalizedApiError } from "@/src/types/api";
 import { whatsappService, type ApiTemplateRequest, type TemplateRequestStatus } from "./whatsapp";
 
@@ -111,7 +112,20 @@ function TemplateRequestRow({ request }: { request: ApiTemplateRequest }) {
       </div>
       <p className="mt-1 text-xs text-muted-foreground">
         {request.created_by.name} · {request.created_at}
+        {request.updated_at && <> · Updated {formatEpochMs(request.updated_at)}</>}
       </p>
+      {request.body_text && (
+        <p className="mt-1 line-clamp-3 whitespace-pre-wrap text-xs text-muted-foreground">{request.body_text}</p>
+      )}
+      {request.auth_config && (
+        <p className="mt-1 text-xs text-muted-foreground">
+          OTP code expires in {request.auth_config.code_expiration_minutes} min
+          {request.auth_config.add_security_recommendation && " · security recommendation on"}
+        </p>
+      )}
+      {request.meta_template_id && (
+        <p className="mt-1 font-mono text-[10px] text-muted-foreground">Meta ID: {request.meta_template_id}</p>
+      )}
       {reason && <p className="mt-1 text-xs text-destructive">{reason}</p>}
       {request.status === "SUBMIT_FAILED" && (
         <Button

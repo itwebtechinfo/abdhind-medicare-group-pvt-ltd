@@ -142,7 +142,14 @@ export const authService = {
       };
       this.persistSession(session);
       return session;
-    } catch {
+    } catch (err) {
+      // Only an auth rejection ends the session (the 401 path in the
+      // interceptor has already tried a refresh). A network blip or 5xx on
+      // page load keeps the stored session instead of logging the user out.
+      const status = (err as { status?: number }).status ?? 0;
+      if (status === 0 || status >= 500) {
+        return sessionStorageLayer.load();
+      }
       this.clearSession();
       return null;
     }
@@ -174,6 +181,12 @@ export const authService = {
     return session.tokens.accessToken;
   },
 
+  /**
+   * Resolves to the refreshed session, or `null` when the server rejected the
+   * refresh token (the session is really over). Transient failures — network
+   * down, timeout, 5xx — reject instead, so a flaky connection doesn't get
+   * misread as "session expired" and log the user out.
+   */
   async refreshTokens(): Promise<AuthSession | null> {
     const session = sessionStorageLayer.load();
     if (!session?.tokens.refreshToken) return null;
@@ -189,8 +202,10 @@ export const authService = {
       };
       this.persistSession(updated);
       return updated;
-    } catch {
-      return null;
+    } catch (err) {
+      const status = (err as AxiosError).response?.status;
+      if (status === 401 || status === 403) return null;
+      throw err;
     }
   },
 

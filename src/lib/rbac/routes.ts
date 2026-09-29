@@ -19,6 +19,7 @@ export const ROUTE_ACCESS_RULES: RouteAccessRule[] = [
   { path: "/settings", permissions: "settings:view", prefix: true },
   { path: "/pharmacy", permissions: ["pharmacy:view", "pharmacy:manage"], prefix: true },
   { path: "/lab", permissions: ["lab:view", "lab:manage"], prefix: true },
+  { path: "/orders", permissions: ["orders:view", "orders:manage"], prefix: true },
   { path: "/profile", permissions: "dashboard:view" },
   {
     // Longest-path-first matching (see getRouteAccessForPath) means this is

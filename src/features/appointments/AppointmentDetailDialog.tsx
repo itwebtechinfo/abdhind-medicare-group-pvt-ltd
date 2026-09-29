@@ -29,8 +29,9 @@ import { LabOrdersSection } from "@/src/features/lab/LabOrdersSection";
 import { RescheduleDialog } from "./RescheduleDialog";
 import { ConfirmAppointmentDialog } from "./ConfirmAppointmentDialog";
 import { CancelAppointmentDialog } from "./CancelAppointmentDialog";
+import { formatEpochMs, languageLabel } from "@/src/lib/format";
 import { appointmentService } from "./appointment";
-import type { AppointmentStatus, ApiAppointment } from "./appointment";
+import type { AppointmentStatus, ApiAppointment, AppointmentReminders } from "./appointment";
 
 interface AppointmentDetailDialogProps {
   open: boolean;
@@ -48,6 +49,16 @@ const STATUS_VARIANT: Record<AppointmentStatus, "success" | "warning" | "seconda
 };
 
 const APPOINTMENTS_QUERY_KEY = ["appointments"] as const;
+
+const REMINDER_STAGES: { key: keyof AppointmentReminders; label: string }[] = [
+  { key: "24h_sent", label: "24h" },
+  { key: "2h_sent", label: "2h" },
+  { key: "30m_sent", label: "30m" },
+];
+
+/** Reminders only go out once staff approve (see reminder_cron_job), so
+ * they're meaningless on a PENDING or CANCELLED booking. */
+const REMINDER_STATUSES: AppointmentStatus[] = ["APPROVED", "PATIENT_CONFIRMED", "COMPLETED"];
 
 export function AppointmentDetailDialog({
   open,
@@ -152,6 +163,9 @@ export function AppointmentDetailDialog({
     current.patient?.age != null ? `${current.patient.age}y` : null,
     current.patient?.gender || null,
     current.patient?.address || null,
+    current.patient?.preferred_language
+      ? `WhatsApp: ${languageLabel(current.patient.preferred_language)}`
+      : null,
   ]
     .filter(Boolean)
     .join(" · ");
@@ -180,6 +194,28 @@ export function AppointmentDetailDialog({
             <p className="text-xs text-muted-foreground">
               <span className="font-medium text-foreground">Cancellation reason:</span>{" "}
               {current.cancellation_reason || "No reason given"}
+            </p>
+          )}
+          {REMINDER_STATUSES.includes(current.status) && (
+            <p className="text-xs text-muted-foreground">
+              <span className="font-medium text-foreground">WhatsApp reminders:</span>{" "}
+              {REMINDER_STAGES.map(({ key, label }) => (
+                <span key={key} className="mr-2">
+                  {label} {current.reminders?.[key] ? "✓" : "—"}
+                </span>
+              ))}
+            </p>
+          )}
+          {current.status === "COMPLETED" && (
+            <p className="text-xs text-muted-foreground">
+              <span className="font-medium text-foreground">Feedback request:</span>{" "}
+              {current.feedback_requested ? "Sent" : "Not sent yet"}
+            </p>
+          )}
+          {current.no_show_flagged && (
+            <p className="text-xs text-destructive">
+              Flagged as no-show
+              {current.no_show_flagged_at ? ` on ${formatEpochMs(current.no_show_flagged_at)}` : ""}
             </p>
           )}
         </DialogHeader>

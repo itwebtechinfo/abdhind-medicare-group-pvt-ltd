@@ -1,9 +1,12 @@
 "use client";
 
+import { useQuery } from "@tanstack/react-query";
 import {
   BadgeCheck,
   CalendarClock,
+  ClipboardList,
   Fingerprint,
+  Languages,
   KeyRound,
   Mail,
   MapPin,
@@ -17,6 +20,8 @@ import { Card, CardContent } from "@/src/components/ui/card";
 import { Badge } from "@/src/components/ui/badge";
 import { Separator } from "@/src/components/ui/separator";
 import { Avatar, AvatarFallback, AvatarImage } from "@/src/components/ui/avatar";
+import { languageLabel } from "@/src/lib/format";
+import { patientService } from "@/src/features/patients/patient";
 
 function initials(name: string) {
   return name
@@ -53,6 +58,21 @@ function InfoRow({
 
 export default function ProfilePage() {
   const { user, session } = useAuth();
+  const isPatient = user?.role === "patient";
+
+  // The clinic's record for this login (UHID, visit history) — separate from
+  // the login account above, and only exists once they've booked at least once.
+  const { data: patientRecord, isLoading: patientRecordLoading } = useQuery({
+    queryKey: ["me", "patient"],
+    queryFn: async () => (await patientService.getMine()).data,
+    enabled: isPatient,
+  });
+  const visitCounts = patientRecord
+    ? {
+        total: patientRecord.appointments.length,
+        completed: patientRecord.appointments.filter((a) => a.status === "COMPLETED").length,
+      }
+    : null;
 
   const address = [user?.address, user?.district, user?.state].filter(Boolean).join(", ");
 
@@ -137,6 +157,44 @@ export default function ProfilePage() {
           </CardContent>
         </Card>
       </div>
+
+      {isPatient && (
+        <Card>
+          <CardContent className="p-6">
+            <p className="mb-4 text-xs font-medium uppercase tracking-wide text-muted-foreground">
+              Clinic Patient Record
+            </p>
+            {patientRecordLoading ? (
+              <p className="text-sm text-muted-foreground">Loading…</p>
+            ) : patientRecord?.patient ? (
+              <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+                <InfoRow icon={Fingerprint} label="UHID" value={patientRecord.patient.uhid} />
+                <InfoRow icon={UserRound} label="Name on record" value={patientRecord.patient.full_name} />
+                <InfoRow icon={Phone} label="Phone on record" value={patientRecord.patient.phone} />
+                <InfoRow
+                  icon={Languages}
+                  label="WhatsApp language"
+                  value={languageLabel(patientRecord.patient.preferred_language)}
+                />
+                <InfoRow
+                  icon={ClipboardList}
+                  label="Visits"
+                  value={
+                    visitCounts
+                      ? `${visitCounts.completed} completed · ${visitCounts.total} total`
+                      : "—"
+                  }
+                />
+                <InfoRow icon={CalendarClock} label="Registered" value={patientRecord.patient.created_at} />
+              </div>
+            ) : (
+              <p className="text-sm text-muted-foreground">
+                No clinic record linked to this account yet — it&apos;s created with your first appointment.
+              </p>
+            )}
+          </CardContent>
+        </Card>
+      )}
 
       {/* Permissions */}
       {user && user.permissions.length > 0 && (

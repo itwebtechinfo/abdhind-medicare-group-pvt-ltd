@@ -59,6 +59,7 @@ export const SYSTEM_ADMIN_PERMISSIONS: Permission[] = [
   "enquiry:view",
   "enquiry:manage",
   "whatsapp_inbox:manage",
+  "orders:manage",
 ];
 
 export const ROLE_PERMISSIONS: Record<UserRole, Permission[]> = {
@@ -77,6 +78,7 @@ export const ROLE_PERMISSIONS: Record<UserRole, Permission[]> = {
     "enquiry:view",
     "enquiry:manage",
     "whatsapp_inbox:manage",
+    "orders:manage",
   ],
   account: [
     "dashboard:view",
@@ -107,6 +109,7 @@ export const ROLE_PERMISSIONS: Record<UserRole, Permission[]> = {
     "reports:view",
     "whatsapp_inbox:view",
     "whatsapp_inbox:reply",
+    "orders:manage",
   ],
   patient: ["dashboard:view", "appointments:view", "reports:view"],
   pharmacy: [

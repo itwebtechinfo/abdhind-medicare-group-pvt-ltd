@@ -24,13 +24,33 @@ export interface DoctorLoadEntry {
 }
 
 export interface DoctorLoadReport {
+  start_date: string;
+  end_date: string;
   doctors: DoctorLoadEntry[];
 }
 
 export interface FollowUpConversionReport {
+  start_date: string;
+  end_date: string;
   total_completed_appointments: number;
   follow_up_scheduled_count: number;
   follow_up_conversion_rate_percent: number;
+}
+
+interface FeedbackPatient {
+  full_name: string;
+  phone: string;
+  uhid?: string | null;
+}
+
+interface FeedbackDoctor {
+  full_name: string;
+}
+
+/** The rated visit — only the fields /feedback joins in. */
+interface FeedbackAppointment {
+  reference_code?: string | null;
+  appointment_datetime?: string | null;
 }
 
 export interface RawFeedbackEntry {
@@ -38,8 +58,10 @@ export interface RawFeedbackEntry {
   appointment_id: string;
   rating: number;
   comment: string | null;
-  patient: { full_name: string; phone: string };
-  doctor: { full_name: string };
+  /** Joined with preserveNullAndEmptyArrays — absent if the record was deleted. */
+  patient?: FeedbackPatient | null;
+  doctor?: FeedbackDoctor | null;
+  appointment?: FeedbackAppointment | null;
   created_at: string;
 }
 
@@ -48,8 +70,10 @@ export interface FeedbackEntry {
   appointment_id: string;
   rating: number;
   comment: string | null;
-  patient: { full_name: string; phone: string };
-  doctor: { full_name: string };
+  patient: FeedbackPatient | null;
+  doctor: FeedbackDoctor | null;
+  reference_code: string | null;
+  appointment_datetime: string | null;
   created_at: string;
 }
 
@@ -67,8 +91,10 @@ function mapFeedback(raw: RawFeedbackEntry): FeedbackEntry {
     appointment_id: raw.appointment_id,
     rating: raw.rating,
     comment: raw.comment,
-    patient: raw.patient,
-    doctor: raw.doctor,
+    patient: raw.patient ?? null,
+    doctor: raw.doctor ?? null,
+    reference_code: raw.appointment?.reference_code ?? null,
+    appointment_datetime: raw.appointment?.appointment_datetime ?? null,
     created_at: raw.created_at,
   };
 }
@@ -85,10 +111,11 @@ export const reportsService = {
       params: cleanParams(range),
     }),
 
-  feedback: async (doctorId?: string) => {
+  /** Pass a range to count only feedback submitted within it; omit for all-time. */
+  feedback: async (doctorId?: string, range: ReportDateRange = {}) => {
     const res = await http.get<{ count: number; feedback: RawFeedbackEntry[] }>(
       API_ENDPOINTS.feedback.list,
-      { params: cleanParams({ doctor_id: doctorId }) }
+      { params: cleanParams({ doctor_id: doctorId, ...range }) }
     );
     return { ...res, data: { ...res.data, feedback: res.data.feedback.map(mapFeedback) } };
   },

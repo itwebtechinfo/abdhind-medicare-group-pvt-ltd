@@ -92,6 +92,12 @@ export const API_ENDPOINTS = {
   feedback: {
     list: "/api/v1/feedback",
   },
+  productOrders: {
+    /** GET: list (query: status), newest first. Orders are created by the WhatsApp bot only. */
+    list: "/api/v1/product-orders",
+    /** GET: detail. PATCH: { status?, staff_note? } — forward-only status transitions. */
+    detail: (id: string) => `/api/v1/product-orders/${id}`,
+  },
   uploads: {
     /** GET, public — subFolder/fileName from a stored "uploads/<subFolder>/<fileName>" path. */
     file: (subFolder: string, fileName: string) => `/api/v1/uploads/${subFolder}/${fileName}`,

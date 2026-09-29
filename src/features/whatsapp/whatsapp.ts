@@ -220,6 +220,8 @@ export interface RawApiTemplateRequest {
   created_by: { user_id: string; name: string };
   /** Pre-formatted IST display string. */
   created_at: string;
+  /** Epoch ms of the last status change (submit, approval, rejection, retry). */
+  updated_at?: number | null;
 }
 
 export interface ApiTemplateRequest {
@@ -239,6 +241,7 @@ export interface ApiTemplateRequest {
   submit_error: string | null;
   created_by: { user_id: string; name: string };
   created_at: string;
+  updated_at: number | null;
 }
 
 /** Live `{{n}}` placeholder count straight from a text field, for detecting
@@ -256,11 +259,21 @@ export interface BroadcastFailure {
   reason: string;
 }
 
+export interface BroadcastRecipient {
+  phone: string;
+  variables: string[];
+}
+
 export interface RawApiBroadcastJob {
   _id: string;
   template_name: string;
   language: string;
   variables: string[];
+  /** Absent/null on jobs created before these existed. */
+  header_variables?: string[] | null;
+  button_variables?: string[] | null;
+  /** Only present when fetched with include_recipients=true. */
+  resolved_recipients?: BroadcastRecipient[];
   total: number;
   sent_count: number;
   failed_count: number;
@@ -282,6 +295,10 @@ export interface ApiBroadcastJob {
   template_name: string;
   language: string;
   variables: string[];
+  header_variables: string[];
+  button_variables: string[];
+  /** null unless fetched with includeRecipients. */
+  resolved_recipients: BroadcastRecipient[] | null;
   total: number;
   sent_count: number;
   failed_count: number;
@@ -579,6 +596,7 @@ function mapTemplateRequest(raw: RawApiTemplateRequest): ApiTemplateRequest {
     submit_error: raw.submit_error,
     created_by: raw.created_by,
     created_at: raw.created_at,
+    updated_at: raw.updated_at ?? null,
   };
 }
 
@@ -587,7 +605,10 @@ function mapBroadcastJob(raw: RawApiBroadcastJob): ApiBroadcastJob {
     id: raw._id,
     template_name: raw.template_name,
     language: raw.language,
-    variables: raw.variables,
+    variables: raw.variables ?? [],
+    header_variables: raw.header_variables ?? [],
+    button_variables: raw.button_variables ?? [],
+    resolved_recipients: raw.resolved_recipients ?? null,
     total: raw.total,
     sent_count: raw.sent_count,
     failed_count: raw.failed_count,
@@ -697,8 +718,11 @@ export const whatsappService = {
     return { ...res, data: { ...res.data, jobs: res.data.jobs.map(mapBroadcastJob) } };
   },
 
-  getBroadcastJob: async (jobId: string) => {
-    const res = await http.get<{ job: RawApiBroadcastJob }>(API_ENDPOINTS.whatsapp.broadcastJob(jobId));
+  /** includeRecipients adds the full audience list — leave it off for status polling. */
+  getBroadcastJob: async (jobId: string, options: { includeRecipients?: boolean } = {}) => {
+    const res = await http.get<{ job: RawApiBroadcastJob }>(API_ENDPOINTS.whatsapp.broadcastJob(jobId), {
+      params: options.includeRecipients ? { include_recipients: true } : undefined,
+    });
     return { ...res, data: { job: mapBroadcastJob(res.data.job) } };
   },
 
