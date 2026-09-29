@@ -23,6 +23,11 @@ export interface RawJoinedPerson {
   age?: number | null;
   gender?: string | null;
   address?: string | null;
+  /** Patient-only — hospital-wide patient id, e.g. "UHID-000123". */
+  uhid?: string | null;
+  preferred_language?: string | null;
+  /** Doctor-only. */
+  specialization?: string | null;
 }
 
 export interface RawBookedBy {
@@ -52,6 +57,7 @@ export interface RawApiAppointment {
   follow_up_of?: string | null;
   follow_up_appointment_id?: string | null;
   no_show_flagged?: boolean;
+  no_show_flagged_at?: number | null;
   feedback_requested?: boolean;
   patient?: RawJoinedPerson;
   doctor?: RawJoinedPerson;
@@ -81,6 +87,7 @@ export interface ApiAppointment {
   follow_up_of: string | null;
   follow_up_appointment_id: string | null;
   no_show_flagged: boolean;
+  no_show_flagged_at: number | null;
   feedback_requested: boolean;
   patient?: RawJoinedPerson;
   doctor?: RawJoinedPerson;
@@ -188,6 +195,7 @@ export function mapAppointment(raw: RawApiAppointment): ApiAppointment {
     follow_up_of: raw.follow_up_of ?? null,
     follow_up_appointment_id: raw.follow_up_appointment_id ?? null,
     no_show_flagged: raw.no_show_flagged ?? false,
+    no_show_flagged_at: raw.no_show_flagged_at ?? null,
     feedback_requested: raw.feedback_requested ?? false,
     patient: raw.patient,
     doctor: raw.doctor,

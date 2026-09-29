@@ -185,6 +185,7 @@ function RoleDashboardComponent() {
                 <div>
                   <p className="font-medium">{appt.patient?.full_name ?? "Patient"}</p>
                   <p className="text-xs text-muted-foreground">
+                    {appt.reference_code && <span className="font-mono">{appt.reference_code} · </span>}
                     {appt.appointment_datetime.replace("T", " ")}
                   </p>
                 </div>
@@ -219,6 +220,7 @@ function RoleDashboardComponent() {
                 <div>
                   <p className="font-medium">{appt.patient?.full_name ?? "Patient"}</p>
                   <p className="text-xs text-muted-foreground">
+                    {appt.reference_code && <span className="font-mono">{appt.reference_code} · </span>}
                     {appt.doctor?.full_name ?? "—"} · {appt.appointment_datetime.replace("T", " ")}
                   </p>
                 </div>

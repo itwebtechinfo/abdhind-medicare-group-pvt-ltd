@@ -91,10 +91,19 @@ export function PatientHistoryDialog({ open, onOpenChange, patientId }: PatientH
                     )}
                   </p>
                   <p className="text-xs text-muted-foreground">
+                    {appt.reference_code && <span className="font-mono">{appt.reference_code} · </span>}
                     {appt.appointment_datetime.replace("T", " ")} · Source: {appt.source}
                   </p>
+                  {appt.status === "CANCELLED" && (
+                    <p className="text-xs text-muted-foreground">
+                      Reason: {appt.cancellation_reason || "No reason given"}
+                    </p>
+                  )}
                 </div>
-                <Badge variant={STATUS_VARIANT[appt.status]}>{appt.status}</Badge>
+                <div className="flex shrink-0 items-center gap-1.5">
+                  {appt.no_show_flagged && <Badge variant="destructive">No-show</Badge>}
+                  <Badge variant={STATUS_VARIANT[appt.status]}>{appt.status}</Badge>
+                </div>
               </div>
             ))}
           </div>

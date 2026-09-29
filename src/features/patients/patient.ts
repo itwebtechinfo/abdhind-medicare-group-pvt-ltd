@@ -51,6 +51,11 @@ export interface RawPatientAppointmentRecord {
   created_at: string;
   follow_up_of?: string | null;
   follow_up_appointment_id?: string | null;
+  reference_code?: string | null;
+  cancellation_reason?: string | null;
+  completed_at?: number | null;
+  no_show_flagged?: boolean;
+  booked_by_user_id?: string | null;
 }
 
 export interface PatientAppointmentRecord {
@@ -64,6 +69,11 @@ export interface PatientAppointmentRecord {
   created_at: string;
   follow_up_of: string | null;
   follow_up_appointment_id: string | null;
+  reference_code: string | null;
+  cancellation_reason: string | null;
+  completed_at: number | null;
+  no_show_flagged: boolean;
+  booked_by_user_id: string | null;
 }
 
 export interface CreatePatientPayload {
@@ -178,6 +188,11 @@ function mapAppointmentRecord(raw: RawPatientAppointmentRecord): PatientAppointm
     created_at: raw.created_at,
     follow_up_of: raw.follow_up_of ?? null,
     follow_up_appointment_id: raw.follow_up_appointment_id ?? null,
+    reference_code: raw.reference_code ?? null,
+    cancellation_reason: raw.cancellation_reason ?? null,
+    completed_at: raw.completed_at ?? null,
+    no_show_flagged: raw.no_show_flagged ?? false,
+    booked_by_user_id: raw.booked_by_user_id ?? null,
   };
 }
 

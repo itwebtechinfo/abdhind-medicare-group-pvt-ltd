@@ -72,8 +72,20 @@ export function AppointmentDetailDialog({
 
   const invalidateList = () => queryClient.invalidateQueries({ queryKey: APPOINTMENTS_QUERY_KEY });
 
+  // Mutation responses are the bare appointment doc — no patient/doctor
+  // join, and booked_by only on some endpoints — so keep the joined data
+  // from the row we opened with instead of blanking it out.
   const mergeIn = (updated: ApiAppointment) =>
-    setCurrent((prev) => (prev ? { ...updated, patient: prev.patient, doctor: prev.doctor } : updated));
+    setCurrent((prev) =>
+      prev
+        ? {
+            ...updated,
+            patient: updated.patient ?? prev.patient,
+            doctor: updated.doctor ?? prev.doctor,
+            booked_by: updated.booked_by ?? prev.booked_by,
+          }
+        : updated
+    );
 
   const confirmMutation = useMutation({
     mutationFn: (slotId?: string) => appointmentService.confirm(current?.id as string, { slot_id: slotId }),
@@ -136,6 +148,7 @@ export function AppointmentDetailDialog({
   // Only the pieces that are actually present — an old record missing
   // address/gender just shows fewer segments instead of a blank/"null".
   const patientDetails = [
+    current.patient?.uhid || null,
     current.patient?.age != null ? `${current.patient.age}y` : null,
     current.patient?.gender || null,
     current.patient?.address || null,
@@ -152,6 +165,9 @@ export function AppointmentDetailDialog({
             {current.patient?.full_name ?? "Appointment"}
             <Badge variant={STATUS_VARIANT[current.status]}>{current.status}</Badge>
           </DialogTitle>
+          {current.reference_code && (
+            <p className="font-mono text-xs text-muted-foreground">Booking ID: {current.reference_code}</p>
+          )}
           {patientDetails && (
             <p className="text-xs text-muted-foreground">{patientDetails}</p>
           )}
@@ -160,6 +176,12 @@ export function AppointmentDetailDialog({
             Source: {current.source}
             {current.booked_by && <> · Booked by {current.booked_by.full_name}</>}
           </DialogDescription>
+          {current.status === "CANCELLED" && (
+            <p className="text-xs text-muted-foreground">
+              <span className="font-medium text-foreground">Cancellation reason:</span>{" "}
+              {current.cancellation_reason || "No reason given"}
+            </p>
+          )}
         </DialogHeader>
 
         <div className="flex flex-wrap gap-2">

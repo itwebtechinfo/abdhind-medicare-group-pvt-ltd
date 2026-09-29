@@ -235,9 +235,13 @@ function mapSlot(raw: RawApiSlot): ApiSlot {
 }
 
 export const doctorService = {
-  list: async () => {
+  /** Defaults to active-only, exactly as before — pass includeInactive to
+   * also see deactivated doctors (used by the admin roster's "Show inactive"
+   * toggle so a deactivated doctor can still be found and reactivated). */
+  list: async (options?: { includeInactive?: boolean }) => {
     const res = await http.get<{ count: number; doctors: RawApiDoctor[] }>(
-      API_ENDPOINTS.doctors.list
+      API_ENDPOINTS.doctors.list,
+      options?.includeInactive ? { params: { include_inactive: true } } : undefined
     );
     return { ...res, data: { ...res.data, doctors: res.data.doctors.map(mapDoctor) } };
   },

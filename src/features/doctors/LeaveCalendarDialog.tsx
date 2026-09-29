@@ -56,6 +56,10 @@ export function LeaveCalendarDialog({ open, onOpenChange, doctor }: LeaveCalenda
       setDate("");
       setReason("");
       invalidate();
+      // Adding a leave deletes that day's open slots server-side (see the
+      // dialog description above) — refresh the Slots list too, or it keeps
+      // showing the now-deleted slots until the dialog is closed and reopened.
+      invalidateSlots();
     },
     onError: (err: NormalizedApiError) => toast.error(err.error, err.msg),
   });

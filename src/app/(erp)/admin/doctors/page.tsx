@@ -27,10 +27,11 @@ export default function AdminDoctorsPage() {
   const [formOpen, setFormOpen] = useState(false);
   const [editingDoctor, setEditingDoctor] = useState<ApiDoctor | null>(null);
   const [leaveDoctor, setLeaveDoctor] = useState<ApiDoctor | null>(null);
+  const [showInactive, setShowInactive] = useState(false);
 
   const { data: doctors = [], isLoading } = useQuery({
-    queryKey: DOCTORS_QUERY_KEY,
-    queryFn: async () => (await doctorService.list()).data.doctors,
+    queryKey: [...DOCTORS_QUERY_KEY, showInactive],
+    queryFn: async () => (await doctorService.list({ includeInactive: showInactive })).data.doctors,
   });
 
   const { data: departments = [] } = useQuery({
@@ -99,19 +100,29 @@ export default function AdminDoctorsPage() {
       description="Internal doctor roster, working hours, and leave calendar."
       icon={Stethoscope}
       actions={
-        <Can module="doctors" action="create">
-          <Button
-            size="sm"
-            className="gap-2"
-            onClick={() => {
-              setEditingDoctor(null);
-              setFormOpen(true);
-            }}
-          >
-            <UserPlus className="h-4 w-4" />
-            Add Doctor
-          </Button>
-        </Can>
+        <div className="flex items-center gap-3">
+          <label className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
+            <Switch
+              checked={showInactive}
+              onCheckedChange={setShowInactive}
+              aria-label={showInactive ? "Hide inactive doctors" : "Show inactive doctors"}
+            />
+            Show inactive
+          </label>
+          <Can module="doctors" action="create">
+            <Button
+              size="sm"
+              className="gap-2"
+              onClick={() => {
+                setEditingDoctor(null);
+                setFormOpen(true);
+              }}
+            >
+              <UserPlus className="h-4 w-4" />
+              Add Doctor
+            </Button>
+          </Can>
+        </div>
       }
     >
       <ErpDataTable

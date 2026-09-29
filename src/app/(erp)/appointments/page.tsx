@@ -423,6 +423,23 @@ export default function AppointmentsPage() {
             header: "No-show",
             render: (r) => (r.no_show_flagged ? <Badge variant="destructive">Yes</Badge> : "—"),
           },
+          {
+            key: "reference_code",
+            header: "Booking ID",
+            render: (r) => r.reference_code ?? "—",
+          },
+          {
+            key: "cancellation_reason",
+            header: "Cancel Reason",
+            render: (r) =>
+              r.status === "CANCELLED" ? (
+                <span className="line-clamp-2 max-w-[220px] text-xs" title={r.cancellation_reason ?? undefined}>
+                  {r.cancellation_reason || "No reason given"}
+                </span>
+              ) : (
+                "—"
+              ),
+          },
         ]}
       />
 
