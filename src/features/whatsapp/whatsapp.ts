@@ -497,9 +497,20 @@ export const EMPTY_BROADCAST_VALUES: BroadcastFormValues = {
   scheduled_at_local: "",
 };
 
+/** Meta rejects template buttons with emojis, variables, newlines or
+ * formatting characters — mirrors template_button_text_error in whatsapp.py. */
+const TEMPLATE_BUTTON_FORBIDDEN_RE = /\p{Extended_Pictographic}|[\u200D\uFE0F\u20E3]|[*_~`\n\r\t]|\{\{/u;
+
 const templateButtonSchema = z.object({
   type: z.enum(["QUICK_REPLY", "URL", "PHONE_NUMBER"]),
-  text: z.string().trim().min(1, "Button text is required").max(25, "25 characters max"),
+  text: z
+    .string()
+    .trim()
+    .min(1, "Button text is required")
+    .max(25, "25 characters max")
+    .refine((v) => !TEMPLATE_BUTTON_FORBIDDEN_RE.test(v), {
+      message: "No emojis, variables, line breaks or formatting (* _ ~ `) in buttons",
+    }),
   url: z.string().trim().optional(),
   phone_number: z.string().trim().optional(),
 });

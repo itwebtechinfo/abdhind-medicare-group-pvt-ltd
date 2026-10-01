@@ -60,8 +60,9 @@ export function SystemTemplatesPanel() {
     mutationFn: () => whatsappService.seedSystemTemplates(),
     onSuccess: (res) => {
       const results = res.data.results;
-      const failed = results.filter((r) => r.status === "SUBMIT_FAILED").length;
-      const submitted = results.filter((r) => r.status !== "SKIPPED" && r.status !== "SUBMIT_FAILED").length;
+      const isFailure = (status: string) => status === "SUBMIT_FAILED" || status === "INVALID";
+      const failed = results.filter((r) => isFailure(r.status)).length;
+      const submitted = results.filter((r) => r.status !== "SKIPPED" && !isFailure(r.status)).length;
       if (failed > 0) {
         toast.error("Some templates failed to submit", `${submitted} submitted, ${failed} failed — see the reasons below.`);
       } else {
