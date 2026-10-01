@@ -4,8 +4,9 @@ import { useQuery } from "@tanstack/react-query";
 import { History, Loader2 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/src/components/ui/card";
 import { whatsappService, type ApiAuditLog } from "./whatsapp";
+import { POLL_INTERVALS } from "@/src/lib/polling";
 
-const POLL_MS = 15000;
+const POLL_MS = POLL_INTERVALS.activityFeed;
 
 function describeActivity(log: ApiAuditLog): string {
   const d = log.details;

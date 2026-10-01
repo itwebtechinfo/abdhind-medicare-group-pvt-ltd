@@ -5,8 +5,9 @@ import { useQuery } from "@tanstack/react-query";
 import { usePermission } from "@/src/hooks/usePermission";
 import { toast } from "@/src/lib/toast";
 import { whatsappService } from "./whatsapp";
+import { POLL_INTERVALS } from "@/src/lib/polling";
 
-const POLL_MS = 20000;
+const POLL_MS = POLL_INTERVALS.activityWatcher;
 const STORAGE_KEY = "whatsapp_activity_last_seen";
 
 function getLastSeen(): number {
@@ -22,8 +23,8 @@ function setLastSeen(ts: number) {
 /**
  * Renders nothing — silently polls for WhatsApp template approvals/
  * rejections and completed broadcasts the admin hasn't seen yet, and toasts
- * them, so those events surface even when nobody's sitting on the Templates
- * or Broadcast page. Scoped to WhatsApp only rather than the shared topbar
+ * them anywhere in the WhatsApp section (mounted by app/(erp)/whatsapp/layout.tsx,
+ * not app-wide, so other ERP pages don't pay for this poll). Scoped to WhatsApp only rather than the shared topbar
  * bell — no app-wide notification system exists to hook into, and building
  * one is a separate, bigger feature than "the WhatsApp module is missing
  * this." Only polls for roles that can actually create templates/

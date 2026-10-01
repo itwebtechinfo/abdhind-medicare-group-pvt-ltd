@@ -514,7 +514,10 @@ export function DataTable<TData>({
                         className={cn(
                           "whitespace-nowrap",
                           cell.column.id === "actions" &&
-                            "sticky right-0 z-10 bg-card text-right shadow-[-8px_0_8px_-8px_rgba(0,0,0,0.15)] group-hover:bg-muted/50 group-data-[state=selected]:bg-muted"
+                            // Sticky cell must stay opaque: the row's translucent hover
+                            // (bg-muted/50) let horizontally-scrolled cells show through it.
+                            // Same look, painted as muted/50 over an opaque card layer.
+                            "sticky right-0 z-10 bg-card text-right shadow-[-8px_0_8px_-8px_rgba(0,0,0,0.15)] group-hover:[background:linear-gradient(hsl(var(--muted)/0.5),hsl(var(--muted)/0.5)),hsl(var(--card))] group-data-[state=selected]:bg-muted"
                         )}
                       >
                         {flexRender(cell.column.columnDef.cell, cell.getContext())}

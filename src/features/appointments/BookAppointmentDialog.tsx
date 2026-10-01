@@ -31,6 +31,8 @@ interface BookAppointmentDialogProps {
   onOpenChange: (open: boolean) => void;
   isSubmitting: boolean;
   onSubmit: (payload: CreateAppointmentPayload) => void;
+  /** Staff only — pre-fills the patient fields (e.g. "Book visit" from the Patients page). */
+  initialValues?: Partial<BookAppointmentFormValues>;
 }
 
 const today = () => new Date().toISOString().slice(0, 10);
@@ -40,6 +42,7 @@ export function BookAppointmentDialog({
   onOpenChange,
   isSubmitting,
   onSubmit,
+  initialValues,
 }: BookAppointmentDialogProps) {
   const [date, setDate] = useState(today());
   const { user } = useAuth();
@@ -74,7 +77,9 @@ export function BookAppointmentDialog({
     formState: { errors },
   } = useForm<BookAppointmentFormValues>({
     resolver: zodResolver(bookAppointmentSchema),
-    defaultValues: isPatient ? selfDefaults : isDoctor ? doctorDefaults : EMPTY_BOOK_APPOINTMENT_VALUES,
+    defaultValues: isPatient
+      ? selfDefaults
+      : { ...(isDoctor ? doctorDefaults : EMPTY_BOOK_APPOINTMENT_VALUES), ...initialValues },
   });
 
   const doctorId = useWatch({ control, name: "doctor_id" });

@@ -10,9 +10,10 @@ import { Input } from "@/src/components/ui/input";
 import { Switch } from "@/src/components/ui/switch";
 import { cn } from "@/src/lib/utils";
 import { displayTimeOnly, whatsappService, type ApiConversation } from "./whatsapp";
+import { POLL_INTERVALS } from "@/src/lib/polling";
 
 const PAGE_SIZE = 30;
-const POLL_MS = 8000;
+const POLL_MS = POLL_INTERVALS.chatList;
 
 const HANDLER_FILTERS: { value: boolean | undefined; label: string }[] = [
   { value: undefined, label: "All" },

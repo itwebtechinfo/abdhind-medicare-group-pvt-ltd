@@ -12,6 +12,7 @@ import type { NormalizedApiError } from "@/src/types/api";
 import { TEMPLATE_REQUESTS_QUERY_KEY } from "./TemplateRequestsPanel";
 import { TEMPLATES_QUERY_KEY } from "./TemplatesPanel";
 import { whatsappService, type SystemTemplate } from "./whatsapp";
+import { POLL_INTERVALS } from "@/src/lib/polling";
 
 export const SYSTEM_TEMPLATES_QUERY_KEY = ["whatsapp", "systemTemplates"] as const;
 
@@ -43,7 +44,7 @@ export function SystemTemplatesPanel() {
     queryKey: SYSTEM_TEMPLATES_QUERY_KEY,
     queryFn: async () => (await whatsappService.listSystemTemplates()).data.templates,
     refetchInterval: (query) =>
-      (query.state.data ?? []).some((t) => IN_FLIGHT.has(t.status)) ? 30000 : false,
+      (query.state.data ?? []).some((t) => IN_FLIGHT.has(t.status)) ? POLL_INTERVALS.templateReview : false,
   });
 
   const grouped = useMemo(() => {

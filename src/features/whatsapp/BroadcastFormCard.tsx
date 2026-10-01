@@ -10,6 +10,7 @@ import { FileUp, Loader2, Megaphone, X } from "lucide-react";
 import { Button } from "@/src/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/src/components/ui/card";
 import { Input } from "@/src/components/ui/input";
+import { useDebouncedValue } from "@/src/hooks/useDebouncedValue";
 import { Textarea } from "@/src/components/ui/textarea";
 import { Switch } from "@/src/components/ui/switch";
 import { InfoTooltip } from "@/src/components/ui/info-tooltip";
@@ -50,17 +51,6 @@ const BROADCAST_STEPS = [
   "Select recipients",
   "Send",
 ];
-
-/** Waits for `value` to stop changing for `delayMs` before updating — used
- * to avoid firing the audience-preview call on every keystroke. */
-function useDebouncedValue<T>(value: T, delayMs: number): T {
-  const [debounced, setDebounced] = useState(value);
-  useEffect(() => {
-    const id = setTimeout(() => setDebounced(value), delayMs);
-    return () => clearTimeout(id);
-  }, [value, delayMs]);
-  return debounced;
-}
 
 interface BroadcastFormCardProps {
   onCreated: (jobId: string) => void;

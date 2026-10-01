@@ -9,6 +9,7 @@ import { toast } from "@/src/lib/toast";
 import { formatEpochMs } from "@/src/lib/format";
 import type { NormalizedApiError } from "@/src/types/api";
 import { whatsappService, type ApiTemplateRequest, type TemplateRequestStatus } from "./whatsapp";
+import { POLL_INTERVALS } from "@/src/lib/polling";
 
 export const TEMPLATE_REQUESTS_QUERY_KEY = ["whatsapp", "templateRequests"] as const;
 
@@ -29,12 +30,12 @@ export function TemplateRequestsPanel() {
     queryKey: TEMPLATE_REQUESTS_QUERY_KEY,
     queryFn: () => whatsappService.listTemplateRequests(),
     // Keeps polling the whole list while anything is still awaiting Meta —
-    // mirrors BroadcastJobCard's 2.5s-until-terminal pattern, applied at
+    // mirrors BroadcastJobCard's poll-until-terminal pattern, applied at
     // list level since several requests can be in flight at once.
     refetchInterval: (query) => {
       const requests = query.state.data?.data.requests ?? [];
       const stillPending = requests.some((r) => !TERMINAL_STATUSES.includes(r.status));
-      return stillPending ? 2500 : false;
+      return stillPending ? POLL_INTERVALS.templateReview : false;
     },
   });
 

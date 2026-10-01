@@ -19,6 +19,14 @@ export const API_ENDPOINTS = {
     list: "/api/v1/patients",
     /** GET: patient + their appointment history. PATCH: partial update. */
     detail: (id: string) => `/api/v1/patients/${id}`,
+    /** GET: header subtitle + tab counts (DB-side). */
+    stats: "/api/v1/patients/stats",
+    /** GET: drawer Overview — visit summary, WhatsApp conversation id, recent activity. */
+    overview: (id: string) => `/api/v1/patients/${id}/overview`,
+    /** GET: every lab order across the patient's appointments. */
+    labOrders: (id: string) => `/api/v1/patients/${id}/lab-orders`,
+    /** GET: every pharmacy dispense for the patient (pharmacy:manage). */
+    dispenses: (id: string) => `/api/v1/patients/${id}/dispenses`,
     /** POST: public, unauthenticated — sends a WhatsApp OTP for self-signup. */
     signupOtpRequest: "/api/v1/patients/signup/otp/request",
     /** POST: public, unauthenticated — creates the patient's account + login in one call. */
@@ -47,6 +55,7 @@ export const API_ENDPOINTS = {
     list: "/api/v1/appointments",
     detail: (id: string) => `/api/v1/appointments/${id}`,
     complete: (id: string) => `/api/v1/appointments/${id}/complete`,
+    arrive: (id: string) => `/api/v1/appointments/${id}/arrive`,
     cancel: (id: string) => `/api/v1/appointments/${id}/cancel`,
     auditLog: (id: string) => `/api/v1/appointments/${id}/audit-log`,
     followUp: (id: string) => `/api/v1/appointments/${id}/follow-up`,

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
 import { MessageCircle } from "lucide-react";
 import { Badge } from "@/src/components/ui/badge";
@@ -8,6 +9,7 @@ import { ChatListPanel } from "@/src/features/whatsapp/ChatListPanel";
 import { ChatWindow } from "@/src/features/whatsapp/ChatWindow";
 import { whatsappService, type ApiConversation } from "@/src/features/whatsapp/whatsapp";
 import { cn } from "@/src/lib/utils";
+import { POLL_INTERVALS } from "@/src/lib/polling";
 
 /** Cheap `limit: 1` calls — only `data.count` (the pre-slice total, see
  * whatsappService.listConversations) is read, so these never fetch a real
@@ -16,19 +18,38 @@ function useConversationCounts() {
   const { data: totalData } = useQuery({
     queryKey: ["whatsapp", "conversations", "header-count", "total"],
     queryFn: () => whatsappService.listConversations({ limit: 1 }),
-    refetchInterval: 8000,
+    refetchInterval: POLL_INTERVALS.chatList,
   });
   const { data: unreadData } = useQuery({
     queryKey: ["whatsapp", "conversations", "header-count", "unread"],
     queryFn: () => whatsappService.listConversations({ unread_only: true, limit: 1 }),
-    refetchInterval: 8000,
+    refetchInterval: POLL_INTERVALS.chatList,
   });
   return { total: totalData?.data.count ?? 0, unread: unreadData?.data.count ?? 0 };
 }
 
 export default function WhatsappInboxPage() {
-  const [selected, setSelected] = useState<ApiConversation | null>(null);
+  const [picked, setPicked] = useState<ApiConversation | null>(null);
   const { total, unread } = useConversationCounts();
+
+  // Deep link: /whatsapp?phone=+91XXXXXXXXXX (e.g. the Patients page's
+  // WhatsApp button) opens that conversation straight away.
+  const router = useRouter();
+  const deepLinkPhone = useSearchParams().get("phone");
+  const { data: deepLinked } = useQuery({
+    queryKey: ["whatsapp", "conversations", "deep-link", deepLinkPhone],
+    queryFn: async () =>
+      (await whatsappService.listConversations({ search: deepLinkPhone as string, limit: 5 })).data.conversations.find(
+        (c) => c.conversation_id === deepLinkPhone
+      ) ?? null,
+    enabled: Boolean(deepLinkPhone),
+  });
+  const selected = picked ?? deepLinked ?? null;
+  const setSelected = (conversation: ApiConversation | null) => {
+    setPicked(conversation);
+    // Drop the ?phone= once the user navigates, or "Back" would reopen it.
+    if (deepLinkPhone) router.replace("/whatsapp");
+  };
 
   return (
     <div className="mx-auto flex h-[calc(100vh-8rem)] min-h-[560px] w-full max-w-[1600px] flex-col overflow-hidden rounded-2xl border border-border bg-card shadow-sm">

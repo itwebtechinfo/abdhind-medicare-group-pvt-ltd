@@ -37,9 +37,10 @@ import {
   type ConversationAssignee,
   type ApiMessage,
 } from "./whatsapp";
+import { POLL_INTERVALS } from "@/src/lib/polling";
 
 const PAGE_SIZE = 30;
-const POLL_MS = 4000;
+const POLL_MS = POLL_INTERVALS.chatMessages;
 const NEAR_BOTTOM_PX = 80;
 
 function displayName(conversation: Pick<ApiConversation, "patient_name" | "contact_name">): string | null {

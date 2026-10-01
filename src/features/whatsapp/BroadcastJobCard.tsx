@@ -7,6 +7,7 @@ import { Badge } from "@/src/components/ui/badge";
 import { Button } from "@/src/components/ui/button";
 import { Card, CardContent } from "@/src/components/ui/card";
 import { whatsappService } from "./whatsapp";
+import { POLL_INTERVALS } from "@/src/lib/polling";
 
 /** Renders at most this many recipients — the full list can be thousands. */
 const RECIPIENT_PREVIEW_LIMIT = 200;
@@ -30,8 +31,8 @@ export function BroadcastJobCard({ jobId }: BroadcastJobCardProps) {
       const status = query.state.data?.data.job.status;
       if (status === "completed") return false;
       // A "scheduled" job can be due days out — nothing changes until then,
-      // so polling every 2.5s like an in-flight send would just be noise.
-      return status === "scheduled" ? 30000 : 2500;
+      // so polling like an in-flight send would just be noise.
+      return status === "scheduled" ? POLL_INTERVALS.broadcastScheduled : POLL_INTERVALS.broadcastSending;
     },
   });
 

@@ -79,6 +79,97 @@ export interface PatientAppointmentRecord {
   booked_by_user_id: string | null;
 }
 
+/** Patients-page tabs — filtered server-side by GET /patients?tab=. */
+export type PatientTab = "all" | "upcoming_visit" | "new_this_week" | "missed_last_visit";
+
+/** GET /patients/stats — counted in the DB with the same rules as the tab filters. */
+export interface PatientStats {
+  total: number;
+  new_this_week: number;
+  upcoming_visit: number;
+  missed_last_visit: number;
+}
+
+/** Per-row visit info, computed server-side (routes/patients.py visit rules). */
+export interface PatientVisitSummary {
+  /** Latest COMPLETED (or checked-in) appointment. */
+  last_visit: { appointment_id: string; appointment_datetime: string; kind: string } | null;
+  /** Set when the latest past non-cancelled appointment was flagged no-show. */
+  missed: { appointment_id: string; appointment_datetime: string } | null;
+  next_appointment: {
+    id: string;
+    appointment_datetime: string;
+    status: AppointmentStatus;
+    arrived_at: string | null;
+    no_show_flagged: boolean;
+    source: string;
+    reference_code: string | null;
+    doctor_name: string | null;
+    doctor_specialization: string | null;
+  } | null;
+}
+
+export interface PatientListRow extends ApiPatient {
+  visit_summary: PatientVisitSummary;
+  /** WhatsApp inbox conversation id for this phone, when one exists. */
+  whatsapp_conversation_id: string | null;
+}
+
+export interface PatientListParams {
+  tab?: PatientTab;
+  search?: string;
+  limit?: number;
+  offset?: number;
+}
+
+export interface PatientActivityEntry {
+  type: "appointment" | "registered";
+  /** Epoch ms. */
+  at: number;
+  appointment_id?: string;
+  appointment_datetime?: string | null;
+  reference_code?: string | null;
+  source?: string | null;
+  from_status?: AppointmentStatus | null;
+  to_status?: AppointmentStatus | null;
+  event?: string | null;
+  old_datetime?: string | null;
+  new_datetime?: string | null;
+  changed_by_role?: string | null;
+  changed_by_name?: string | null;
+}
+
+export interface PatientOverview {
+  visit_summary: PatientVisitSummary | null;
+  /** The WhatsApp inbox conversation for this patient's phone, if they've ever messaged. */
+  whatsapp_conversation_id: string | null;
+  recent_activity: PatientActivityEntry[];
+}
+
+interface LinkedAppointment {
+  appointment?: { _id: string; appointment_datetime: string; reference_code?: string | null } | null;
+}
+
+export interface PatientLabOrder extends LinkedAppointment {
+  _id: string;
+  appointment_id: string;
+  test_name: string;
+  status: "ORDERED" | "COMPLETED";
+  result_text: string | null;
+  result_file: string | null;
+  completed_at: number | null;
+  ordered_by?: { name: string | null; role: string } | null;
+  created_at: string;
+}
+
+export interface PatientDispense extends LinkedAppointment {
+  _id: string;
+  appointment_id: string;
+  items: { medicine_name: string; unit: string; unit_price: number; quantity: number }[];
+  dispensed_by?: { name: string | null; role: string } | null;
+  created_at: string;
+}
+
 export interface CreatePatientPayload {
   full_name: string;
   phone: string;
@@ -200,7 +291,56 @@ function mapAppointmentRecord(raw: RawPatientAppointmentRecord): PatientAppointm
   };
 }
 
+type RawVisitSummary = Omit<PatientVisitSummary, "next_appointment"> & {
+  next_appointment: (Omit<NonNullable<PatientVisitSummary["next_appointment"]>, "id"> & { _id: string }) | null;
+};
+
+function mapVisitSummary(raw: RawVisitSummary | null | undefined): PatientVisitSummary {
+  const next = raw?.next_appointment;
+  return {
+    last_visit: raw?.last_visit ?? null,
+    missed: raw?.missed ?? null,
+    next_appointment: next ? { ...next, id: next._id } : null,
+  };
+}
+
 export const patientService = {
+  /** Patients page: one server-filtered page, each row with its visit summary. */
+  listPage: async (params: PatientListParams) => {
+    const res = await http.get<{
+      count: number;
+      patients: (RawApiPatient & { visit_summary?: RawVisitSummary; whatsapp_conversation_id?: string | null })[];
+    }>(API_ENDPOINTS.patients.list, {
+      params: { ...params, search: params.search || undefined, include_summary: true },
+    });
+    return {
+      ...res,
+      data: {
+        count: res.data.count,
+        patients: res.data.patients.map(
+          (raw): PatientListRow => ({
+            ...mapPatient(raw),
+            visit_summary: mapVisitSummary(raw.visit_summary),
+            whatsapp_conversation_id: raw.whatsapp_conversation_id ?? null,
+          })
+        ),
+      },
+    };
+  },
+
+  stats: () => http.get<PatientStats>(API_ENDPOINTS.patients.stats),
+
+  overview: async (id: string) => {
+    const res = await http.get<Omit<PatientOverview, "visit_summary"> & { visit_summary: RawVisitSummary | null }>(
+      API_ENDPOINTS.patients.overview(id)
+    );
+    return { ...res, data: { ...res.data, visit_summary: mapVisitSummary(res.data.visit_summary) } };
+  },
+
+  labOrders: (id: string) => http.get<{ lab_orders: PatientLabOrder[] }>(API_ENDPOINTS.patients.labOrders(id)),
+
+  dispenses: (id: string) => http.get<{ dispenses: PatientDispense[] }>(API_ENDPOINTS.patients.dispenses(id)),
+
   list: async () => {
     const res = await http.get<{ count: number; patients: RawApiPatient[] }>(
       API_ENDPOINTS.patients.list
@@ -253,3 +393,21 @@ export const patientService = {
     };
   },
 };
+
+// ---------- Display helpers ----------
+
+/** "+919311289091" / "9311289091" -> "+91 93112 89091". Other country codes are shown as stored. */
+export function formatPatientPhone(phone: string | null | undefined): string {
+  if (!phone) return "—";
+  const digits = phone.replace(/\D/g, "");
+  const national = digits.length === 10 ? digits : digits.length === 12 && digits.startsWith("91") ? digits.slice(2) : null;
+  return national ? `+91 ${national.slice(0, 5)} ${national.slice(5)}` : phone;
+}
+
+/** Same number as a tel: / WhatsApp target, always with the country code. */
+export function patientPhoneE164(phone: string | null | undefined): string | null {
+  if (!phone) return null;
+  const digits = phone.replace(/\D/g, "");
+  if (digits.length === 10) return `+91${digits}`;
+  return digits ? `+${digits}` : null;
+}
