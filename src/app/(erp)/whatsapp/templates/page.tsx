@@ -3,6 +3,7 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { FileStack } from "lucide-react";
 import { CreateTemplateFormCard } from "@/src/features/whatsapp/CreateTemplateFormCard";
+import { SystemTemplatesPanel } from "@/src/features/whatsapp/SystemTemplatesPanel";
 import { TemplateRequestsPanel, TEMPLATE_REQUESTS_QUERY_KEY } from "@/src/features/whatsapp/TemplateRequestsPanel";
 import { TemplatesPanel, TEMPLATES_QUERY_KEY } from "@/src/features/whatsapp/TemplatesPanel";
 import { WhatsAppActivityFeed } from "@/src/features/whatsapp/WhatsAppActivityFeed";
@@ -41,6 +42,10 @@ export default function WhatsappTemplatesPage() {
         backHref="/whatsapp/broadcast"
         backLabel="Back to Broadcast"
       />
+
+      <div className="mb-6">
+        <SystemTemplatesPanel />
+      </div>
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
         <CreateTemplateFormCard

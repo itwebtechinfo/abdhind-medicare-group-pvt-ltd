@@ -16,6 +16,8 @@ const ACTION_LABELS: Record<string, string> = {
   message_retry: "Retried message",
   template_sync: "Synced templates",
   broadcast_created: "Created broadcast",
+  system_templates_seeded: "Submitted system templates",
+  otp_template_seeded: "Submitted OTP template",
 };
 
 interface AuditLogDialogProps {

@@ -21,6 +21,13 @@ function describeActivity(log: ApiAuditLog): string {
       return `Template "${name}" ${String(d.status ?? "").toLowerCase()}`;
     case "template_request_retried":
       return `Retried template "${name}"`;
+    case "system_templates_seeded": {
+      const results = Array.isArray(d.results) ? (d.results as { status?: string }[]) : [];
+      const submitted = results.filter((r) => r.status !== "SKIPPED").length;
+      return `Submitted ${submitted} system template(s) to Meta (${results.length - submitted} already there)`;
+    }
+    case "otp_template_seeded":
+      return "Submitted the OTP template to Meta";
     case "broadcast_created":
       return d.scheduled_at
         ? `Scheduled a broadcast using "${templateName}" to ${Number(d.total) || 0} recipient(s)`

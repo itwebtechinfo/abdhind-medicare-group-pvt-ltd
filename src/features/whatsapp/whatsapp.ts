@@ -101,7 +101,9 @@ export type AuditLogAction =
   | "broadcast_created"
   | "template_request_created"
   | "template_status_update"
-  | "template_request_retried";
+  | "template_request_retried"
+  | "system_templates_seeded"
+  | "otp_template_seeded";
 
 export interface RawApiAuditLog {
   _id: string;
@@ -174,6 +176,41 @@ export function templateHasHeaderVariable(template: Pick<ApiTemplate, "component
 export function templateHasButtonVariable(template: Pick<ApiTemplate, "components">): boolean {
   const buttonsComponent = template.components.find((c) => c.type === "BUTTONS");
   return (buttonsComponent?.buttons ?? []).some((b) => b.type === "URL" && /\{\{1\}\}/.test(b.url ?? ""));
+}
+
+// ---------- Built-in system templates ----------
+
+/** Meta's own statuses (APPROVED, PENDING, REJECTED, PAUSED, …), our request
+ * statuses (SUBMITTING, SUBMIT_FAILED) before Meta knows it, or NOT_SUBMITTED. */
+export type SystemTemplateStatus = string;
+
+export interface SystemTemplate {
+  name: string;
+  /** Meta language code, e.g. "hi" / "en_US". */
+  language: string;
+  category: string;
+  purpose: string | null;
+  /** Labels for {{1}}, {{2}}… in order. */
+  variables: string[];
+  /** null for AUTHENTICATION (Meta writes that copy). */
+  body: string | null;
+  buttons: string[];
+  status: SystemTemplateStatus;
+  /** Rejection reason / submit error, when there is one. */
+  reason: string | null;
+  request_id: string | null;
+  /** Epoch ms of the last Meta sync for this template. */
+  synced_at: number | null;
+  /** false = the approved copy on Meta no longer takes the variables the system sends, so it won't be used. */
+  variables_match: boolean;
+}
+
+export interface SeedSystemTemplatesResult {
+  name: string;
+  language: string;
+  status: string;
+  reason?: string;
+  request_id?: string;
 }
 
 // ---------- Template requests (submit a new template to Meta) ----------
@@ -704,6 +741,12 @@ export const whatsappService = {
   },
 
   syncTemplates: () => http.post<{ synced: number }>(API_ENDPOINTS.whatsapp.templatesSync),
+
+  listSystemTemplates: () =>
+    http.get<{ templates: SystemTemplate[] }>(API_ENDPOINTS.whatsapp.systemTemplates),
+
+  seedSystemTemplates: () =>
+    http.post<{ results: SeedSystemTemplatesResult[] }>(API_ENDPOINTS.whatsapp.seedSystemTemplates),
 
   createBroadcast: (payload: CreateBroadcastPayload) =>
     http.post<{ job_id: string; total: number }>(API_ENDPOINTS.whatsapp.broadcast, payload),
