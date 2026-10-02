@@ -1,6 +1,9 @@
 "use client";
 
+import { useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { ShieldAlert } from "lucide-react";
+import { AUTH_ROUTES } from "@/src/lib/auth/constants";
 import { useRequireAuth } from "@/src/hooks/useRequireAuth";
 import { useAuth } from "@/src/hooks/useAuth";
 import { EnterpriseLoader } from "@/src/components/common/EnterpriseLoader";
@@ -18,7 +21,18 @@ export function ProtectedRoute({
   fallback,
 }: ProtectedRouteProps) {
   const { isLoading, isAuthorized, guard: guardResult } = useRequireAuth(guard);
-  const { status } = useAuth();
+  const { status, user } = useAuth();
+  const router = useRouter();
+  // A temporary password must be replaced before any page opens (the API
+  // also refuses everything except /auth/me, /auth/change-password, /auth/logout).
+  const mustChangePassword = Boolean(user?.mustChangePassword);
+  useEffect(() => {
+    if (mustChangePassword) router.replace(AUTH_ROUTES.changePassword);
+  }, [mustChangePassword, router]);
+
+  if (mustChangePassword) {
+    return <EnterpriseLoader label="Set a new password" sublabel="Taking you to the password screen" />;
+  }
 
   if (isLoading) {
     return (

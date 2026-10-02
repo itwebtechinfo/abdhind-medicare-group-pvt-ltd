@@ -191,6 +191,7 @@ export function PatientsBoard() {
       // A new booking changes the next-appointment column and the stats.
       invalidatePatients();
       queryClient.invalidateQueries({ queryKey: ["appointments"] });
+      queryClient.invalidateQueries({ queryKey: ["notifications"] });
     },
     onError: (err: NormalizedApiError) => toast.error(err.error, err.msg),
   });

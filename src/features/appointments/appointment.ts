@@ -259,7 +259,7 @@ export const appointmentService = {
     return { ...res, data: { appointment: mapAppointment(res.data.appointment) } };
   },
 
-  /** POST /doctor/approve — confirm a PENDING appointment, optionally at a doctor-preferred
+  /** POST /api/v1/doctor/approve — confirm a PENDING appointment, optionally at a doctor-preferred
    * slot_id (status + time in one call). Same endpoint the doctor dashboard's quick-approve uses. */
   confirm: async (id: string, payload: ConfirmAppointmentPayload = {}) => {
     const res = await http.post<{ appointment: RawApiAppointment }>(

@@ -37,6 +37,8 @@ export interface AuthContextValue {
   ) => Promise<{ success: true } | { success: false; error: AuthError }>;
   logout: () => Promise<void>;
   refreshSession: () => Promise<void>;
+  /** Swap in an already-persisted session (e.g. after a password change). */
+  replaceSession: (session: AuthSession) => void;
   checkPermission: (permission: Permission) => boolean;
   checkModuleAction: (module: string, action: PermissionAction) => boolean;
   checkRole: (role: UserRole) => boolean;
@@ -115,6 +117,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }, [hydrate]);
 
+  const replaceSession = useCallback((next: AuthSession) => {
+    setSession(next);
+    setStatus("authenticated");
+  }, []);
+
   const value = useMemo<AuthContextValue>(
     () => ({
       status,
@@ -126,6 +133,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       signup,
       logout,
       refreshSession,
+      replaceSession,
       checkPermission: (permission) => hasPermission(session, permission),
       checkModuleAction: (module, action) => {
         if (!session) return false;
@@ -133,7 +141,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       },
       checkRole: (role) => hasRole(session, role),
     }),
-    [status, session, login, signup, logout, refreshSession]
+    [status, session, login, signup, logout, refreshSession, replaceSession]
   );
 
   return (

@@ -1,160 +1,93 @@
+import { http } from "@/src/services/http";
+import { API_ENDPOINTS } from "@/src/config/endpoints";
+import {
+  dayMonth,
+  formatClock,
+  istNow,
+  sourceLabel,
+  splitAppointmentDateTime,
+} from "@/src/features/appointments/appointment";
+
 // ---------- Types ----------
 
-export type NotificationType =
-  | "appointment_new"
-  | "appointment_confirmed"
-  | "appointment_cancelled"
-  | "followup_reminder"
-  | "message_failed"
-  | "enquiry_new"
-  | "doctor_linked"
-  | "doctor_unlinked";
+/** Derived live by GET /notifications from records that need action. */
+export type NotificationType = "enquiry_new" | "appointment_pending";
 
-export interface AppNotification {
-  id: string;
-  type: NotificationType;
-  title: string;
-  description: string;
-  timestamp: string; // ISO string
-  isRead: boolean;
+interface BaseNotification {
+  /** "enquiry:<id>" / "appointment:<id>" — what mark-as-read stores. */
+  key: string;
+  /** Epoch ms. */
+  created_at: number;
+  is_read: boolean;
+  name: string | null;
 }
 
-// ---------- Dummy data ----------
+export interface EnquiryNotification extends BaseNotification {
+  type: "enquiry_new";
+  enquiry_id: string;
+  phone: string | null;
+  preferred_time: string | null;
+}
+
+export interface AppointmentNotification extends BaseNotification {
+  type: "appointment_pending";
+  appointment_id: string;
+  patient_id: string;
+  doctor_name: string | null;
+  appointment_datetime: string | null;
+  source: string | null;
+}
+
+export type AppNotification = EnquiryNotification | AppointmentNotification;
+
+// ---------- Service ----------
+
+export const notificationService = {
+  list: () => http.get<{ items: AppNotification[]; unread_count: number }>(API_ENDPOINTS.notifications.list),
+  markRead: (keys: string[]) => http.post<null>(API_ENDPOINTS.notifications.read, { keys }),
+  markAllRead: () => http.post<null>(API_ENDPOINTS.notifications.readAll),
+};
+
+// ---------- Display ----------
+
+/** Title, one-line description and the drawer link for an item. */
+export function describeNotification(n: AppNotification): { title: string; description: string; href: string } {
+  if (n.type === "enquiry_new") {
+    return {
+      title: "New enquiry",
+      description: `${n.name ?? "Someone"} requested a callback${n.preferred_time ? ` · ${n.preferred_time}` : ""}`,
+      href: `/enquiries?enquiry=${encodeURIComponent(n.enquiry_id)}`,
+    };
+  }
+  let when = "";
+  if (n.appointment_datetime) {
+    const { date, minutes } = splitAppointmentDateTime(n.appointment_datetime);
+    const clock = formatClock(minutes);
+    when = ` for ${dayMonth(date, istNow(Date.now()).date)}, ${clock.time} ${clock.period}`;
+  }
+  return {
+    title: "Appointment needs approval",
+    description: `${n.name ?? "A patient"} booked${n.doctor_name ? ` with ${n.doctor_name}` : ""}${when}${
+      n.source ? ` · via ${sourceLabel(n.source)}` : ""
+    }`,
+    href: `/appointments?appointment=${encodeURIComponent(n.appointment_id)}&patient=${encodeURIComponent(n.patient_id)}`,
+  };
+}
 
 const MIN = 60 * 1000;
 const HOUR = 60 * MIN;
 const DAY = 24 * HOUR;
 
-/** Builds fresh relative timestamps on every call so the demo always reads as "live". */
-export function buildDummyNotifications(): AppNotification[] {
-  const now = Date.now();
-  const ago = (ms: number) => new Date(now - ms).toISOString();
-
-  return [
-    {
-      id: "n1",
-      type: "appointment_new",
-      title: "New appointment booked",
-      description:
-        "Rahul Sharma booked an appointment with Dr. Ekhlaq Ahmad for 05 Aug, 11:00 AM.",
-      timestamp: ago(2 * MIN),
-      isRead: false,
-    },
-    {
-      id: "n2",
-      type: "message_failed",
-      title: "WhatsApp message failed",
-      description:
-        "Appointment reminder to Priya Verma (+91 98765 43210) could not be delivered.",
-      timestamp: ago(12 * MIN),
-      isRead: false,
-    },
-    {
-      id: "n3",
-      type: "appointment_confirmed",
-      title: "Appointment confirmed",
-      description:
-        "Dr. Sneha Kapoor confirmed the appointment with Amit Yadav for 06 Aug, 4:30 PM.",
-      timestamp: ago(45 * MIN),
-      isRead: false,
-    },
-    {
-      id: "n4",
-      type: "enquiry_new",
-      title: "New enquiry received",
-      description:
-        "Anjali Mehta enquired about Root Canal Treatment via the website contact form.",
-      timestamp: ago(1 * HOUR),
-      isRead: false,
-    },
-    {
-      id: "n5",
-      type: "followup_reminder",
-      title: "Follow-up reminder due",
-      description:
-        "Follow-up due today for Suresh Kumar (Diabetes checkup, last visit 20 Jul).",
-      timestamp: ago(3 * HOUR),
-      isRead: false,
-    },
-    {
-      id: "n6",
-      type: "appointment_cancelled",
-      title: "Appointment cancelled",
-      description:
-        "Neha Joshi cancelled her appointment with Dr. Ekhlaq Ahmad scheduled for 03 Aug, 9:00 AM.",
-      timestamp: ago(1 * DAY + 5 * HOUR),
-      isRead: true,
-    },
-    {
-      id: "n7",
-      type: "doctor_linked",
-      title: "Doctor linked to branch",
-      description:
-        "Dr. Vikram Singh was linked to Abdhind Medicare — Sector 62 branch.",
-      timestamp: ago(1 * DAY + 10 * HOUR),
-      isRead: true,
-    },
-    {
-      id: "n8",
-      type: "message_failed",
-      title: "WhatsApp message failed",
-      description:
-        'Broadcast to 24 patients failed — Meta template "appointment_reminder" was rejected.',
-      timestamp: ago(2 * DAY),
-      isRead: true,
-    },
-    {
-      id: "n9",
-      type: "doctor_unlinked",
-      title: "Doctor unlinked from branch",
-      description:
-        "Dr. Farhan Ali was unlinked from Abdhind Medicare — Noida branch.",
-      timestamp: ago(3 * DAY),
-      isRead: true,
-    },
-    {
-      id: "n10",
-      type: "appointment_new",
-      title: "New appointment booked",
-      description:
-        "Kavita Desai booked an appointment with Dr. Sneha Kapoor for 08 Aug, 10:30 AM.",
-      timestamp: ago(5 * DAY),
-      isRead: true,
-    },
-  ];
-}
-
-// ---------- Formatting ----------
-
-export function formatTimeAgo(iso: string): string {
-  const date = new Date(iso);
-  const diffMs = Date.now() - date.getTime();
-
+export function formatTimeAgo(epochMs: number): string {
+  const diffMs = Date.now() - epochMs;
   if (diffMs < MIN) return "Just now";
-  if (diffMs < HOUR) {
-    const m = Math.floor(diffMs / MIN);
-    return `${m} min ago`;
-  }
+  if (diffMs < HOUR) return `${Math.floor(diffMs / MIN)} min ago`;
   if (diffMs < DAY) {
     const h = Math.floor(diffMs / HOUR);
     return `${h} hour${h > 1 ? "s" : ""} ago`;
   }
-
-  const time = date.toLocaleTimeString("en-IN", {
-    hour: "numeric",
-    minute: "2-digit",
-    hour12: true,
-  });
-
-  const startOfToday = new Date().setHours(0, 0, 0, 0);
-  const startOfDate = new Date(date).setHours(0, 0, 0, 0);
-  const dayDiff = Math.round((startOfToday - startOfDate) / DAY);
-
-  if (dayDiff === 1) return `Yesterday, ${time}`;
-  if (dayDiff < 7) return `${dayDiff} days ago`;
-
-  return date.toLocaleDateString("en-IN", {
-    day: "2-digit",
-    month: "short",
-  });
+  const days = Math.floor(diffMs / DAY);
+  if (days === 1) return "Yesterday";
+  if (days < 7) return `${days} days ago`;
+  return new Date(epochMs).toLocaleDateString("en-IN", { day: "2-digit", month: "short", timeZone: "Asia/Kolkata" });
 }

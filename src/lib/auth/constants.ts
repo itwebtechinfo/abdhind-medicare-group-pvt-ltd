@@ -10,6 +10,8 @@ export const AUTH_STORAGE_KEYS = {
 export const AUTH_ROUTES = {
   /** Single source of truth for "not authenticated" bounces from a protected page. */
   login: "/login",
+  /** Forced after signing in with a temporary password; also self-service. */
+  changePassword: "/change-password",
   dashboard: "/dashboard",
   unauthorized: "/unauthorized",
   /** The public marketing homepage — not used as a logged-out redirect target. */
@@ -21,6 +23,7 @@ export const PROTECTED_ROUTE_PREFIXES = [
   "/dashboard",
   "/appointments",
   "/patients",
+  "/enquiries",
   "/admin",
   "/reports",
   "/settings",

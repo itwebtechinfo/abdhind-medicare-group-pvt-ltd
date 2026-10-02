@@ -88,7 +88,7 @@ export const ERP_NAV_SECTIONS: ErpNavSection[] = [
       },
       {
         name: "Enquiries",
-        href: "/appointments?section=enquiries",
+        href: "/enquiries",
         icon: MessageSquare,
         permissions: ["enquiry:view", "enquiry:manage"],
       },

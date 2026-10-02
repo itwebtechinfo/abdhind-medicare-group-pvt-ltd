@@ -42,7 +42,7 @@ function mapApiUser(raw: ApiUser): AuthUser {
     id: raw.id,
     phone: raw.phone_number,
     displayName: raw.full_name,
-    email: raw.email,
+    email: raw.email ?? undefined,
     // Backend role casing has been inconsistent (e.g. "ADMIN" vs the documented
     // "admin") — normalize defensively rather than trust exact casing.
     role: raw.role.toLowerCase() as UserRole,
@@ -53,6 +53,7 @@ function mapApiUser(raw: ApiUser): AuthUser {
     state: raw.state,
     district: raw.district,
     address: raw.address,
+    mustChangePassword: Boolean(raw.must_change_password),
   };
 }
 
@@ -209,8 +210,23 @@ export const authService = {
     }
   },
 
+  /** Self-service password change (also how a temporary password is replaced).
+   * Keeps this device signed in and stores the refreshed user (flag cleared). */
+  async changePassword(currentPassword: string, newPassword: string): Promise<AuthSession | null> {
+    const envelope = await http.post<{ user: ApiUser }>(API_ENDPOINTS.auth.changePassword, {
+      current_password: currentPassword,
+      new_password: newPassword,
+    });
+    const stored = sessionStorageLayer.load();
+    if (!stored) return null;
+    const session: AuthSession = { ...stored, user: mapApiUser(envelope.data.user) };
+    this.persistSession(session);
+    return session;
+  },
+
   getLoginRedirect(session: AuthSession | null): string {
     if (!session) return AUTH_ROUTES.login;
+    if (session.user.mustChangePassword) return AUTH_ROUTES.changePassword;
     return getDashboardPathForRole(session.user.role);
   },
 

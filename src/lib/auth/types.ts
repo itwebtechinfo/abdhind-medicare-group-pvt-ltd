@@ -47,6 +47,8 @@ export interface AuthUser {
   state?: string | null;
   district?: string | null;
   address?: string | null;
+  /** Signed in with a temporary password — must set a new one before anything else. */
+  mustChangePassword?: boolean;
 }
 
 export interface TokenPair {

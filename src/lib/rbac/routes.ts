@@ -15,6 +15,7 @@ export const ROUTE_ACCESS_RULES: RouteAccessRule[] = [
   { path: "/dashboard", permissions: "dashboard:view" },
   { path: "/appointments", permissions: "appointments:view", prefix: true },
   { path: "/patients", permissions: "patients:view", prefix: true },
+  { path: "/enquiries", permissions: ["enquiry:view", "enquiry:manage"], prefix: true },
   { path: "/reports", permissions: "reports:view", prefix: true },
   { path: "/settings", permissions: "settings:view", prefix: true },
   { path: "/pharmacy", permissions: ["pharmacy:view", "pharmacy:manage"], prefix: true },

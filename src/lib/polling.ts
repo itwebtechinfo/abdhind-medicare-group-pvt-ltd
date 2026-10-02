@@ -18,4 +18,6 @@ export const POLL_INTERVALS = {
   broadcastScheduled: 60_000,
   /** Template requests / system templates still awaiting Meta review (takes minutes to hours). */
   templateReview: 30_000,
+  /** Topbar notification bell (also refetches when the tab regains focus). */
+  notifications: 60_000,
 } as const;

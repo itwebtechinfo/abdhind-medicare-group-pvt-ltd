@@ -5,14 +5,26 @@ export const API_ENDPOINTS = {
     refresh: "/api/v1/auth/refresh",
     logout: "/api/v1/auth/logout",
     me: "/api/v1/auth/me",
+    /** POST { current_password, new_password }: self-service, also replaces a temporary password. */
+    changePassword: "/api/v1/auth/change-password",
   },
+  /** GET: staff roles with label, description and page access (from backend PERMISSIONS). */
+  roles: "/api/v1/roles",
   users: {
     /** GET: list users. POST: create a user. */
     list: "/api/v1/users",
     /** GET: user detail. PATCH: partial update. */
     detail: (id: string) => `/api/v1/users/${id}`,
+    /** GET: per-tab counts for the Staff & access page. */
+    stats: "/api/v1/users/stats",
     deactivate: (id: string) => `/api/v1/users/${id}/deactivate`,
+    /** Old name for reactivate — kept for compatibility. */
     activate: (id: string) => `/api/v1/users/${id}/activate`,
+    reactivate: (id: string) => `/api/v1/users/${id}/reactivate`,
+    /** PATCH { role, doctor_id? }. */
+    role: (id: string) => `/api/v1/users/${id}/role`,
+    /** POST: new temporary password (shown once). Also "Resend invite". */
+    resetPassword: (id: string) => `/api/v1/users/${id}/reset-password`,
   },
   patients: {
     /** GET: list patients. POST: create a patient. */
@@ -31,6 +43,22 @@ export const API_ENDPOINTS = {
     signupOtpRequest: "/api/v1/patients/signup/otp/request",
     /** POST: public, unauthenticated — creates the patient's account + login in one call. */
     signup: "/api/v1/patients/signup",
+  },
+  enquiries: {
+    /** POST: public, unauthenticated — website "Quick Enquiry" callback form. */
+    public: "/api/v1/public/enquiries",
+    /** GET: staff list (status/search/paging) with per-status counts. */
+    list: "/api/v1/enquiries",
+    /** GET: one enquiry. PATCH: change status and/or add a note. */
+    detail: (id: string) => `/api/v1/enquiries/${id}`,
+  },
+  notifications: {
+    /** GET: topbar bell items (derived live) + unread count for this user. */
+    list: "/api/v1/notifications",
+    /** POST { keys }: mark specific items read for this user. */
+    read: "/api/v1/notifications/read",
+    /** POST: mark everything up to now as read for this user. */
+    readAll: "/api/v1/notifications/read-all",
   },
   me: {
     /** GET: authenticated patient's own record + appointment history. `patient` is null if never booked. */
@@ -68,11 +96,10 @@ export const API_ENDPOINTS = {
     otpRequest: "/api/v1/appointments/public/otp/request",
     book: "/api/v1/appointments/public",
   },
-  /** Root-level, not under /api/v1. */
   doctorQuick: {
-    pending: "/doctor/pending",
-    approve: "/doctor/approve",
-    exitHumanMode: "/doctor/exit-human-mode",
+    pending: "/api/v1/doctor/pending",
+    approve: "/api/v1/doctor/approve",
+    exitHumanMode: "/api/v1/doctor/exit-human-mode",
   },
   dashboard: {
     today: "/api/v1/dashboard/today",

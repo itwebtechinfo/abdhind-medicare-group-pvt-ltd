@@ -259,6 +259,8 @@ export function AppointmentsBoard() {
           queryClient.invalidateQueries({ queryKey: APPOINTMENTS_QUERY_KEY }),
           // Patients page next-appointment / last-visit columns and stats.
           queryClient.invalidateQueries({ queryKey: ["patients"] }),
+          // Bell: an approved/declined booking leaves "needs approval".
+          queryClient.invalidateQueries({ queryKey: ["notifications"] }),
         ]);
         return true;
       } catch (err) {
@@ -293,6 +295,7 @@ export function AppointmentsBoard() {
       await Promise.all([
         queryClient.invalidateQueries({ queryKey: APPOINTMENTS_QUERY_KEY }),
         queryClient.invalidateQueries({ queryKey: ["patients"] }),
+        queryClient.invalidateQueries({ queryKey: ["notifications"] }),
       ]);
     } catch (err) {
       const e = err as NormalizedApiError;

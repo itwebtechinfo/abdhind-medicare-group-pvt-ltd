@@ -4,6 +4,9 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState, useRef, useEffect } from "react";
 import Image from "next/image";
+import { toast } from "@/src/lib/toast";
+import { enquiryService, PREFERRED_TIMES } from "@/src/features/enquiries/enquiry";
+import type { NormalizedApiError } from "@/src/types/api";
 import {
   Phone,
   MessageCircle,
@@ -55,11 +58,13 @@ export function Navbar() {
   const [activeTab, setActiveTab] = useState("/");
   const menuRef = useRef<HTMLDivElement>(null);
   const [enquiryOpen, setEnquiryOpen] = useState(false);
-  const [enquiryForm, setEnquiryForm] = useState({
+  const [enquiryForm, setEnquiryForm] = useState<{ name: string; phone: string; time: string; website: string }>({
     name: "",
     phone: "",
-    time: "Morning",
+    time: PREFERRED_TIMES[0],
+    website: "",
   });
+  const [enquirySending, setEnquirySending] = useState(false);
 
   const navItems: NavItem[] = [
     { name: "Home", href: "/" },
@@ -222,10 +227,27 @@ export function Navbar() {
     setActiveTab(pathname);
   }, [pathname]);
 
-  const handleEnquirySubmit = (e: React.FormEvent) => {
+  // Saved to the Enquiries page in the ERP for reception to call back.
+  const handleEnquirySubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setEnquiryForm({ name: "", phone: "", time: "Morning" });
-    setEnquiryOpen(false);
+    if (enquirySending) return;
+    setEnquirySending(true);
+    try {
+      const res = await enquiryService.submitPublic({
+        full_name: enquiryForm.name,
+        phone: enquiryForm.phone,
+        preferred_time: enquiryForm.time,
+        ...(enquiryForm.website ? { website: enquiryForm.website } : {}),
+      });
+      toast.success("Enquiry sent", res.msg);
+      setEnquiryForm({ name: "", phone: "", time: PREFERRED_TIMES[0], website: "" });
+      setEnquiryOpen(false);
+    } catch (err) {
+      const error = err as NormalizedApiError;
+      toast.error("Couldn't send your enquiry", error.msg || "Please check your number and try again.");
+    } finally {
+      setEnquirySending(false);
+    }
   };
 
   return (
@@ -423,6 +445,21 @@ export function Navbar() {
                       onSubmit={handleEnquirySubmit}
                       className="p-5 space-y-4"
                     >
+                      {/* Honeypot: off-screen and skipped by keyboard/screen
+                          readers, so only bots fill it in. */}
+                      <div aria-hidden="true" className="absolute -left-[10000px] top-auto h-px w-px overflow-hidden">
+                        <label>
+                          Website
+                          <input
+                            type="text"
+                            name="website"
+                            tabIndex={-1}
+                            autoComplete="off"
+                            value={enquiryForm.website}
+                            onChange={(e) => setEnquiryForm({ ...enquiryForm, website: e.target.value })}
+                          />
+                        </label>
+                      </div>
                       <div>
                         <label className="block text-sm font-medium text-gray-700 mb-1">
                           Full Name
@@ -473,16 +510,17 @@ export function Navbar() {
                           }
                           className="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:border-teal-400 focus:ring-2 focus:ring-teal-100 outline-none transition-all"
                         >
-                          <option>Morning (9 AM - 12 PM)</option>
-                          <option>Afternoon (12 PM - 4 PM)</option>
-                          <option>Evening (4 PM - 8 PM)</option>
+                          {PREFERRED_TIMES.map((time) => (
+                            <option key={time}>{time}</option>
+                          ))}
                         </select>
                       </div>
                       <button
                         type="submit"
-                        className="w-full bg-gradient-to-r from-teal-600 to-teal-700 text-white py-2.5 rounded-xl font-semibold hover:from-teal-700 hover:to-teal-800 transition-all duration-200 shadow-md"
+                        disabled={enquirySending}
+                        className="w-full bg-gradient-to-r from-teal-600 to-teal-700 text-white py-2.5 rounded-xl font-semibold hover:from-teal-700 hover:to-teal-800 transition-all duration-200 shadow-md disabled:opacity-60"
                       >
-                        Submit Enquiry →
+                        {enquirySending ? "Sending…" : "Submit Enquiry →"}
                       </button>
                       <label className="flex items-center gap-2 text-xs text-gray-500">
                         <input
