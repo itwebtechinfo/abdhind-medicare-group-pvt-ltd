@@ -26,6 +26,8 @@ interface PatientFormDialogProps {
   onOpenChange: (open: boolean) => void;
   /** Present => edit mode, prefilled from this patient. */
   patient?: ApiPatient | null;
+  /** Create mode only: starting values (e.g. phone + WhatsApp name from the inbox). */
+  defaults?: Partial<CreatePatientFormValues>;
   isSubmitting: boolean;
   onCreate: (values: CreatePatientFormValues) => void;
   onUpdate: (id: string, changes: UpdatePatientPayload) => void;
@@ -43,6 +45,7 @@ export function PatientFormDialog({
   open,
   onOpenChange,
   patient,
+  defaults,
   isSubmitting,
   onCreate,
   onUpdate,
@@ -72,8 +75,9 @@ export function PatientFormDialog({
             gender: (patient.gender as CreatePatientFormValues["gender"]) ?? "",
             address: patient.address ?? "",
           }
-        : EMPTY_VALUES
+        : { ...EMPTY_VALUES, ...defaults }
     );
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- defaults only seed the form when it opens
   }, [open, patient, reset]);
 
   const onSubmit = handleSubmit((values) => {

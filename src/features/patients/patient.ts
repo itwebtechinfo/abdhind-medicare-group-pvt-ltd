@@ -291,11 +291,11 @@ function mapAppointmentRecord(raw: RawPatientAppointmentRecord): PatientAppointm
   };
 }
 
-type RawVisitSummary = Omit<PatientVisitSummary, "next_appointment"> & {
+export type RawVisitSummary = Omit<PatientVisitSummary, "next_appointment"> & {
   next_appointment: (Omit<NonNullable<PatientVisitSummary["next_appointment"]>, "id"> & { _id: string }) | null;
 };
 
-function mapVisitSummary(raw: RawVisitSummary | null | undefined): PatientVisitSummary {
+export function mapVisitSummary(raw: RawVisitSummary | null | undefined): PatientVisitSummary {
   const next = raw?.next_appointment;
   return {
     last_visit: raw?.last_visit ?? null,

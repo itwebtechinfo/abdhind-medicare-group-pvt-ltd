@@ -4,10 +4,11 @@
  * browser tab is hidden (refetchIntervalInBackground defaults to false).
  */
 export const POLL_INTERVALS = {
-  /** Open WhatsApp chat — new messages in the conversation on screen. */
-  chatMessages: 10_000,
-  /** WhatsApp inbox conversation list and its header counts. */
-  chatList: 30_000,
+  /** WhatsApp inbox: /inbox/sync is the page's ONLY periodic request (list,
+   * open chat, counts, presence and the bell's count all ride on it). */
+  inboxSyncVisible: 10_000,
+  /** …while the tab is hidden (it also re-syncs at once on focus). */
+  inboxSyncHidden: 60_000,
   /** Template/broadcast activity feed on the Templates page. */
   activityFeed: 60_000,
   /** WhatsApp section-wide "template approved / broadcast done" toasts. */
@@ -18,6 +19,7 @@ export const POLL_INTERVALS = {
   broadcastScheduled: 60_000,
   /** Template requests / system templates still awaiting Meta review (takes minutes to hours). */
   templateReview: 30_000,
-  /** Topbar notification bell (also refetches when the tab regains focus). */
+  /** Topbar notification bell (also refetches when the tab regains focus).
+   * Paused while the WhatsApp inbox is open - its sync carries the count. */
   notifications: 60_000,
 } as const;

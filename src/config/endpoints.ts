@@ -141,6 +141,23 @@ export const API_ENDPOINTS = {
     /** POST { path } → { url } — short-lived signed URL for a private upload. */
     sign: "/api/v1/files/sign",
   },
+  inbox: {
+    /** GET: list page(s) + all scope/group counts (query: scope, group, q, cursor, include_users). */
+    conversations: "/api/v1/inbox/conversations",
+    /** GET: open a chat - header + latest messages + patient panel context (marks it read). */
+    conversation: (id: string) => `/api/v1/inbox/conversations/${encodeURIComponent(id)}`,
+    /** GET ?before=: older history. POST (multipart): send text/template/media with client_id. */
+    messages: (id: string) => `/api/v1/inbox/conversations/${encodeURIComponent(id)}/messages`,
+    /** POST { text, mentions, client_id }: internal note - never sent to WhatsApp. */
+    notes: (id: string) => `/api/v1/inbox/conversations/${encodeURIComponent(id)}/notes`,
+    /** POST { type, ... }: assign / snooze / done / reopen / take_over / hand_back / book / send_report / ... */
+    actions: (id: string) => `/api/v1/inbox/conversations/${encodeURIComponent(id)}/actions`,
+    /** GET ?since=&scope=&open=: deltas - the inbox's only periodic call. */
+    sync: "/api/v1/inbox/sync",
+    /** GET/POST; PATCH/DELETE with an id. */
+    savedReplies: "/api/v1/inbox/saved-replies",
+    savedReply: (id: string) => `/api/v1/inbox/saved-replies/${id}`,
+  },
   whatsapp: {
     /** GET: chat list (query: unread_only, human_mode, search, tag, limit, offset). */
     conversations: "/api/v1/whatsapp/conversations",

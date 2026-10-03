@@ -1,11 +1,12 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { useRouter } from "next/navigation";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Bell, CalendarClock, Check, CheckCheck, Inbox, Mail, type LucideIcon } from "lucide-react";
+import { AtSign, Bell, CalendarClock, Check, CheckCheck, Hourglass, Inbox, Mail, type LucideIcon } from "lucide-react";
 import { Button } from "@/src/components/ui/button";
 import { Skeleton } from "@/src/components/ui/skeleton";
+import { inboxSyncBridge } from "@/src/lib/inbox-sync-bridge";
 import { POLL_INTERVALS } from "@/src/lib/polling";
 import { toast } from "@/src/lib/toast";
 import { cn } from "@/src/lib/utils";
@@ -30,6 +31,16 @@ const TYPE_META: Record<NotificationType, { icon: LucideIcon; iconClass: string;
     iconClass: "text-amber-600 dark:text-amber-400",
     bgClass: "bg-amber-500/15",
   },
+  inbox_mention: {
+    icon: AtSign,
+    iconClass: "text-sky-600 dark:text-sky-400",
+    bgClass: "bg-sky-500/15",
+  },
+  inbox_waiting: {
+    icon: Hourglass,
+    iconClass: "text-red-600 dark:text-red-400",
+    bgClass: "bg-red-500/15",
+  },
 };
 
 const CLOSE_ANIMATION_MS = 150;
@@ -46,13 +57,16 @@ export function NotificationBell() {
   // Real items from GET /notifications (enquiries NEW + appointments PENDING,
   // RBAC-filtered server-side). Polls every minute while the tab is visible
   // and refetches as soon as the tab regains focus.
+  // While the WhatsApp inbox is open its sync call carries this count and
+  // invalidates this query when it changes - so no second poll from here.
+  const inboxSyncing = useSyncExternalStore(inboxSyncBridge.subscribe, inboxSyncBridge.isActive, () => false);
   const { data, isLoading } = useQuery({
     queryKey: NOTIFICATIONS_QUERY_KEY,
     queryFn: async () => (await notificationService.list()).data,
-    refetchInterval: POLL_INTERVALS.notifications,
+    refetchInterval: inboxSyncing ? false : POLL_INTERVALS.notifications,
     // "always": refetch on focus even if the last poll is still within the
     // app-wide 60s staleTime — coming back to the tab should show new items.
-    refetchOnWindowFocus: "always",
+    refetchOnWindowFocus: inboxSyncing ? false : "always",
   });
   const items = data?.items ?? [];
   const unreadCount = data?.unread_count ?? 0;

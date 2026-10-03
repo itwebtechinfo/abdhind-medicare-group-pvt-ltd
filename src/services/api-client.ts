@@ -10,6 +10,14 @@ import type { AuthSession } from "@/src/lib/auth/types";
 
 type RetryableRequestConfig = InternalAxiosRequestConfig & { _retry?: boolean };
 
+declare module "axios" {
+  interface AxiosRequestConfig {
+    /** Background poll (e.g. the WhatsApp inbox sync every 10s): don't
+     * count it in the global activity indicator, or it blinks forever. */
+    silent?: boolean;
+  }
+}
+
 export const apiClient = axios.create({
   baseURL: env.apiBaseUrl,
   timeout: env.apiTimeoutMs,
@@ -41,7 +49,7 @@ apiClient.interceptors.request.use((config) => {
 for (const instance of [apiClient, publicApiClient]) {
   instance.interceptors.request.use(
     (config) => {
-      loaderController.requestStart();
+      if (!config.silent) loaderController.requestStart();
       return config;
     },
     (error) => {
@@ -51,11 +59,11 @@ for (const instance of [apiClient, publicApiClient]) {
   );
   instance.interceptors.response.use(
     (response) => {
-      loaderController.requestEnd();
+      if (!response.config.silent) loaderController.requestEnd();
       return response;
     },
     (error) => {
-      loaderController.requestEnd();
+      if (!(error as AxiosError).config?.silent) loaderController.requestEnd();
       return Promise.reject(error);
     }
   );
@@ -92,6 +100,7 @@ export function normalizeApiError(error: AxiosError): NormalizedApiError {
     status: error.response?.status ?? 0,
     msg: data?.msg ?? error.message ?? "Something went wrong. Please try again.",
     error: data?.error ?? (error.response ? "Error" : "Network Error"),
+    data: (data as { data?: unknown } | undefined)?.data ?? undefined,
   };
 }
 

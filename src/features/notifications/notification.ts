@@ -11,7 +11,7 @@ import {
 // ---------- Types ----------
 
 /** Derived live by GET /notifications from records that need action. */
-export type NotificationType = "enquiry_new" | "appointment_pending";
+export type NotificationType = "enquiry_new" | "appointment_pending" | "inbox_mention" | "inbox_waiting";
 
 interface BaseNotification {
   /** "enquiry:<id>" / "appointment:<id>" — what mark-as-read stores. */
@@ -38,7 +38,31 @@ export interface AppointmentNotification extends BaseNotification {
   source: string | null;
 }
 
-export type AppNotification = EnquiryNotification | AppointmentNotification;
+/** Someone @mentioned you in a WhatsApp internal note. */
+export interface InboxMentionNotification extends BaseNotification {
+  type: "inbox_mention";
+  conversation_id: string;
+  snippet: string | null;
+}
+
+/** A WhatsApp chat has waited more than an hour (clinic hours) for a staff reply. */
+export interface InboxWaitingNotification extends BaseNotification {
+  type: "inbox_waiting";
+  conversation_id: string;
+  waiting_since: number;
+  assigned_to_me: boolean;
+}
+
+export type AppNotification =
+  | EnquiryNotification
+  | AppointmentNotification
+  | InboxMentionNotification
+  | InboxWaitingNotification;
+
+/** Deep link that opens one WhatsApp conversation in the inbox. */
+export function inboxChatHref(conversationId: string): string {
+  return `/whatsapp?c=${encodeURIComponent(conversationId)}`;
+}
 
 // ---------- Service ----------
 
@@ -57,6 +81,20 @@ export function describeNotification(n: AppNotification): { title: string; descr
       title: "New enquiry",
       description: `${n.name ?? "Someone"} requested a callback${n.preferred_time ? ` · ${n.preferred_time}` : ""}`,
       href: `/enquiries?enquiry=${encodeURIComponent(n.enquiry_id)}`,
+    };
+  }
+  if (n.type === "inbox_mention") {
+    return {
+      title: `${n.name ?? "Someone"} mentioned you`,
+      description: n.snippet ?? "In a WhatsApp internal note",
+      href: inboxChatHref(n.conversation_id),
+    };
+  }
+  if (n.type === "inbox_waiting") {
+    return {
+      title: "WhatsApp chat waiting over 1 hour",
+      description: `${n.name ?? "A patient"} is waiting for a reply${n.assigned_to_me ? " · assigned to you" : " · unassigned"}`,
+      href: inboxChatHref(n.conversation_id),
     };
   }
   let when = "";

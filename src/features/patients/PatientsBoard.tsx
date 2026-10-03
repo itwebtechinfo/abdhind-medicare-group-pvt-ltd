@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { keepPreviousData, useInfiniteQuery, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Download, Search, UserPlus, Users } from "lucide-react";
 import { Can } from "@/src/components/rbac/PermissionGate";
@@ -101,8 +102,13 @@ export function PatientsBoard() {
   const nowMs = useMinuteClock();
   const today = nowMs === null ? null : istNow(nowMs).date;
 
+  // Deep link from elsewhere (e.g. the WhatsApp inbox's "View patient"):
+  // /patients?open=<UHID> searches for that patient and opens the drawer.
+  const router = useRouter();
+  const openUhid = useSearchParams().get("open");
+
   const [tab, setTab] = useState<PatientTab>("all");
-  const [search, setSearch] = useState("");
+  const [search, setSearch] = useState(openUhid ?? "");
   const debouncedSearch = useDebouncedValue(search.trim(), 300);
   const searchRef = useRef<HTMLInputElement>(null);
 
@@ -149,8 +155,13 @@ export function PatientsBoard() {
 
   // Prefer the freshest copy of the open patient after a refetch.
   const drawerPatient = useMemo(
-    () => (selected ? (rows.find((r) => r.id === selected.id) ?? selected) : null),
-    [rows, selected]
+    () =>
+      selected
+        ? (rows.find((r) => r.id === selected.id) ?? selected)
+        : openUhid
+          ? (rows.find((r) => r.uhid === openUhid) ?? null)
+          : null,
+    [rows, selected, openUhid]
   );
 
   const invalidatePatients = () => queryClient.invalidateQueries({ queryKey: PATIENTS_QUERY_KEY });
@@ -359,7 +370,10 @@ export function PatientsBoard() {
         <PatientDrawer
           patient={drawerPatient}
           todayYmd={today}
-          onClose={() => setSelected(null)}
+          onClose={() => {
+            setSelected(null);
+            if (openUhid) router.replace("/patients", { scroll: false });
+          }}
           onBook={setBookFor}
           onEdit={openEdit}
           onHistory={(p) => setHistoryPatientId(p.id)}

@@ -1,97 +1,119 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState, useSyncExternalStore } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useQuery } from "@tanstack/react-query";
 import { MessageCircle } from "lucide-react";
-import { Badge } from "@/src/components/ui/badge";
-import { ChatListPanel } from "@/src/features/whatsapp/ChatListPanel";
-import { ChatWindow } from "@/src/features/whatsapp/ChatWindow";
-import { whatsappService, type ApiConversation } from "@/src/features/whatsapp/whatsapp";
 import { cn } from "@/src/lib/utils";
-import { POLL_INTERVALS } from "@/src/lib/polling";
+import { ChatPanel } from "@/src/features/inbox/ChatPanel";
+import { ConversationList } from "@/src/features/inbox/ConversationList";
+import { InboxProvider, useInbox } from "@/src/features/inbox/InboxProvider";
+import { PatientPanel } from "@/src/features/inbox/PatientPanel";
 
-/** Cheap `limit: 1` calls — only `data.count` (the pre-slice total, see
- * whatsappService.listConversations) is read, so these never fetch a real
- * page of conversations just to show a header stat. */
-function useConversationCounts() {
-  const { data: totalData } = useQuery({
-    queryKey: ["whatsapp", "conversations", "header-count", "total"],
-    queryFn: () => whatsappService.listConversations({ limit: 1 }),
-    refetchInterval: POLL_INTERVALS.chatList,
-  });
-  const { data: unreadData } = useQuery({
-    queryKey: ["whatsapp", "conversations", "header-count", "unread"],
-    queryFn: () => whatsappService.listConversations({ unread_only: true, limit: 1 }),
-    refetchInterval: POLL_INTERVALS.chatList,
-  });
-  return { total: totalData?.data.count ?? 0, unread: unreadData?.data.count ?? 0 };
+const PANEL_KEY = "inbox.patientPanel";
+const panelListeners = new Set<() => void>();
+
+/** The patient panel's open/closed choice, remembered per browser. */
+const panelPref = {
+  get(): boolean {
+    try {
+      return window.localStorage.getItem(PANEL_KEY) !== "closed";
+    } catch {
+      return true;
+    }
+  },
+  set(open: boolean) {
+    try {
+      window.localStorage.setItem(PANEL_KEY, open ? "open" : "closed");
+    } catch {
+      /* private mode - just not remembered */
+    }
+    panelListeners.forEach((l) => l());
+  },
+  subscribe(listener: () => void) {
+    panelListeners.add(listener);
+    return () => panelListeners.delete(listener);
+  },
+};
+
+const WIDE = "(min-width: 1280px)";
+/** Mount the side panel only where it's shown - a hidden copy would still fetch. */
+function useWide(): boolean {
+  return useSyncExternalStore(
+    (cb) => {
+      const mq = window.matchMedia(WIDE);
+      mq.addEventListener("change", cb);
+      return () => mq.removeEventListener("change", cb);
+    },
+    () => window.matchMedia(WIDE).matches,
+    () => true
+  );
 }
 
 export default function WhatsappInboxPage() {
-  const [picked, setPicked] = useState<ApiConversation | null>(null);
-  const { total, unread } = useConversationCounts();
-
-  // Deep link: /whatsapp?phone=+91XXXXXXXXXX (e.g. the Patients page's
-  // WhatsApp button) opens that conversation straight away.
-  const router = useRouter();
-  const deepLinkPhone = useSearchParams().get("phone");
-  const { data: deepLinked } = useQuery({
-    queryKey: ["whatsapp", "conversations", "deep-link", deepLinkPhone],
-    queryFn: async () =>
-      (await whatsappService.listConversations({ search: deepLinkPhone as string, limit: 5 })).data.conversations.find(
-        (c) => c.conversation_id === deepLinkPhone
-      ) ?? null,
-    enabled: Boolean(deepLinkPhone),
-  });
-  const selected = picked ?? deepLinked ?? null;
-  const setSelected = (conversation: ApiConversation | null) => {
-    setPicked(conversation);
-    // Drop the ?phone= once the user navigates, or "Back" would reopen it.
-    if (deepLinkPhone) router.replace("/whatsapp");
-  };
-
+  // Deep links: /whatsapp?c=+91… (bell, mentions) and the older ?phone= (Patients page).
+  const params = useSearchParams();
+  const initial = params.get("c") ?? params.get("phone");
   return (
-    <div className="mx-auto flex h-[calc(100vh-8rem)] min-h-[560px] w-full max-w-[1600px] flex-col overflow-hidden rounded-2xl border border-border bg-card shadow-sm">
-      <div className="flex shrink-0 items-center gap-3 border-b border-border bg-gradient-to-r from-primary/[0.06] to-transparent px-5 py-3.5">
-        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
-          <MessageCircle className="h-[18px] w-[18px]" />
-        </div>
-        <h1 className="truncate text-base font-semibold leading-tight">WhatsApp Inbox</h1>
-        <span className="hidden items-center gap-1.5 text-xs text-muted-foreground sm:flex">
-          <span className="relative flex h-1.5 w-1.5">
-            <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
-            <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-emerald-500" />
-          </span>
-          Live
-        </span>
-        <div className="ml-auto flex shrink-0 items-center gap-2">
-          <Badge variant="secondary" className="font-normal">
-            {total} conversation{total === 1 ? "" : "s"}
-          </Badge>
-          {unread > 0 && (
-            <Badge variant="warning" className="font-normal">
-              {unread} unread
-            </Badge>
-          )}
-        </div>
+    <InboxProvider initialOpenId={initial}>
+      <InboxLayout />
+    </InboxProvider>
+  );
+}
+
+function InboxLayout() {
+  const { state, openChat } = useInbox();
+  const router = useRouter();
+  const params = useSearchParams();
+  const panelOpen = useSyncExternalStore(panelPref.subscribe, panelPref.get, () => true);
+  const [mobilePanel, setMobilePanel] = useState(false);
+  const wide = useWide();
+
+  // Keep the URL in step with the open chat so a reload / shared link reopens it.
+  useEffect(() => {
+    const current = params.get("c");
+    if (state.openId && current !== state.openId) router.replace(`/whatsapp?c=${encodeURIComponent(state.openId)}`, { scroll: false });
+    if (!state.openId && (current || params.get("phone"))) router.replace("/whatsapp", { scroll: false });
+  }, [state.openId, params, router]);
+
+  const togglePanel = (open: boolean) => panelPref.set(open);
+
+  const chatOpen = Boolean(state.openId);
+  return (
+    <div className="mx-auto flex h-[calc(100dvh-8rem)] min-h-[520px] w-full max-w-[1800px] overflow-hidden rounded-2xl border border-[#E3E9E5] bg-card shadow-sm dark:border-border">
+      <div className={cn("h-full min-h-0 w-full shrink-0 border-[#E3E9E5] dark:border-border lg:w-[360px] lg:border-r", chatOpen && "hidden lg:block")}>
+        <ConversationList />
       </div>
 
-      <div className="grid min-h-0 flex-1 grid-cols-1 overflow-hidden md:grid-cols-[340px_1fr]">
-        <div className={cn("h-full min-h-0 overflow-hidden md:border-r md:border-border", selected && "hidden md:block")}>
-          <ChatListPanel selectedPhone={selected?.conversation_id ?? null} onSelect={setSelected} />
-        </div>
-        <div className={cn("h-full min-h-0 overflow-hidden", !selected && "hidden md:flex")}>
-          {selected ? (
-            <ChatWindow conversation={selected} onBack={() => setSelected(null)} />
-          ) : (
-            <div className="flex h-full flex-col items-center justify-center gap-2 text-muted-foreground">
-              <MessageCircle className="h-10 w-10" />
-              <p className="text-sm">Select a conversation to start replying.</p>
-            </div>
-          )}
-        </div>
+      <div className={cn("relative h-full min-h-0 min-w-0 flex-1", !chatOpen && "hidden lg:block")}>
+        {chatOpen ? (
+          <ChatPanel
+            onBack={() => openChat(null)}
+            onShowPanel={() => (wide ? togglePanel(true) : setMobilePanel(true))}
+            panelOpen={panelOpen}
+          />
+        ) : (
+          <div className="flex h-full flex-col items-center justify-center gap-2 bg-[#EFEAE2]/50 text-muted-foreground dark:bg-background">
+            <MessageCircle className="h-10 w-10" />
+            <p className="text-sm">Select a conversation to start replying.</p>
+          </div>
+        )}
       </div>
+
+      {wide && chatOpen && state.open && panelOpen && (
+        <div className="h-full min-h-0 w-[340px] shrink-0 border-l border-[#E3E9E5] dark:border-border">
+          <PatientPanel onCollapse={() => togglePanel(false)} />
+        </div>
+      )}
+
+      {/* Below xl the panel slides over the chat. */}
+      {!wide && chatOpen && state.open && mobilePanel && (
+        <div className="fixed inset-0 z-40" role="dialog" aria-modal="true" aria-label="Patient details">
+          <button type="button" className="absolute inset-0 bg-black/40" aria-label="Close" onClick={() => setMobilePanel(false)} />
+          <div className="absolute inset-y-0 right-0 w-full max-w-[380px] shadow-2xl">
+            <PatientPanel mobile onCollapse={() => setMobilePanel(false)} />
+          </div>
+        </div>
+      )}
     </div>
   );
 }

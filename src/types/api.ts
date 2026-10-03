@@ -16,4 +16,6 @@ export interface NormalizedApiError {
   status: number;
   msg: string;
   error: string;
+  /** Machine-readable extras on some errors, e.g. { code: "window_closed" }. */
+  data?: unknown;
 }

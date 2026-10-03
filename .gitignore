@@ -40,3 +40,7 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# isolated E2E dev server build (NEXT_DIST_DIR) and the inbox E2E report
+/.next-e2e/
+/playwright-report-inbox/
