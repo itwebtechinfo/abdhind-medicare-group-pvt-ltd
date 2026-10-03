@@ -11,7 +11,7 @@ import {
 
 export function Footer() {
   return (
-    <footer className="w-full min-w-0 bg-gray-900 text-gray-300">
+    <footer data-testid="site-footer" className="w-full min-w-0 bg-gray-900 text-gray-300">
       {/* Main Footer - Bottom padding reduced here (pb-4 / md:pb-6) */}
       <div className="w-full px-4 pt-12 pb-4 sm:px-6 md:pt-16 md:pb-6 lg:px-8">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-12">
@@ -89,11 +89,6 @@ export function Footer() {
               <li>
                 <Link href="/doctors" className="hover:text-green-400 transition-colors">
                   Doctors
-                </Link>
-              </li>
-              <li>
-                <Link href="/blog" className="hover:text-green-400 transition-colors">
-                  Health Blog
                 </Link>
               </li>
               <li>

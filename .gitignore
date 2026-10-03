@@ -41,6 +41,12 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
-# isolated E2E dev server build (NEXT_DIST_DIR) and the inbox E2E report
+# QA / e2e: local credentials, screenshots and run artefacts are never committed
+/qa/
+/test-results/
+/playwright-report/
+/blob-report/
+
+# isolated E2E dev server build (NEXT_DIST_DIR)
 /.next-e2e/
 /playwright-report-inbox/

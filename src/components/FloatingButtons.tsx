@@ -8,7 +8,7 @@ import { Calendar } from "lucide-react";
 // ── Floating Buttons ──────────────────────────────────────────────
 export function FloatingButtons() {
   return (
-    <div className="fixed bottom-6 right-5 sm:right-6 z-[999] flex flex-col items-end gap-3.5">
+    <div data-testid="floating-buttons" className="fixed bottom-6 right-5 sm:right-6 z-[999] flex flex-col items-end gap-3.5">
 
       {/* 📞 Phone */}
       <Tip label="📞 Call Now">

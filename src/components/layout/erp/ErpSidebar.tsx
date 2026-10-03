@@ -108,6 +108,7 @@ function ErpSidebarComponent() {
                       <li key={item.name}>
                         <button
                           type="button"
+                          aria-expanded={Boolean(isExpanded)}
                           onClick={() =>
                             setExpanded((p) => ({
                               ...p,
@@ -240,6 +241,7 @@ function ErpSidebarComponent() {
   return (
     <>
       <aside
+        data-testid="erp-sidebar"
         className={cn(
           "fixed left-0 top-0 z-40 hidden h-screen shrink-0 border-r border-sidebar-border bg-sidebar transition-[width] duration-300 ease-out lg:flex lg:flex-col",
           sidebarCollapsed ? "w-[72px]" : "w-[260px]"
@@ -252,6 +254,7 @@ function ErpSidebarComponent() {
           collapsing to icon-only only makes sense as a persistent desktop
           rail; on mobile it's a transient overlay with plenty of width. */}
       <aside
+        data-testid="erp-sidebar-mobile"
         className={cn(
           "fixed left-0 top-0 z-50 flex h-screen w-[min(280px,88vw)] flex-col border-r border-sidebar-border bg-sidebar shadow-2xl transition-transform duration-300 ease-out lg:hidden",
           mobileSidebarOpen ? "translate-x-0" : "-translate-x-full"

@@ -1,4 +1,4 @@
-import { AUTH_ROUTES, PROTECTED_ROUTE_PREFIXES } from "./constants";
+import { AUTH_ROUTES } from "./constants";
 import { ruleAllowsUser } from "@/src/lib/rbac/access";
 import {
   getRouteAccessForPath,
@@ -7,13 +7,6 @@ import {
 import { userHasPermission } from "@/src/lib/rbac/permissions";
 import type { AuthSession, Permission, UserRole } from "./types";
 import { tokenStorage } from "./token-storage";
-
-export function isProtectedPath(pathname: string): boolean {
-  return PROTECTED_ROUTE_PREFIXES.some(
-    (prefix) =>
-      pathname === prefix || pathname.startsWith(`${prefix}/`)
-  );
-}
 
 export interface RouteGuardOptions {
   roles?: UserRole[];
@@ -27,15 +20,14 @@ export interface RouteGuardResult {
   redirectTo?: string;
 }
 
+/** Called only for pages that ARE protected — i.e. from the (erp) layout's
+ * ProtectedRoute — so every path that reaches it requires sign-in, plus the
+ * permission rule from rbac/routes.ts if one matches. */
 export function evaluateRouteGuard(
   pathname: string,
   session: AuthSession | null,
   options: RouteGuardOptions = {}
 ): RouteGuardResult {
-  if (!isProtectedPath(pathname)) {
-    return { allowed: true };
-  }
-
   if (!session) {
     return {
       allowed: false,

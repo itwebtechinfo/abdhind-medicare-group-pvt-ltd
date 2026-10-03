@@ -18,23 +18,14 @@ export const AUTH_ROUTES = {
   home: "/",
 } as const;
 
-/** Route prefixes that require authentication */
-export const PROTECTED_ROUTE_PREFIXES = [
-  "/dashboard",
-  "/appointments",
-  "/patients",
-  "/enquiries",
-  "/admin",
-  "/reports",
-  "/settings",
-  "/profile",
-  "/pharmacy",
-  "/lab",
-  "/whatsapp",
-] as const;
+// There is deliberately no list of "ERP paths". Which pages are protected and
+// which chrome they get is decided by the route group a page lives in:
+// app/(erp) = protected + ERP shell, app/(site) = website chrome,
+// app/(auth) = bare card. See app/(erp)/layout.tsx.
 
-export function isErpPath(pathname: string): boolean {
-  return PROTECTED_ROUTE_PREFIXES.some(
-    (prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`)
-  );
+/** Where to send someone after sign-in: `next` if it's a safe in-app path. */
+export function safeNextPath(next: string | null | undefined): string | null {
+  if (!next || !next.startsWith("/") || next.startsWith("//") || next.startsWith("/\\")) return null;
+  if (next === AUTH_ROUTES.login || next.startsWith(`${AUTH_ROUTES.login}?`)) return null;
+  return next;
 }

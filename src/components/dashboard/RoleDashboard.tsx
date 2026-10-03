@@ -261,16 +261,16 @@ function RoleDashboardComponent() {
           <QuickLink href="/reports" icon={FileText} label="View Reports" />
         )}
         {can("pharmacy:view") && (
-          <QuickLink href="/reports" icon={Pill} label="Pharmacy" />
+          <QuickLink href="/pharmacy" icon={Pill} label="Pharmacy" />
         )}
         {can("lab:view") && (
-          <QuickLink href="/reports" icon={FlaskConical} label="Laboratory" />
+          <QuickLink href="/lab" icon={FlaskConical} label="Laboratory" />
         )}
         {can("billing:view") && (
-          <QuickLink href="/reports" icon={Wallet} label="Billing" />
+          <QuickLink href="/coming-soon/invoices" icon={Wallet} label="Billing" />
         )}
         {can("enquiry:view") && (
-          <QuickLink href="/appointments" icon={MessageSquare} label="Enquiries" />
+          <QuickLink href="/enquiries" icon={MessageSquare} label="Enquiries" />
         )}
         {can("settings:view") && (
           <QuickLink href="/settings" icon={AlertTriangle} label="Settings" />

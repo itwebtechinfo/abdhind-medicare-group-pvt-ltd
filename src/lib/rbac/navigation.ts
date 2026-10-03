@@ -65,23 +65,21 @@ export const ERP_NAV_SECTIONS: ErpNavSection[] = [
         permissions: ["appointments:view"],
       },
       {
-        // Placeholder — no dedicated page yet, reuses /reports. The
-        // ?section= param exists purely so the sidebar can tell this
-        // apart from the other placeholder items below; the page content
-        // itself is the same until a real Clinical Records page exists.
+        // Not built yet — opens the (erp) "Coming soon" page for the module,
+        // like Test Reports, Prescriptions, Invoices and Payments below.
         name: "Clinical Records",
-        href: "/reports?section=clinical-records",
+        href: "/coming-soon/clinical-records",
         icon: ClipboardList,
         permissions: ["reports:view"],
         children: [
           {
             name: "Test Reports",
-            href: "/reports?section=test-reports",
+            href: "/coming-soon/test-reports",
             permissions: ["reports:view"],
           },
           {
             name: "Prescriptions",
-            href: "/reports?section=prescriptions",
+            href: "/coming-soon/prescriptions",
             permissions: ["reports:view"],
           },
         ],
@@ -178,19 +176,19 @@ export const ERP_NAV_SECTIONS: ErpNavSection[] = [
     items: [
       {
         name: "Reports",
-        href: "/reports?section=reports",
+        href: "/reports",
         icon: BarChart3,
         permissions: ["reports:view", "billing:view"],
       },
       {
         name: "Invoices",
-        href: "/reports?section=invoices",
+        href: "/coming-soon/invoices",
         icon: FileText,
         permissions: ["billing:view", "billing:create"],
       },
       {
         name: "Payments",
-        href: "/reports?section=payments",
+        href: "/coming-soon/payments",
         icon: Wallet,
         permissions: ["billing:view", "billing:edit"],
       },

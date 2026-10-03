@@ -37,7 +37,8 @@ import {
   DialogTitle,
 } from "@/src/components/ui/dialog";
 import { cn } from "@/src/lib/utils";
-import { AUTH_STORAGE_KEYS } from "@/src/lib/auth/constants";
+import { AUTH_STORAGE_KEYS, safeNextPath } from "@/src/lib/auth/constants";
+import { evaluateRouteGuard } from "@/src/lib/auth/route-guard";
 import { loginSchema, type LoginFormValues } from "@/src/features/auth/login-schema";
 import { toast } from "@/src/lib/toast";
 import { patientService } from "@/src/features/patients/patient";
@@ -171,7 +172,15 @@ export function LoginForm() {
   // dashboard; the sidebar renders whatever their permissions allow.
   useEffect(() => {
     if (isAuthenticated && !authLoading && session && isInitialized) {
-      const redirectPath = authService.getLoginRedirect(session);
+      // Back to the page that sent them here (?next=), if it's a safe in-app
+      // path their role may open; otherwise their role's landing page.
+      // A pending temporary-password change always comes first.
+      const next = safeNextPath(new URLSearchParams(window.location.search).get("next"));
+      const landing = authService.getLoginRedirect(session);
+      const redirectPath =
+        next && !session.user.mustChangePassword && evaluateRouteGuard(next.split("?")[0], session).allowed
+          ? next
+          : landing;
       startTransition(() => {
         router.replace(redirectPath);
       });

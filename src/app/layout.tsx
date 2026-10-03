@@ -1,9 +1,7 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
 import { AuthProvider } from "../contexts/AuthProvider";
-import { SiteLayout } from "../components/layout/SiteLayout";
-import { ThemeProvider } from "../components/theme/ThemeProvider";
-import { ThemeScript } from "../components/theme/ThemeScript";
+import { ThemeProvider } from "@/src/components/theme/ThemeProvider";
 import { Providers } from "@/src/lib/Providers";
 import { Toaster } from "@/src/components/ui/sonner";
 import { TopProgressBar } from "@/src/components/common/TopProgressBar";
@@ -79,9 +77,6 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" className="font-sans" suppressHydrationWarning>
-      <head>
-        <ThemeScript />
-      </head>
       <body className="flex min-h-screen flex-col antialiased">
         <Providers>
           <TopProgressBar />
@@ -89,9 +84,12 @@ export default function RootLayout({
           <Suspense fallback={null}>
             <RouteChangeProgress />
           </Suspense>
+          {/* No chrome here: each route group brings its own layout —
+              (site) website Navbar/Footer, (erp) ERP shell, (auth) bare card.
+              The theme follows the route group too (see ThemeProvider). */}
           <AuthProvider>
             <ThemeProvider>
-              <SiteLayout>{children}</SiteLayout>
+              {children}
               <Toaster />
             </ThemeProvider>
           </AuthProvider>

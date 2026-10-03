@@ -9,7 +9,7 @@ function ErpShellInner({ children }: { children: React.ReactNode }) {
   const { sidebarCollapsed } = useErpLayout();
 
   return (
-    <div className="min-h-screen w-full min-w-0 bg-erp-canvas">
+    <div data-testid="erp-shell" className="min-h-screen w-full min-w-0 bg-erp-canvas">
       <ErpSidebar />
       <div
         className={cn(

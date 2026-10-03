@@ -55,7 +55,11 @@ export function useRequireAuth(options: RouteGuardOptions = {}) {
         authService.clearSession();
         authEvents.emitSessionEnded();
       }
-      router.replace(guard.redirectTo);
+      // Signed out: remember where they were going, so /login can send them
+      // back after sign-in (if their role is allowed there).
+      const signedOut = guard.reason === "unauthenticated" || guard.reason === "expired";
+      const here = `${window.location.pathname}${window.location.search}`;
+      router.replace(signedOut ? `${guard.redirectTo}?next=${encodeURIComponent(here)}` : guard.redirectTo);
     }
   }, [isLoading, guard.allowed, guard.redirectTo, guard.reason, router]);
 

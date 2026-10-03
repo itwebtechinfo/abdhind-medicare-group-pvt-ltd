@@ -251,7 +251,7 @@ export function Navbar() {
   };
 
   return (
-    <div ref={menuRef} className="fixed top-0 left-0 right-0 z-50 w-full min-w-0">
+    <div ref={menuRef} data-testid="site-navbar" className="fixed top-0 left-0 right-0 z-50 w-full min-w-0">
       {/* Top Bar */}
       <div className="w-full bg-gradient-to-r from-teal-900 to-teal-800 text-white text-xs border-b border-teal-700/50">
         <div className="w-full px-4 py-2 sm:px-6 lg:px-8">

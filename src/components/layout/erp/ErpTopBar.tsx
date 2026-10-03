@@ -60,7 +60,7 @@ function ErpTopBarComponent() {
       .toUpperCase() ?? "AH";
 
   return (
-    <header className="sticky top-0 z-30 flex h-14 w-full min-w-0 items-center justify-between gap-2 border-b border-border bg-card/95 px-3 shadow-sm backdrop-blur-md sm:h-16 sm:gap-4 sm:px-4 lg:px-6">
+    <header data-testid="erp-topbar" className="sticky top-0 z-30 flex h-14 w-full min-w-0 items-center justify-between gap-2 border-b border-border bg-card/95 px-3 shadow-sm backdrop-blur-md sm:h-16 sm:gap-4 sm:px-4 lg:px-6">
       <div className="flex min-w-0 flex-1 items-center gap-2">
         <Button
           type="button"
@@ -143,6 +143,7 @@ function ErpTopBarComponent() {
           <DropdownMenuTrigger asChild>
             <button
               type="button"
+              aria-label="Account menu"
               className="flex items-center gap-2 rounded-full border border-border py-1 pl-1 pr-2 transition-colors hover:bg-muted/50 sm:pr-3"
             >
               <Avatar className="h-8 w-8">

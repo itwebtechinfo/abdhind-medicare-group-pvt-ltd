@@ -1,14 +1,24 @@
 "use client";
 
-import { useTheme } from "next-themes";
+import { useSyncExternalStore } from "react";
 import { Toaster as SonnerToaster, type ToasterProps } from "sonner";
 
+// The Toaster lives in the root layout so a toast survives a route-group
+// switch (e.g. "Session expired" while redirecting to /login). Theme providers
+// are per route group, so read the applied theme from <html> instead.
+function subscribeHtmlClass(onChange: () => void) {
+  const observer = new MutationObserver(onChange);
+  observer.observe(document.documentElement, { attributes: true, attributeFilter: ["class"] });
+  return () => observer.disconnect();
+}
+const htmlTheme = (): "dark" | "light" => (document.documentElement.classList.contains("dark") ? "dark" : "light");
+
 export function Toaster(props: ToasterProps) {
-  const { resolvedTheme } = useTheme();
+  const theme = useSyncExternalStore(subscribeHtmlClass, htmlTheme, () => "light" as const);
 
   return (
     <SonnerToaster
-      theme={(resolvedTheme as ToasterProps["theme"]) ?? "light"}
+      theme={theme}
       position="top-right"
       richColors
       closeButton

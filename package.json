@@ -6,7 +6,10 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "test:e2e": "playwright test",
+    "test:e2e:report": "playwright show-report",
+    "test:e2e:inbox": "playwright test -c playwright.inbox.config.ts"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.5.7",
@@ -36,6 +39,7 @@
     "zod": "^4.4.3"
   },
   "devDependencies": {
+    "@playwright/test": "^1.63.0",
     "@types/node": "^20",
     "@types/papaparse": "^5.5.2",
     "@types/react": "19.2.17",

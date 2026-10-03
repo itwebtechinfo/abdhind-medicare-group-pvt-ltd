@@ -1,15 +1,17 @@
 import type { UserRole } from "@/src/lib/auth/types";
 import { AUTH_ROUTES } from "@/src/lib/auth/constants";
 
+/** Same labels as the backend's /roles (routes/users.py ROLE_INFO), so the
+ * sidebar, profile and the Staff & access page all say the same thing. */
 export const ROLE_LABELS: Record<UserRole, string> = {
-  system_admin: "System Admin",
+  system_admin: "System admin",
   admin: "Admin",
-  account: "Account Section",
+  account: "Accounts",
   doctor: "Doctor",
-  reception: "Reception + Enquiry",
+  reception: "Reception",
   patient: "Patient",
-  pharmacy: "Pharmacy Section",
-  lab: "Lab Section",
+  pharmacy: "Pharmacy",
+  lab: "Lab",
 };
 
 /** Post-login landing route per role */

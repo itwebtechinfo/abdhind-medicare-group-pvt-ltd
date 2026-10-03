@@ -79,7 +79,7 @@ export function ProductsCatalog() {
   return (
     <div className="-mx-4 -mt-2 min-h-screen bg-[#f5f7f8] text-slate-950 md:-mx-10">
       <section className="border-b border-slate-200 bg-white">
-        <div className="mx-auto grid max-w-7xl gap-6 px-4 py-6 lg:grid-cols-[1fr_360px] lg:px-8">
+        <div className="mx-auto grid max-w-7xl grid-cols-1 gap-6 px-4 py-6 lg:grid-cols-[minmax(0,1fr)_360px] lg:px-8">
           <div className="space-y-5">
             <div className="flex flex-wrap items-center gap-2 text-xs font-bold uppercase tracking-wide text-teal-700">
               <span className="inline-flex items-center gap-1 rounded-full bg-teal-50 px-3 py-1">
@@ -193,7 +193,7 @@ export function ProductsCatalog() {
         </div>
       </section>
 
-      <section className="mx-auto grid max-w-7xl gap-6 px-4 py-6 lg:grid-cols-[260px_1fr] lg:px-8">
+      <section className="mx-auto grid max-w-7xl grid-cols-1 gap-6 px-4 py-6 lg:grid-cols-[260px_minmax(0,1fr)] lg:px-8">
         <aside className="hidden lg:block">
           <div className="sticky top-32 rounded-lg border border-slate-200 bg-white p-4 shadow-sm">
             <div className="mb-4 flex items-center gap-2">

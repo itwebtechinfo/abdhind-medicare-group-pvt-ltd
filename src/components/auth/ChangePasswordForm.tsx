@@ -6,6 +6,7 @@ import { Eye, EyeOff, KeyRound, Loader2 } from "lucide-react";
 import { Button } from "@/src/components/ui/button";
 import { Input } from "@/src/components/ui/input";
 import { EnterpriseLoader } from "@/src/components/common/EnterpriseLoader";
+import { AuthCardShell } from "@/src/components/auth/AuthCardShell";
 import { useAuth } from "@/src/hooks/useAuth";
 import { authService } from "@/src/lib/auth/auth-service";
 import { AUTH_ROUTES } from "@/src/lib/auth/constants";
@@ -18,7 +19,7 @@ const MIN_LENGTH = 8;
  * also reachable any time to change your own password. */
 export function ChangePasswordForm() {
   const router = useRouter();
-  const { status, user, replaceSession, logout } = useAuth();
+  const { status, user, replaceSession } = useAuth();
   const [current, setCurrent] = useState("");
   const [next, setNext] = useState("");
   const [confirm, setConfirm] = useState("");
@@ -73,8 +74,8 @@ export function ChangePasswordForm() {
   );
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-[#F5F7F6] px-4 py-10 dark:bg-background">
-      <div className="w-full max-w-md rounded-xl border border-[#E3E9E5] bg-card p-6 shadow-sm dark:border-border sm:p-8">
+    <AuthCardShell hideDashboardLink={forced}>
+      <div>
         <div className="mb-6 flex items-center gap-3">
           <span className="flex h-10 w-10 items-center justify-center rounded-full bg-[#1F7A4A]/10 text-[#1F7A4A] dark:bg-primary/15 dark:text-primary">
             <KeyRound className="h-5 w-5" />
@@ -111,20 +112,13 @@ export function ChangePasswordForm() {
             {saving && <Loader2 className="h-4 w-4 animate-spin" />}
             Save new password
           </Button>
-          <div className="flex justify-between text-xs">
-            {!forced ? (
-              <button type="button" className="text-muted-foreground hover:text-foreground" onClick={() => router.back()}>
-                Cancel
-              </button>
-            ) : (
-              <span />
-            )}
-            <button type="button" className="text-muted-foreground hover:text-foreground" onClick={() => logout()}>
-              Sign out
+          {!forced && (
+            <button type="button" className="text-xs text-muted-foreground hover:text-foreground" onClick={() => router.back()}>
+              Cancel
             </button>
-          </div>
+          )}
         </form>
       </div>
-    </div>
+    </AuthCardShell>
   );
 }
