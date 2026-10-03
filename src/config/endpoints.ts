@@ -135,8 +135,11 @@ export const API_ENDPOINTS = {
     detail: (id: string) => `/api/v1/product-orders/${id}`,
   },
   uploads: {
-    /** GET, public — subFolder/fileName from a stored "uploads/<subFolder>/<fileName>" path. */
+    /** GET — subFolder/fileName from a stored "uploads/<subFolder>/<fileName>" path. Public folders only;
+     *  lab_results / whatsapp_media / prescriptions need a signed URL from `sign`. */
     file: (subFolder: string, fileName: string) => `/api/v1/uploads/${subFolder}/${fileName}`,
+    /** POST { path } → { url } — short-lived signed URL for a private upload. */
+    sign: "/api/v1/files/sign",
   },
   whatsapp: {
     /** GET: chat list (query: unread_only, human_mode, search, tag, limit, offset). */

@@ -8,7 +8,7 @@ import { Button } from "@/src/components/ui/button";
 import { Input } from "@/src/components/ui/input";
 import { usePermission } from "@/src/hooks/usePermission";
 import { toast } from "@/src/lib/toast";
-import { resolveUploadUrl } from "@/src/lib/upload";
+import { openPrivateUpload } from "@/src/lib/upload";
 import type { NormalizedApiError } from "@/src/types/api";
 import { labOrderService, labTestService } from "./lab-test";
 import type { LabOrderStatus } from "./lab-test";
@@ -82,14 +82,13 @@ export function LabOrdersSection({ appointmentId }: { appointmentId: string }) {
               <div className="mt-1 text-xs text-muted-foreground">
                 <p>{order.result_text}</p>
                 {order.result_file && (
-                  <a
-                    href={resolveUploadUrl(order.result_file)}
-                    target="_blank"
-                    rel="noreferrer"
+                  <button
+                    type="button"
+                    onClick={() => openPrivateUpload(order.result_file as string)}
                     className="text-primary underline"
                   >
                     View attached file
-                  </a>
+                  </button>
                 )}
               </div>
             )}

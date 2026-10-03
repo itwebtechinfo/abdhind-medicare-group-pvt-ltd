@@ -9,7 +9,7 @@ import { Button } from "@/src/components/ui/button";
 import { Skeleton } from "@/src/components/ui/skeleton";
 import { usePermission } from "@/src/hooks/usePermission";
 import { languageLabel } from "@/src/lib/format";
-import { resolveUploadUrl } from "@/src/lib/upload";
+import { openPrivateUpload } from "@/src/lib/upload";
 import { cn } from "@/src/lib/utils";
 import {
   appointmentService,
@@ -460,15 +460,14 @@ function LabTab({ patientId, todayYmd }: { patientId: string; todayYmd: string }
           </div>
           {o.result_text && <p className={cn("mt-2 whitespace-pre-wrap", APPT_UI.ink)}>{o.result_text}</p>}
           {o.result_file && (
-            <a
-              href={resolveUploadUrl(o.result_file)}
-              target="_blank"
-              rel="noreferrer"
+            <button
+              type="button"
+              onClick={() => openPrivateUpload(o.result_file as string)}
               className="mt-2 inline-flex items-center gap-1.5 text-xs font-medium text-[#1F7A4A] hover:underline dark:text-primary"
             >
               <FileText className="h-3.5 w-3.5" />
               Open report file
-            </a>
+            </button>
           )}
         </li>
       ))}
