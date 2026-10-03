@@ -22,7 +22,9 @@ import {
   type InboxRow,
   type InboxScope,
 } from "./inbox";
-import { useInbox } from "./InboxProvider";
+import { InboxErrorState } from "./InboxErrorState";
+import { errorMessage, useInbox } from "./InboxProvider";
+import { toast } from "@/src/lib/toast";
 
 const SCOPES: { value: InboxScope; label: string }[] = [
   { value: "mine", label: "Mine" },
@@ -39,7 +41,7 @@ const GROUP_ICON: Record<InboxGroup, React.ComponentType<{ className?: string }>
 };
 
 export function ConversationList() {
-  const { state, setScope, setQuery, loadGroup, loadMoreResults, openChat } = useInbox();
+  const { state, setScope, setQuery, loadGroup, loadMoreResults, openChat, reload } = useInbox();
   const [search, setSearch] = useState(state.q);
   const debounced = useDebouncedValue(search.trim(), 300);
   const [expanded, setExpanded] = useState<InboxGroup[]>([]);
@@ -62,7 +64,9 @@ export function ConversationList() {
   const toggleGroup = (g: InboxGroup) => {
     const opening = !expanded.includes(g);
     setExpanded((cur) => (opening ? [...cur, g] : cur.filter((x) => x !== g)));
-    if (opening && !state.loadedGroups.includes(g)) loadGroup(g).catch(() => undefined);
+    if (opening && !state.loadedGroups.includes(g)) {
+      loadGroup(g).catch((err) => toast.error(`Couldn't load ${GROUP_LABEL[g].toLowerCase()}`, errorMessage(err)));
+    }
   };
 
   const counts = state.counts;
@@ -106,8 +110,16 @@ export function ConversationList() {
         </div>
       </div>
 
+      {state.listError && Object.keys(state.rows).length > 0 && (
+        <div role="alert" className="flex items-center justify-between gap-2 border-b border-red-200 bg-red-50 px-4 py-2 text-sm text-red-800 dark:border-red-500/30 dark:bg-red-500/10 dark:text-red-200">
+          <span>Couldn&apos;t refresh conversations.</span>
+          <button type="button" className="font-semibold underline" onClick={() => void reload()}>Retry</button>
+        </div>
+      )}
       <div className="min-h-0 flex-1 overflow-y-auto" data-testid="conversation-list">
-        {state.listLoading && !Object.keys(state.rows).length ? (
+        {state.listError && !Object.keys(state.rows).length ? (
+          <InboxErrorState title="Couldn't load conversations" detail={state.listError} onRetry={reload} testId="list-error" />
+        ) : state.listLoading && !Object.keys(state.rows).length ? (
           <ListSkeleton />
         ) : searching ? (
           <SearchResults onOpen={openChat} onMore={loadMoreResults} />
@@ -313,6 +325,8 @@ function LoadMore({ onClick }: { onClick: () => Promise<void> | void }) {
         setLoading(true);
         try {
           await onClick();
+        } catch (err) {
+          toast.error("Couldn't load more", errorMessage(err));
         } finally {
           setLoading(false);
         }

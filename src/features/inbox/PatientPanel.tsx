@@ -20,7 +20,9 @@ import { PatientFormDialog } from "@/src/features/patients/PatientFormDialog";
 import { LastVisitSummary, NextAppointmentSummary } from "@/src/features/patients/PatientRow";
 import { mapVisitSummary, patientService, type CreatePatientFormValues } from "@/src/features/patients/patient";
 import { inboxService, istDayStart, newClientId, type InboxAction, type InboxHeader, type PatientContext } from "./inbox";
-import { useInbox } from "./InboxProvider";
+import { InboxErrorState } from "./InboxErrorState";
+import { errorMessage, useInbox } from "./InboxProvider";
+import { Skeleton } from "@/src/components/ui/skeleton";
 
 const DAY = 86_400_000;
 const shortDate = new Intl.DateTimeFormat("en-IN", { day: "2-digit", month: "short", timeZone: "Asia/Kolkata" });
@@ -36,9 +38,24 @@ function clock12(hhmm: string): string {
 }
 
 export function PatientPanel({ onCollapse, mobile }: { onCollapse: () => void; mobile?: boolean }) {
-  const { state, putHeader, putContext, putMessage, syncNow } = useInbox();
+  const { state, putHeader, putContext, putMessage, syncNow, retryOpen } = useInbox();
   const open = state.open;
-  if (!open) return null;
+  if (state.openError || !open) {
+    return (
+      <aside className="flex h-full min-h-0 flex-col bg-card" aria-label="Patient details" data-testid="patient-panel">
+        <div className="flex justify-end border-b border-[#E3E9E5] p-4 dark:border-border">
+          <Button variant="outline" size="icon" className="h-8 w-8" onClick={onCollapse} aria-label={mobile ? "Close patient details" : "Collapse patient panel"}>
+            {mobile ? <X className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
+          </Button>
+        </div>
+        {state.openError ? (
+          <InboxErrorState title="Couldn't load patient details" detail={state.openError} onRetry={retryOpen} testId="panel-error" />
+        ) : (
+          <div className="space-y-3 p-4"><Skeleton className="h-24 w-full" /><Skeleton className="h-32 w-full" /></div>
+        )}
+      </aside>
+    );
+  }
   const h = open.conversation;
   const ctx = open.context;
 
@@ -160,13 +177,13 @@ function QuickBook({ h, lastDoctorId, run }: { h: InboxHeader; lastDoctorId: str
   const [doctorId, setDoctorId] = useState<string | null>(null);
   const [slotId, setSlotId] = useState<string | null>(null);
 
-  const { data: doctors = [] } = useQuery({
+  const { data: doctors = [], error: doctorsError, refetch: refetchDoctors } = useQuery({
     queryKey: ["doctors", "active"],
     queryFn: async () => (await doctorService.list()).data.doctors.filter((d) => d.active),
     staleTime: 5 * 60_000,
   });
   const chosenDoctor = doctorId ?? (doctors.find((d) => d.id === lastDoctorId) ?? doctors[0])?.id ?? null;
-  const { data: slots = [], isFetching } = useQuery({
+  const { data: slots = [], isFetching, error: slotsError, refetch: refetchSlots } = useQuery({
     queryKey: ["doctors", chosenDoctor, "slots", date],
     queryFn: async () => (await doctorService.listSlots(chosenDoctor!, date)).data.slots.filter((s) => !s.is_booked),
     enabled: Boolean(chosenDoctor && date),
@@ -199,7 +216,15 @@ function QuickBook({ h, lastDoctorId, run }: { h: InboxHeader; lastDoctorId: str
         <Input type="date" className="h-9 w-full px-2" value={date} min={ymd(state.now)} onChange={(e) => { if (e.target.value) { setDate(e.target.value); setSlotId(null); } }} aria-label="Date" />
       </div>
       <div className="mb-3 flex min-h-9 flex-wrap gap-1.5">
-        {isFetching ? <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" /> : !slots.length ? (
+        {doctorsError || slotsError ? (
+          <InboxErrorState
+            compact
+            title={doctorsError ? "Couldn't load doctors" : "Couldn't load slots"}
+            detail={errorMessage(doctorsError ?? slotsError)}
+            onRetry={() => (doctorsError ? refetchDoctors() : refetchSlots())}
+            testId="slots-error"
+          />
+        ) : isFetching ? <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" /> : !slots.length ? (
           <p className="text-sm text-muted-foreground">No open slots that day.</p>
         ) : slots.slice(0, 12).map((s) => (
           <button key={s.id} type="button" onClick={() => setSlotId(s.id)} aria-pressed={slotId === s.id}

@@ -99,14 +99,14 @@ function InboxLayout() {
         )}
       </div>
 
-      {wide && chatOpen && state.open && panelOpen && (
+      {wide && chatOpen && (state.open || state.openError) && panelOpen && (
         <div className="h-full min-h-0 w-[340px] shrink-0 border-l border-[#E3E9E5] dark:border-border">
           <PatientPanel onCollapse={() => togglePanel(false)} />
         </div>
       )}
 
       {/* Below xl the panel slides over the chat. */}
-      {!wide && chatOpen && state.open && mobilePanel && (
+      {!wide && chatOpen && (state.open || state.openError) && mobilePanel && (
         <div className="fixed inset-0 z-40" role="dialog" aria-modal="true" aria-label="Patient details">
           <button type="button" className="absolute inset-0 bg-black/40" aria-label="Close" onClick={() => setMobilePanel(false)} />
           <div className="absolute inset-y-0 right-0 w-full max-w-[380px] shadow-2xl">

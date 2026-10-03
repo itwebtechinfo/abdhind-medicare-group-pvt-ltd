@@ -41,9 +41,14 @@ interface State {
   aiEnabled: boolean;
   cursor: number | null;
   listLoading: boolean;
+  /** Set when the list request failed - the page shows an error + Retry, never an endless skeleton. */
+  listError: string | null;
   openId: string | null;
   open: OpenState | null;
   openLoading: boolean;
+  openError: string | null;
+  /** Bumped by "Retry" to re-run the open-chat request. */
+  openAttempt: number;
   now: number;
 }
 
@@ -51,6 +56,9 @@ type Action =
   | { type: "scope"; scope: InboxScope }
   | { type: "query"; q: string }
   | { type: "listLoading" }
+  | { type: "listError"; msg: string }
+  | { type: "openError"; msg: string }
+  | { type: "openRetry" }
   | { type: "list"; data: InboxListData; group?: InboxGroup; append?: boolean }
   | { type: "sync"; changed: InboxRow[]; messages: InboxMessage[]; conversation?: InboxHeader; presence?: { id: string; name: string }[]; counts: InboxCounts; now: number }
   | { type: "openStart"; id: string | null }
@@ -86,7 +94,13 @@ function reducer(state: State, action: Action): State {
     case "query":
       return { ...state, q: action.q, results: action.q ? state.results : null };
     case "listLoading":
-      return { ...state, listLoading: true };
+      return { ...state, listLoading: true, listError: null };
+    case "listError":
+      return { ...state, listLoading: false, listError: action.msg };
+    case "openError":
+      return { ...state, openLoading: false, openError: action.msg };
+    case "openRetry":
+      return { ...state, openLoading: true, openError: null, openAttempt: state.openAttempt + 1 };
     case "list": {
       const { data } = action;
       const rows = { ...state.rows };
@@ -118,6 +132,7 @@ function reducer(state: State, action: Action): State {
         aiEnabled: data.ai_enabled ?? state.aiEnabled,
         cursor: state.cursor ?? data.now,
         listLoading: false,
+        listError: null,
         now: data.now,
       };
     }
@@ -134,7 +149,13 @@ function reducer(state: State, action: Action): State {
       return { ...state, rows, open, counts: action.counts, cursor: action.now, now: action.now };
     }
     case "openStart":
-      return { ...state, openId: action.id, open: action.id === state.openId ? state.open : null, openLoading: Boolean(action.id) };
+      return {
+        ...state,
+        openId: action.id,
+        open: action.id === state.openId ? state.open : null,
+        openLoading: Boolean(action.id),
+        openError: null,
+      };
     case "openLoaded": {
       if (action.data.conversation.id !== state.openId) return state;
       const { now: _now, ...rest } = action.data; // eslint-disable-line @typescript-eslint/no-unused-vars
@@ -143,6 +164,7 @@ function reducer(state: State, action: Action): State {
         ...state,
         open: { ...rest, loadingOlder: false },
         openLoading: false,
+        openError: null,
         rows: { ...state.rows, [row.id]: row },
       };
     }
@@ -180,6 +202,15 @@ function reducer(state: State, action: Action): State {
   }
 }
 
+/** Short, human reason for an error card ("Server error (500)", "No connection"...). */
+export function errorMessage(err: unknown): string {
+  const e = err as { status?: number; msg?: string } | undefined;
+  if (!e?.status) return "No connection to the server.";
+  if (e.status === 404) return "The inbox service wasn't found on this server (404).";
+  if (e.status >= 500) return `Server error (${e.status}).`;
+  return e.msg || `Request failed (${e.status}).`;
+}
+
 interface InboxContextValue {
   state: State;
   setScope: (scope: InboxScope) => void;
@@ -193,6 +224,7 @@ interface InboxContextValue {
   putContext: (c: PatientContext) => void;
   syncNow: () => void;
   reload: () => Promise<void>;
+  retryOpen: () => void;
 }
 
 const InboxContext = createContext<InboxContextValue | null>(null);
@@ -218,9 +250,12 @@ export function InboxProvider({ children, initialOpenId }: { children: React.Rea
     aiEnabled: false,
     cursor: null,
     listLoading: true,
+    listError: null,
     openId: initialOpenId ?? null,
     open: null,
     openLoading: Boolean(initialOpenId),
+    openError: null,
+    openAttempt: 0,
     now: Date.now(),
   });
 
@@ -231,13 +266,17 @@ export function InboxProvider({ children, initialOpenId }: { children: React.Rea
 
   const fetchList = useCallback(async (scope: InboxScope, q: string, withUsers: boolean) => {
     dispatch({ type: "listLoading" });
-    const res = await inboxService.list({ scope, q: q || undefined, include_users: withUsers || undefined });
-    if (stateRef.current.scope === scope && stateRef.current.q === q) dispatch({ type: "list", data: res.data });
+    try {
+      const res = await inboxService.list({ scope, q: q || undefined, include_users: withUsers || undefined });
+      if (stateRef.current.scope === scope && stateRef.current.q === q) dispatch({ type: "list", data: res.data });
+    } catch (err) {
+      dispatch({ type: "listError", msg: errorMessage(err) });
+    }
   }, []);
 
   // ---------- list ----------
   useEffect(() => {
-    fetchList(state.scope, state.q, !stateRef.current.me).catch(() => dispatch({ type: "tick", now: Date.now() }));
+    void fetchList(state.scope, state.q, !stateRef.current.me);
   }, [state.scope, state.q, fetchList]);
 
   const loadGroup = useCallback(async (group: InboxGroup, more = false) => {
@@ -265,11 +304,11 @@ export function InboxProvider({ children, initialOpenId }: { children: React.Rea
     inboxService
       .open(id)
       .then((res) => !cancelled && dispatch({ type: "openLoaded", data: res.data }))
-      .catch(() => !cancelled && dispatch({ type: "openStart", id: null }));
+      .catch((err) => !cancelled && dispatch({ type: "openError", msg: errorMessage(err) }));
     return () => {
       cancelled = true;
     };
-  }, [state.openId]);
+  }, [state.openId, state.openAttempt]);
 
   const loadOlder = useCallback(async () => {
     const { openId, open } = stateRef.current;
@@ -357,7 +396,9 @@ export function InboxProvider({ children, initialOpenId }: { children: React.Rea
       putHeader: (header) => dispatch({ type: "header", header }),
       putContext: (context) => dispatch({ type: "context", context }),
       syncNow: () => void runSync(),
-      reload: () => fetchList(stateRef.current.scope, stateRef.current.q, false),
+      // Also re-asks for the staff list if the very first load never got it.
+      reload: () => fetchList(stateRef.current.scope, stateRef.current.q, !stateRef.current.me),
+      retryOpen: () => dispatch({ type: "openRetry" }),
     }),
     [state, loadGroup, loadMoreResults, openChat, loadOlder, runSync, fetchList]
   );

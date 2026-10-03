@@ -23,6 +23,7 @@ import {
   clockTime, dayLabel, displayName, formatPhone, inboxService, istDayStart,
   type InboxAction, type InboxHeader, type InboxMessage,
 } from "./inbox";
+import { InboxErrorState } from "./InboxErrorState";
 import { useInbox } from "./InboxProvider";
 import { MessageBubble } from "./MessageBubble";
 
@@ -40,8 +41,18 @@ function snoozePresets(now: number): { label: string; until: number }[] {
 }
 
 export function ChatPanel({ onBack, onShowPanel, panelOpen }: { onBack: () => void; onShowPanel: () => void; panelOpen: boolean }) {
-  const { state } = useInbox();
+  const { state, retryOpen } = useInbox();
   const open = state.open;
+  if (state.openError) {
+    return (
+      <div className="flex h-full flex-col">
+        <div className="flex items-center border-b p-2 lg:hidden">
+          <Button variant="ghost" size="icon" onClick={onBack} aria-label="Back to conversations"><ArrowLeft className="h-5 w-5" /></Button>
+        </div>
+        <InboxErrorState title="Couldn't load this chat" detail={state.openError} onRetry={retryOpen} testId="chat-error" />
+      </div>
+    );
+  }
   if (state.openLoading || !open) {
     return (
       <div className="flex h-full flex-col">
