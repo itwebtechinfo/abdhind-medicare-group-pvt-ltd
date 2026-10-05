@@ -244,13 +244,6 @@ export const appointmentService = {
     return { ...res, data: { ...res.data, appointments: res.data.appointments.map(mapAppointment) } };
   },
 
-  get: async (id: string) => {
-    const res = await http.get<{ appointment: RawApiAppointment }>(
-      API_ENDPOINTS.appointments.detail(id)
-    );
-    return { ...res, data: { appointment: mapAppointment(res.data.appointment) } };
-  },
-
   create: async (payload: CreateAppointmentPayload) => {
     const res = await http.post<{ appointment: RawApiAppointment }>(
       API_ENDPOINTS.appointments.list,

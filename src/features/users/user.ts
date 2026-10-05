@@ -129,8 +129,6 @@ export const userService = {
 
   roles: () => http.get<{ roles: RoleInfo[] }>(API_ENDPOINTS.roles),
 
-  get: (id: string) => http.get<{ user: ApiUser }>(API_ENDPOINTS.users.detail(id)),
-
   /** Returns the temporary password ONCE — show it, never store it. */
   create: (payload: CreateStaffPayload) =>
     http.post<{ user: ApiUser; temporary_password: string }>(API_ENDPOINTS.users.list, payload),

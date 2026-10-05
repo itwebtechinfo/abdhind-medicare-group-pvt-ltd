@@ -18,8 +18,6 @@ export const API_ENDPOINTS = {
     /** GET: per-tab counts for the Staff & access page. */
     stats: "/api/v1/users/stats",
     deactivate: (id: string) => `/api/v1/users/${id}/deactivate`,
-    /** Old name for reactivate — kept for compatibility. */
-    activate: (id: string) => `/api/v1/users/${id}/activate`,
     reactivate: (id: string) => `/api/v1/users/${id}/reactivate`,
     /** PATCH { role, doctor_id? }. */
     role: (id: string) => `/api/v1/users/${id}/role`,
@@ -135,9 +133,6 @@ export const API_ENDPOINTS = {
     detail: (id: string) => `/api/v1/product-orders/${id}`,
   },
   uploads: {
-    /** GET — subFolder/fileName from a stored "uploads/<subFolder>/<fileName>" path. Public folders only;
-     *  lab_results / whatsapp_media / prescriptions need a signed URL from `sign`. */
-    file: (subFolder: string, fileName: string) => `/api/v1/uploads/${subFolder}/${fileName}`,
     /** POST { path } → { url } — short-lived signed URL for a private upload. */
     sign: "/api/v1/files/sign",
   },
@@ -159,27 +154,6 @@ export const API_ENDPOINTS = {
     savedReply: (id: string) => `/api/v1/inbox/saved-replies/${id}`,
   },
   whatsapp: {
-    /** GET: chat list (query: unread_only, human_mode, search, tag, limit, offset). */
-    conversations: "/api/v1/whatsapp/conversations",
-    /** GET: chat history (query: before, limit). */
-    messages: (phone: string) => `/api/v1/whatsapp/conversations/${encodeURIComponent(phone)}/messages`,
-    /** POST: multipart/form-data — send a reply (text and/or file). */
-    send: (phone: string) => `/api/v1/whatsapp/conversations/${encodeURIComponent(phone)}/send`,
-    /** POST: no body — flips delivered inbound messages to read. */
-    read: (phone: string) => `/api/v1/whatsapp/conversations/${encodeURIComponent(phone)}/read`,
-    /** POST: no body — assign conversation to caller, disable bot. */
-    takeover: (phone: string) => `/api/v1/whatsapp/conversations/${encodeURIComponent(phone)}/takeover`,
-    /** POST: no body — re-enable bot for the conversation. */
-    release: (phone: string) => `/api/v1/whatsapp/conversations/${encodeURIComponent(phone)}/release`,
-    /** POST: { text } — add a staff-only internal note. */
-    note: (phone: string) => `/api/v1/whatsapp/conversations/${encodeURIComponent(phone)}/note`,
-    /** PUT: { tags: string[] } — replaces the full tag set. */
-    tags: (phone: string) => `/api/v1/whatsapp/conversations/${encodeURIComponent(phone)}/tags`,
-    /** POST: no body — resend a failed outbound message. */
-    retry: (phone: string, messageId: string) =>
-      `/api/v1/whatsapp/conversations/${encodeURIComponent(phone)}/messages/${messageId}/retry`,
-    /** GET: query `q` (required), `limit` — search within a chat. */
-    search: (phone: string) => `/api/v1/whatsapp/conversations/${encodeURIComponent(phone)}/messages/search`,
     /** GET: staff action trail for a conversation. */
     auditLog: (phone: string) => `/api/v1/whatsapp/conversations/${encodeURIComponent(phone)}/audit-log`,
     /** GET: plain-text transcript download. */
@@ -202,8 +176,6 @@ export const API_ENDPOINTS = {
     /** POST: multipart/form-data, admin/system_admin only — submit a new template to Meta for approval.
      *  GET (same URL): list submitted template requests, newest first. */
     templateRequests: "/api/v1/whatsapp/templates/requests",
-    /** GET: poll a single template request's approval status. */
-    templateRequest: (requestId: string) => `/api/v1/whatsapp/templates/requests/${requestId}`,
     /** POST: no body — re-submit a SUBMIT_FAILED request using its stored fields. */
     templateRequestRetry: (requestId: string) => `/api/v1/whatsapp/templates/requests/${requestId}/retry`,
     /** GET: boolean-only WhatsApp env var status, admin/system_admin only. */

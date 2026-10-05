@@ -341,13 +341,6 @@ export const patientService = {
 
   dispenses: (id: string) => http.get<{ dispenses: PatientDispense[] }>(API_ENDPOINTS.patients.dispenses(id)),
 
-  list: async () => {
-    const res = await http.get<{ count: number; patients: RawApiPatient[] }>(
-      API_ENDPOINTS.patients.list
-    );
-    return { ...res, data: { ...res.data, patients: res.data.patients.map(mapPatient) } };
-  },
-
   get: async (id: string) => {
     const res = await http.get<{ patient: RawApiPatient; appointments: RawPatientAppointmentRecord[] }>(
       API_ENDPOINTS.patients.detail(id)

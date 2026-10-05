@@ -2,7 +2,7 @@ import type { AxiosError } from "axios";
 import { AUTH_ROUTES } from "./constants";
 import { sessionStorageLayer } from "./session-storage";
 import { tokenStorage } from "./token-storage";
-import { getDashboardPathForRole, ROLE_LABELS } from "@/src/lib/rbac/roles";
+import { getDashboardPathForRole } from "@/src/lib/rbac/roles";
 import { http, publicHttp } from "@/src/services/http";
 import { normalizeApiError } from "@/src/services/api-client";
 import { API_ENDPOINTS } from "@/src/config/endpoints";
@@ -228,9 +228,5 @@ export const authService = {
     if (!session) return AUTH_ROUTES.login;
     if (session.user.mustChangePassword) return AUTH_ROUTES.changePassword;
     return getDashboardPathForRole(session.user.role);
-  },
-
-  getRoleLabel(role: UserRole): string {
-    return ROLE_LABELS[role];
   },
 };

@@ -1,5 +1,4 @@
 import type { UserRole } from "@/src/lib/auth/types";
-import { ROLE_LABELS } from "@/src/lib/rbac/roles";
 
 export type DashboardStat = {
   title: string;
@@ -155,8 +154,4 @@ export const DASHBOARD_BY_ROLE: Record<UserRole, DashboardConfig> = {
 
 export function getDashboardConfig(role: UserRole): DashboardConfig {
   return DASHBOARD_BY_ROLE[role] ?? DASHBOARD_BY_ROLE.admin;
-}
-
-export function getDashboardTitle(role: UserRole): string {
-  return `${ROLE_LABELS[role]} — ${DASHBOARD_BY_ROLE[role]?.title ?? "Dashboard"}`;
 }

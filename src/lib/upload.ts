@@ -1,17 +1,6 @@
-import { env } from "@/src/config/env";
 import { API_ENDPOINTS } from "@/src/config/endpoints";
 import { apiClient } from "@/src/services/api-client";
 import { toast } from "@/src/lib/toast";
-
-/**
- * Backend stores uploaded files as relative paths like
- * "uploads/lab_results/1785323153897.pdf", served at
- * /api/v1/uploads/<sub_folder>/<file_name>. Only the public folders
- * (assets, products, profile_image) can be linked directly with this.
- */
-export function resolveUploadUrl(path: string): string {
-  return `${env.apiBaseUrl}/api/v1/uploads/${path.replace(/^uploads\//, "")}`;
-}
 
 /** A short-lived (~10 min) signed URL for a private upload (lab_results, whatsapp_media, prescriptions). */
 export async function getSignedUploadUrl(path: string): Promise<string> {

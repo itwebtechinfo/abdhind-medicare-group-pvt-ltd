@@ -1,7 +1,5 @@
-import { z } from "zod";
 import { publicHttp } from "@/src/services/http";
 import { API_ENDPOINTS } from "@/src/config/endpoints";
-import { INDIAN_MOBILE_REGEX } from "@/src/features/auth/login-schema";
 import { mapAppointment, type RawApiAppointment } from "@/src/features/appointments/appointment";
 import { OTP_LENGTH, OTP_RESEND_COOLDOWN_SECONDS } from "@/src/lib/otp";
 
@@ -47,34 +45,6 @@ export interface PublicBookingPayload {
   slot_id: string;
   otp: string;
 }
-
-// ---------- Schema ----------
-
-export const patientDetailsSchema = z.object({
-  patient_name: z.string().trim().min(1, "Full name is required"),
-  patient_phone: z
-    .string()
-    .trim()
-    .regex(INDIAN_MOBILE_REGEX, "Enter a valid 10-digit mobile number"),
-  patient_age: z
-    .string()
-    .trim()
-    .refine((v) => v === "" || (/^\d+$/.test(v) && Number(v) <= 150), {
-      message: "Enter a valid age (0-150)",
-    }),
-  patient_gender: z.enum(["", "Male", "Female", "Other"]),
-  patient_address: z.string().trim(),
-});
-
-export type PatientDetailsFormValues = z.infer<typeof patientDetailsSchema>;
-
-export const EMPTY_PATIENT_DETAILS: PatientDetailsFormValues = {
-  patient_name: "",
-  patient_phone: "",
-  patient_age: "",
-  patient_gender: "",
-  patient_address: "",
-};
 
 // ---------- Service ----------
 

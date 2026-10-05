@@ -1,93 +1,8 @@
 import { z } from "zod";
 import { http } from "@/src/services/http";
-import { apiClient } from "@/src/services/api-client";
 import { API_ENDPOINTS } from "@/src/config/endpoints";
 
 // ---------- Types ----------
-
-export type MessageDirection = "inbound" | "outbound" | "system" | "internal";
-
-export type MessageStatus = "delivered" | "read" | "sent" | "failed" | "system" | "internal";
-
-export type MessageType =
-  | "text"
-  | "image"
-  | "audio"
-  | "video"
-  | "document"
-  | "sticker"
-  | "location"
-  | "button"
-  | "interactive"
-  | "template"
-  | "system_event";
-
-export interface SentBy {
-  role: "bot" | "patient" | "staff" | "system";
-  user_id: string | null;
-  name: string | null;
-}
-
-/**
- * Shape varies by `message_type` (see WHATSAPP_INBOX_API.md §3) — every field
- * here is optional and callers narrow by `message_type` before reading.
- */
-export interface MessageContent {
-  text?: string;
-  buttons?: { id: string; title: string }[];
-  sections?: { title: string; rows: { id: string; title: string }[] }[];
-  selected_id?: string;
-  media_id?: string;
-  media_url?: string;
-  caption?: string | null;
-  mime_type?: string;
-  latitude?: number;
-  longitude?: number;
-  template_name?: string;
-  language?: string;
-  variables?: string[];
-  broadcast_job_id?: string | null;
-  raw?: unknown;
-}
-
-export interface ApiMessage {
-  id: string;
-  conversation_id: string;
-  direction: MessageDirection;
-  message_type: MessageType;
-  content: MessageContent;
-  wa_message_id: string | null;
-  status: MessageStatus;
-  sent_by: SentBy;
-  is_internal_note: boolean;
-  error_reason: string | null;
-  /** Pre-formatted IST display string "DD-MM-YYYY HH:MM" — do not parse as epoch. */
-  created_at: string;
-}
-
-export interface ConversationAssignee {
-  user_id: string;
-  name: string;
-}
-
-export interface ApiConversation {
-  conversation_id: string;
-  phone: string;
-  patient_id: string | null;
-  patient_name: string | null;
-  /** The sender's own WhatsApp display name (from Meta's webhook `contacts`
-   * payload) — set even when they're not a registered patient. Use as the
-   * fallback display name before falling back further to `phone`. */
-  contact_name: string | null;
-  last_message_preview: string;
-  /** Pre-formatted IST display string. */
-  last_message_time: string;
-  last_message_direction: MessageDirection;
-  unread_count: number;
-  human_mode: boolean;
-  assigned_to: ConversationAssignee | null;
-  tags: string[];
-}
 
 export type AuditLogAction =
   | "takeover"
@@ -370,54 +285,6 @@ export interface CreateBroadcastPayload {
   scheduled_at?: number | null;
 }
 
-export interface ConversationListParams {
-  unread_only?: boolean;
-  human_mode?: boolean;
-  search?: string;
-  tag?: string;
-  limit?: number;
-  offset?: number;
-}
-
-// ---------- Timestamp helpers ----------
-// message.created_at / conversation.last_message_time are pre-formatted IST
-// display strings "DD-MM-YYYY HH:MM" (see WHATSAPP_INBOX_API.md §3) — never epoch.
-
-const DISPLAY_TIMESTAMP_RE = /^(\d{2})-(\d{2})-(\d{4}) (\d{2}):(\d{2})$/;
-const IST_OFFSET_MS = (5 * 60 + 30) * 60 * 1000;
-
-export function parseIstDisplayTimestamp(value: string): Date | null {
-  const match = DISPLAY_TIMESTAMP_RE.exec(value);
-  if (!match) return null;
-  const [, dd, mm, yyyy, hh, min] = match;
-  const utcMs =
-    Date.UTC(Number(yyyy), Number(mm) - 1, Number(dd), Number(hh), Number(min)) - IST_OFFSET_MS;
-  return new Date(utcMs);
-}
-
-export function displayTimeOnly(value: string): string {
-  return value.split(" ")[1] ?? value;
-}
-
-const SERVICE_WINDOW_MS = 24 * 60 * 60 * 1000;
-
-/**
- * Meta only allows free-form replies within 24h of the patient's last inbound
- * message — drives the composer's disabled state (§4.3 "24-hour window").
- */
-export function isServiceWindowOpen(
-  messages: Pick<ApiMessage, "direction" | "created_at">[]
-): boolean {
-  for (let i = messages.length - 1; i >= 0; i--) {
-    if (messages[i].direction === "inbound") {
-      const ts = parseIstDisplayTimestamp(messages[i].created_at);
-      if (!ts) return false;
-      return Date.now() - ts.getTime() < SERVICE_WINDOW_MS;
-    }
-  }
-  return false;
-}
-
 // ---------- Schema ----------
 
 export const noteSchema = z.object({
@@ -683,64 +550,11 @@ export interface WhatsAppActivitySummary {
 }
 
 export const whatsappService = {
-  listConversations: (params: ConversationListParams = {}) =>
-    http.get<{ count: number; conversations: ApiConversation[] }>(API_ENDPOINTS.whatsapp.conversations, {
-      params,
-    }),
-
-  getMessages: (phone: string, params: { before?: number; limit?: number } = {}) =>
-    http.get<{ conversation_id: string; messages: ApiMessage[]; next_before_cursor: number | null; has_more: boolean }>(
-      API_ENDPOINTS.whatsapp.messages(phone),
-      { params }
-    ),
-
-  sendMessage: (phone: string, input: { text?: string; caption?: string; file?: File }) => {
-    const form = new FormData();
-    if (input.text) form.append("text", input.text);
-    if (input.caption) form.append("caption", input.caption);
-    if (input.file) form.append("file", input.file);
-    return http.post<{ conversation_id: string }>(API_ENDPOINTS.whatsapp.send(phone), form);
-  },
-
-  markRead: (phone: string) =>
-    http.post<{ conversation_id: string; updated_count: number }>(API_ENDPOINTS.whatsapp.read(phone)),
-
-  takeover: (phone: string) =>
-    http.post<{ conversation_id: string; human_mode: boolean }>(API_ENDPOINTS.whatsapp.takeover(phone)),
-
-  release: (phone: string) =>
-    http.post<{ conversation_id: string; human_mode: boolean }>(API_ENDPOINTS.whatsapp.release(phone)),
-
-  addNote: (phone: string, text: string) =>
-    http.post<{ conversation_id: string; message_id: string }>(API_ENDPOINTS.whatsapp.note(phone), { text }),
-
-  setTags: (phone: string, tags: string[]) =>
-    http.put<{ conversation_id: string; tags: string[] }>(API_ENDPOINTS.whatsapp.tags(phone), { tags }),
-
-  retryMessage: (phone: string, messageId: string) =>
-    http.post<{ conversation_id: string; original_message_id: string }>(
-      API_ENDPOINTS.whatsapp.retry(phone, messageId)
-    ),
-
-  searchMessages: (phone: string, q: string, limit?: number) =>
-    http.get<{ conversation_id: string; query: string; count: number; messages: ApiMessage[] }>(
-      API_ENDPOINTS.whatsapp.search(phone),
-      { params: { q, limit } }
-    ),
-
   getAuditLog: async (phone: string) => {
     const res = await http.get<{ conversation_id: string; logs: RawApiAuditLog[] }>(
       API_ENDPOINTS.whatsapp.auditLog(phone)
     );
     return { ...res, data: { ...res.data, logs: res.data.logs.map(mapAuditLog) } };
-  },
-
-  /** Downloads the plain-text transcript as a Blob — caller triggers the save. */
-  exportConversation: async (phone: string) => {
-    const res = await apiClient.get<Blob>(API_ENDPOINTS.whatsapp.export(phone), {
-      responseType: "blob",
-    });
-    return res.data;
   },
 
   listTemplates: async (status?: string) => {
@@ -813,11 +627,6 @@ export const whatsappService = {
       API_ENDPOINTS.whatsapp.templateRequests
     );
     return { ...res, data: { ...res.data, requests: res.data.requests.map(mapTemplateRequest) } };
-  },
-
-  getTemplateRequest: async (requestId: string) => {
-    const res = await http.get<{ request: RawApiTemplateRequest }>(API_ENDPOINTS.whatsapp.templateRequest(requestId));
-    return { ...res, data: { request: mapTemplateRequest(res.data.request) } };
   },
 
   retryTemplateRequest: (requestId: string) =>

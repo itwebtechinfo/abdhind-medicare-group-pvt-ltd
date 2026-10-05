@@ -246,11 +246,6 @@ export const doctorService = {
     return { ...res, data: { ...res.data, doctors: res.data.doctors.map(mapDoctor) } };
   },
 
-  get: async (id: string) => {
-    const res = await http.get<{ doctor: RawApiDoctor }>(API_ENDPOINTS.doctors.detail(id));
-    return { ...res, data: { doctor: mapDoctor(res.data.doctor) } };
-  },
-
   create: async (payload: CreateDoctorPayload) => {
     const res = await http.post<{ doctor: RawApiDoctor }>(API_ENDPOINTS.doctors.list, payload);
     return { ...res, data: { doctor: mapDoctor(res.data.doctor) } };
