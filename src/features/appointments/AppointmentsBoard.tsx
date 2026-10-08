@@ -18,6 +18,8 @@ import { doctorService } from "@/src/features/doctors/doctor";
 import {
   appointmentService,
   BULK_CANCEL_TABS,
+  cancelNotificationNote,
+  type CancelNotification,
   formatClock,
   formatCreatedAt,
   getDisplayStatus,
@@ -254,7 +256,9 @@ export function AppointmentsBoard() {
   const selectedCount = activeSelection.allMatching ? matchingCount : activeSelection.ids.size;
 
   const toggleRow = (a: ApiAppointment) => {
-    const ids = new Set(activeSelection.ids);
+    // Un-ticking a row while "all matching" is on drops back to an explicit
+    // selection of every loaded row except that one.
+    const ids = new Set(activeSelection.allMatching ? selectableIds : activeSelection.ids);
     if (ids.has(a.id)) ids.delete(a.id);
     else ids.add(a.id);
     setSelection({ listKey, ids, allMatching: false });
@@ -548,7 +552,7 @@ export function AppointmentsBoard() {
                           selected: activeSelection.allMatching
                             ? CANCELLABLE.includes(status)
                             : activeSelection.ids.has(appointment.id),
-                          selectable: CANCELLABLE.includes(status) && !activeSelection.allMatching,
+                          selectable: CANCELLABLE.includes(status),
                           onToggle: toggleRow,
                         }
                       : undefined
@@ -617,14 +621,21 @@ export function AppointmentsBoard() {
         appointment={declineFor?.appointment ?? null}
         mode={declineFor?.mode ?? "decline"}
         isSubmitting={declineFor ? busyIds.has(declineFor.appointment.id) : false}
-        onSubmit={async (reason) => {
+        onSubmit={async (reason, cancelledBy) => {
           if (!declineFor) return;
           const { appointment, mode } = declineFor;
+          let notification: CancelNotification | undefined;
           const ok = await runAction(
             appointment,
-            () => appointmentService.cancel(appointment.id, reason),
+            async () => {
+              const res = await appointmentService.cancel(appointment.id, reason, cancelledBy);
+              notification = res.data.notification;
+              return res;
+            },
             mode === "decline" ? "Appointment declined" : "Appointment cancelled"
           );
+          const note = cancelNotificationNote(notification);
+          if (ok && note) toast.warning(note);
           if (ok) setDeclineFor(null);
         }}
       />

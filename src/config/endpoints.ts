@@ -170,6 +170,8 @@ export const API_ENDPOINTS = {
     systemTemplates: "/api/v1/whatsapp/templates/system",
     /** POST: no body, admin/system_admin only — submits every built-in template Meta doesn't have yet. Idempotent. */
     seedSystemTemplates: "/api/v1/whatsapp/templates/seed-system-templates",
+    /** GET: which template each message type sends today. PUT (admin/system_admin): switch one, e.g. to its *_v2. */
+    templateNameMap: "/api/v1/whatsapp/templates/name-map",
     /** POST: create a bulk (or scheduled) template broadcast job, admin/system_admin only.
      *  GET (same URL): list broadcast jobs, newest first. */
     broadcast: "/api/v1/whatsapp/broadcast",

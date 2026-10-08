@@ -12,7 +12,7 @@ import {
 } from "@/src/components/ui/dialog";
 import { Button } from "@/src/components/ui/button";
 import { Textarea } from "@/src/components/ui/textarea";
-import type { ApiAppointment } from "./appointment";
+import type { ApiAppointment, CancelledBy } from "./appointment";
 
 const REASONS = ["Patient not available", "Doctor unavailable", "Duplicate booking", "Other"] as const;
 type Reason = (typeof REASONS)[number];
@@ -24,15 +24,25 @@ interface DeclineDialogProps {
   /** "decline" for a booking still awaiting approval, "cancel" for a confirmed one. */
   mode: "decline" | "cancel";
   isSubmitting: boolean;
-  /** Saved as-is to the appointment's cancellation_reason. */
-  onSubmit: (reason: string) => void;
+  /** reason is saved as-is to cancellation_reason; cancelledBy picks the patient's WhatsApp message. */
+  onSubmit: (reason: string, cancelledBy: CancelledBy) => void;
 }
+
+const WHO_OPTIONS: { value: CancelledBy; label: string; hint: string }[] = [
+  { value: "clinic", label: "Clinic", hint: "Patient gets the “Sorry, cancelled by the clinic” message." },
+  {
+    value: "patient",
+    label: "Patient requested",
+    hint: "Patient gets a short confirmation — only if they messaged in the last 24 hours.",
+  },
+];
 
 /** Staff decline/cancel with a required reason. Mount with a fresh `key` per
  * appointment so the form resets between opens. */
 export function DeclineDialog({ open, onOpenChange, appointment, mode, isSubmitting, onSubmit }: DeclineDialogProps) {
   const [reason, setReason] = useState<Reason | "">("");
   const [otherText, setOtherText] = useState("");
+  const [cancelledBy, setCancelledBy] = useState<CancelledBy | "">("");
 
   const finalReason = reason === "Other" ? otherText.trim() : reason;
   const verb = mode === "decline" ? "Decline" : "Cancel";
@@ -44,8 +54,7 @@ export function DeclineDialog({ open, onOpenChange, appointment, mode, isSubmitt
           <DialogTitle>{verb} appointment</DialogTitle>
           <DialogDescription>
             {appointment?.patient?.full_name ?? "This patient"}
-            {appointment?.reference_code ? ` · ${appointment.reference_code}` : ""}. The slot will be freed up and the
-            patient gets a WhatsApp &ldquo;Sorry&rdquo; message.
+            {appointment?.reference_code ? ` · ${appointment.reference_code}` : ""}. The slot will be freed up.
           </DialogDescription>
         </DialogHeader>
 
@@ -53,9 +62,38 @@ export function DeclineDialog({ open, onOpenChange, appointment, mode, isSubmitt
           className="space-y-3"
           onSubmit={(e) => {
             e.preventDefault();
-            if (finalReason) onSubmit(finalReason);
+            if (finalReason && cancelledBy) onSubmit(finalReason, cancelledBy);
           }}
         >
+          <fieldset>
+            <legend className="mb-1.5 block text-sm font-medium">Who cancelled?</legend>
+            <div className="grid grid-cols-2 gap-2">
+              {WHO_OPTIONS.map((o) => (
+                <label
+                  key={o.value}
+                  className={`flex cursor-pointer items-center gap-2 rounded-lg border px-3 py-2 text-sm transition-colors ${
+                    cancelledBy === o.value ? "border-primary bg-primary/5" : "border-input hover:bg-accent"
+                  }`}
+                >
+                  <input
+                    type="radio"
+                    name="cancelled-by"
+                    required
+                    value={o.value}
+                    checked={cancelledBy === o.value}
+                    onChange={() => setCancelledBy(o.value)}
+                  />
+                  {o.label}
+                </label>
+              ))}
+            </div>
+            {cancelledBy && (
+              <p className="mt-1.5 text-xs text-muted-foreground">
+                {WHO_OPTIONS.find((o) => o.value === cancelledBy)?.hint}
+              </p>
+            )}
+          </fieldset>
+
           <div>
             <label htmlFor="decline-reason" className="mb-1.5 block text-sm font-medium">
               Reason
@@ -99,7 +137,7 @@ export function DeclineDialog({ open, onOpenChange, appointment, mode, isSubmitt
             <Button type="button" variant="outline" onClick={() => onOpenChange(false)} disabled={isSubmitting}>
               Keep appointment
             </Button>
-            <Button type="submit" variant="destructive" disabled={!finalReason || isSubmitting}>
+            <Button type="submit" variant="destructive" disabled={!finalReason || !cancelledBy || isSubmitting}>
               {isSubmitting && <Loader2 className="h-4 w-4 animate-spin" />}
               {verb} appointment
             </Button>

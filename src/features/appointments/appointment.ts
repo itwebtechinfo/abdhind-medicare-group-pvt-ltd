@@ -139,6 +139,35 @@ export interface CreateAppointmentPayload {
   slot_id: string;
 }
 
+/** Who asked for a staff cancel — decides the patient's WhatsApp message. */
+export type CancelledBy = "clinic" | "patient";
+
+/** What happened to the patient's WhatsApp message after a staff cancel. */
+export interface CancelNotification {
+  status: "sent" | "window_closed" | "no_template" | "opted_out" | "blocked" | "failed" | null;
+  channel: "text" | "template" | null;
+}
+
+/** Toast line for anything other than a delivered message. */
+export function cancelNotificationNote(n: CancelNotification | undefined): string | null {
+  switch (n?.status) {
+    case "sent":
+    case undefined:
+    case null:
+      return null;
+    case "window_closed":
+      return "Patient not notified (outside 24h window)";
+    case "no_template":
+      return "Patient not notified — WhatsApp template not approved yet";
+    case "opted_out":
+      return "Patient not notified — they opted out of WhatsApp messages";
+    case "blocked":
+      return "Patient not notified — number is blocked";
+    default:
+      return "Patient not notified — WhatsApp send failed";
+  }
+}
+
 export interface FollowUpPayload {
   slot_id: string;
 }
@@ -325,14 +354,18 @@ export const appointmentService = {
     return { ...res, data: { appointment: mapAppointment(res.data.appointment) } };
   },
 
-  /** `reason` is optional free text explaining the cancellation; omit it
-   * (or pass undefined) and this behaves exactly as before. */
-  cancel: async (id: string, reason?: string) => {
-    const res = await http.post<{ appointment: RawApiAppointment }>(
+  /** `reason` is optional free text explaining the cancellation. `cancelledBy`
+   * picks the patient's message: "clinic" (default) -> the clinic-cancel
+   * template; "patient" -> a short confirmation, inside the 24h window only. */
+  cancel: async (id: string, reason?: string, cancelledBy: CancelledBy = "clinic") => {
+    const res = await http.post<{ appointment: RawApiAppointment; notification?: CancelNotification }>(
       API_ENDPOINTS.appointments.cancel(id),
-      reason ? { reason } : undefined
+      { ...(reason ? { reason } : {}), cancelled_by: cancelledBy }
     );
-    return { ...res, data: { appointment: mapAppointment(res.data.appointment) } };
+    return {
+      ...res,
+      data: { appointment: mapAppointment(res.data.appointment), notification: res.data.notification },
+    };
   },
 
   /** PATCH — reschedule (slot_id) or cancel (status: "CANCELLED"). Available to patients for

@@ -191,7 +191,7 @@ export function BulkCancelDialog({ open, onOpenChange, selection, count, onCance
                   </div>
                 )}
                 <p className="text-sm text-muted-foreground">
-                  Each patient {preview.send_enabled ? "will get" : "would get"} this message in their language
+                  {`Each patient ${preview.send_enabled ? "will get" : "would get"} this message in their language `}
                   (shown with the sample name &ldquo;{preview.sample_name}&rdquo;):
                 </p>
                 {PREVIEW_LANGUAGES.map(({ key, label }) =>

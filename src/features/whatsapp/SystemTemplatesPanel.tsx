@@ -2,11 +2,12 @@
 
 import { useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { ChevronDown, ChevronRight, Loader2, Send } from "lucide-react";
+import { ArrowRightLeft, ChevronDown, ChevronRight, Loader2, Send } from "lucide-react";
 import { Badge } from "@/src/components/ui/badge";
 import { Button } from "@/src/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/src/components/ui/card";
 import { ConfirmDialog } from "@/src/components/ui/confirm-dialog";
+import { usePermission } from "@/src/hooks/usePermission";
 import { toast } from "@/src/lib/toast";
 import type { NormalizedApiError } from "@/src/types/api";
 import { TEMPLATE_REQUESTS_QUERY_KEY } from "./TemplateRequestsPanel";
@@ -15,6 +16,13 @@ import { whatsappService, type SystemTemplate } from "./whatsapp";
 import { POLL_INTERVALS } from "@/src/lib/polling";
 
 export const SYSTEM_TEMPLATES_QUERY_KEY = ["whatsapp", "systemTemplates"] as const;
+const TEMPLATE_NAME_MAP_QUERY_KEY = ["whatsapp", "templateNameMap"] as const;
+
+/** "appointment_approved" -> "Appointment approved". */
+function messageTypeLabel(type: string) {
+  const words = type.replace(/_/g, " ");
+  return words.charAt(0).toUpperCase() + words.slice(1);
+}
 
 /** Still waiting on Meta (or on our own submit call) — keep polling. */
 const IN_FLIGHT = new Set(["SUBMITTING", "PENDING", "IN_APPEAL"]);
@@ -39,6 +47,26 @@ export function SystemTemplatesPanel() {
   const queryClient = useQueryClient();
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [expanded, setExpanded] = useState<string | null>(null);
+  const [switchTo, setSwitchTo] = useState<SystemTemplate | null>(null);
+  const { role } = usePermission();
+  const canSwitch = role === "admin" || role === "system_admin";
+
+  const { data: nameMap } = useQuery({
+    queryKey: TEMPLATE_NAME_MAP_QUERY_KEY,
+    queryFn: async () => (await whatsappService.getTemplateNameMap()).data,
+    enabled: canSwitch,
+  });
+
+  const switchMutation = useMutation({
+    mutationFn: (t: SystemTemplate) => whatsappService.updateTemplateNameMap({ [t.message_type as string]: t.name }),
+    onSuccess: (_res, t) => {
+      toast.success("Template switched", `${messageTypeLabel(t.message_type as string)} messages now use ${t.name}.`);
+      setSwitchTo(null);
+      queryClient.invalidateQueries({ queryKey: SYSTEM_TEMPLATES_QUERY_KEY });
+      queryClient.invalidateQueries({ queryKey: TEMPLATE_NAME_MAP_QUERY_KEY });
+    },
+    onError: (err: NormalizedApiError) => toast.error(err.error, err.msg),
+  });
 
   const { data, isLoading, isError } = useQuery({
     queryKey: SYSTEM_TEMPLATES_QUERY_KEY,
@@ -113,6 +141,12 @@ export function SystemTemplatesPanel() {
           {grouped.map(([name, variants]) => {
             const isOpen = expanded === name;
             const first = variants[0];
+            // Approved (in a usable shape) but not what its message type sends yet.
+            const switchable =
+              canSwitch &&
+              !first.active &&
+              Boolean(first.message_type) &&
+              variants.some((v) => v.status === "APPROVED" && v.variables_match);
             return (
               <div key={name} className="rounded-lg border border-border px-3 py-2 text-sm">
                 <button
@@ -122,7 +156,7 @@ export function SystemTemplatesPanel() {
                   aria-expanded={isOpen}
                 >
                   <div className="min-w-0">
-                    <p className="flex items-center gap-1 font-medium">
+                    <div className="flex items-center gap-1 font-medium">
                       {isOpen ? <ChevronDown className="h-3.5 w-3.5" /> : <ChevronRight className="h-3.5 w-3.5" />}
                       <span className="font-mono text-xs">{name}</span>
                       <span className="text-xs text-muted-foreground">({first.category.toLowerCase()})</span>
@@ -131,7 +165,7 @@ export function SystemTemplatesPanel() {
                       ) : (
                         <span className="text-[10px] text-muted-foreground">not in use yet</span>
                       )}
-                    </p>
+                    </div>
                     {first.purpose && <p className="mt-0.5 pl-4 text-xs text-muted-foreground">{first.purpose}</p>}
                   </div>
                   <div className="flex shrink-0 flex-wrap justify-end gap-1">
@@ -142,6 +176,19 @@ export function SystemTemplatesPanel() {
                     ))}
                   </div>
                 </button>
+
+                {switchable && (
+                  <div className="mt-1.5 flex flex-wrap items-center justify-between gap-2 pl-4 text-xs">
+                    <span className="text-muted-foreground">
+                      Approved, not in use. {messageTypeLabel(first.message_type as string)} now sends{" "}
+                      <span className="font-mono">{nameMap?.effective[first.message_type as string] ?? "…"}</span>.
+                    </span>
+                    <Button size="sm" variant="outline" className="h-7 gap-1.5" onClick={() => setSwitchTo(first)}>
+                      <ArrowRightLeft className="h-3.5 w-3.5" />
+                      Use this version
+                    </Button>
+                  </div>
+                )}
 
                 {variants.map((v) =>
                   v.reason || !v.variables_match ? (
@@ -180,6 +227,22 @@ export function SystemTemplatesPanel() {
           })}
         </div>
       </CardContent>
+
+      <ConfirmDialog
+        open={Boolean(switchTo)}
+        onOpenChange={(next) => !switchMutation.isPending && !next && setSwitchTo(null)}
+        title="Use this template version?"
+        description={
+          switchTo
+            ? `${messageTypeLabel(switchTo.message_type as string)} messages currently use "${
+                nameMap?.effective[switchTo.message_type as string] ?? "?"
+              }". From now on they will use "${switchTo.name}". You can switch back the same way.`
+            : undefined
+        }
+        confirmLabel="Use this version"
+        isLoading={switchMutation.isPending}
+        onConfirm={() => switchTo && switchMutation.mutate(switchTo)}
+      />
 
       <ConfirmDialog
         open={confirmOpen}

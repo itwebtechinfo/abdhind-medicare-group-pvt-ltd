@@ -124,6 +124,14 @@ export interface SystemTemplate {
   variables_match: boolean;
 }
 
+export interface TemplateNameMap {
+  /** message type -> template name the send path uses right now. */
+  effective: Record<string, string>;
+  defaults: Record<string, string>;
+  /** message type -> registry templates that can serve it (v1, *_v2…). */
+  choices: Record<string, string[]>;
+}
+
 export interface SeedSystemTemplatesResult {
   name: string;
   language: string;
@@ -576,6 +584,12 @@ export const whatsappService = {
 
   seedSystemTemplates: () =>
     http.post<{ results: SeedSystemTemplatesResult[] }>(API_ENDPOINTS.whatsapp.seedSystemTemplates),
+
+  getTemplateNameMap: () => http.get<TemplateNameMap>(API_ENDPOINTS.whatsapp.templateNameMap),
+
+  /** Switch message types to other approved registry templates — takes effect for the next send. */
+  updateTemplateNameMap: (names: Record<string, string>) =>
+    http.put<{ effective: Record<string, string> }>(API_ENDPOINTS.whatsapp.templateNameMap, { names }),
 
   createBroadcast: (payload: CreateBroadcastPayload) =>
     http.post<{ job_id: string; total: number }>(API_ENDPOINTS.whatsapp.broadcast, payload),
