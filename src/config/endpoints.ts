@@ -85,6 +85,10 @@ export const API_ENDPOINTS = {
     cancel: (id: string) => `/api/v1/appointments/${id}/cancel`,
     auditLog: (id: string) => `/api/v1/appointments/${id}/audit-log`,
     followUp: (id: string) => `/api/v1/appointments/${id}/follow-up`,
+    /** POST: cancel many + WhatsApp each patient (background job). */
+    bulkCancel: "/api/v1/appointments/bulk-cancel",
+    bulkCancelPreview: "/api/v1/appointments/bulk-cancel/preview",
+    bulkCancelJob: (jobId: string) => `/api/v1/appointments/bulk-cancel/${jobId}`,
     dispense: (id: string) => `/api/v1/appointments/${id}/dispense`,
     labOrders: (id: string) => `/api/v1/appointments/${id}/lab-orders`,
   },

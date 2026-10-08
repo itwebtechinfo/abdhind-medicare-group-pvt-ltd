@@ -105,6 +105,10 @@ export interface SystemTemplate {
   language: string;
   category: string;
   purpose: string | null;
+  /** Business message it serves, e.g. "appointment_approved" (null for OTP). */
+  message_type: string | null;
+  /** The template the send path uses today for its message type (v1 until a *_v2 is switched on). */
+  active: boolean;
   /** Labels for {{1}}, {{2}}… in order. */
   variables: string[];
   /** null for AUTHENTICATION (Meta writes that copy). */

@@ -79,7 +79,7 @@ export function TagsDialog({ open, onOpenChange, initialTags, isSubmitting, onSu
                   addTag();
                 }
               }}
-              placeholder="e.g. VIP, Follow-up Needed"
+              placeholder="e.g. VIP, Next Appointment Needed"
             />
             <Button type="button" variant="outline" onClick={addTag} disabled={!draft.trim()}>
               Add

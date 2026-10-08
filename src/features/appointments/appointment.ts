@@ -143,6 +143,54 @@ export interface FollowUpPayload {
   slot_id: string;
 }
 
+/** Tabs that offer selection mode / bulk cancel (rows there are still cancellable). */
+export const BULK_CANCEL_TABS: AppointmentTab[] = ["today", "needs_approval", "upcoming"];
+
+/** Same filter the board list uses — "Select all N matching" sends this and the server resolves it. */
+export interface BulkCancelFilter {
+  tab: AppointmentTab;
+  search?: string;
+  doctor_id?: string;
+  date?: string;
+}
+
+export type BulkCancelPayload = {
+  reason: string;
+  /** One per confirm dialog — a retried request returns the same job instead of cancelling twice. */
+  idempotency_key: string;
+} & ({ appointment_ids: string[] } | { select_all_matching: BulkCancelFilter });
+
+export interface BulkCancelPreview {
+  template_name: string;
+  /** false until Meta approves the template — cancelling still works, no WhatsApp is sent. */
+  send_enabled: boolean;
+  approved_languages: string[];
+  sample_name: string;
+  /** Template body per bot language ("hi" / "en") rendered with sample_name. */
+  previews: Record<string, string | null>;
+}
+
+export type BulkCancelNotificationStatus = "pending" | "sent" | "failed" | "opted_out" | "blocked" | "no_template";
+
+export interface BulkCancelJob {
+  _id: string;
+  status: "cancelling" | "sending" | "completed";
+  reason: string;
+  requested_count: number;
+  cancelled_count: number;
+  send_enabled: boolean;
+  template_name: string;
+  skipped: { appointment_id: string; reason: string }[];
+  patients: {
+    patient_id: string;
+    patient_name: string | null;
+    phone: string | null;
+    appointment_ids: string[];
+    notification_status: BulkCancelNotificationStatus;
+  }[];
+  counts: Record<BulkCancelNotificationStatus, number>;
+}
+
 export interface RawAuditLogEntry {
   from_status: AppointmentStatus | null;
   to_status: AppointmentStatus;
@@ -300,6 +348,14 @@ export const appointmentService = {
   auditLog: (id: string) =>
     http.get<{ logs: RawAuditLogEntry[] }>(API_ENDPOINTS.appointments.auditLog(id)),
 
+  bulkCancelPreview: () => http.get<BulkCancelPreview>(API_ENDPOINTS.appointments.bulkCancelPreview),
+
+  bulkCancel: (payload: BulkCancelPayload) =>
+    http.post<{ job: BulkCancelJob }>(API_ENDPOINTS.appointments.bulkCancel, payload),
+
+  bulkCancelJob: (jobId: string) => http.get<{ job: BulkCancelJob }>(API_ENDPOINTS.appointments.bulkCancelJob(jobId)),
+
+  /** Staff-booked Next Appointment — created already confirmed (one step) and the patient is messaged. */
   followUp: async (id: string, payload: FollowUpPayload) => {
     const res = await http.post<{ appointment: RawApiAppointment }>(
       API_ENDPOINTS.appointments.followUp(id),
@@ -344,10 +400,10 @@ const SOURCE_LABELS: Record<string, string> = {
   whatsapp: "WhatsApp",
   phone: "Reception",
   web: "Website",
-  follow_up: "Follow-up",
+  follow_up: "Next Appointment",
 };
 
-/** "follow_up" -> "Follow-up"; unknown values are humanized, never shown raw. */
+/** "follow_up" -> "Next Appointment"; unknown values are humanized, never shown raw. */
 export function sourceLabel(source: string | null | undefined): string {
   if (!source) return "—";
   if (SOURCE_LABELS[source]) return SOURCE_LABELS[source];

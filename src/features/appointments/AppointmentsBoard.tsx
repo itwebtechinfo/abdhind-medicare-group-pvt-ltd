@@ -3,7 +3,7 @@
 import { useCallback, useMemo, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { keepPreviousData, useInfiniteQuery, useQuery, useQueryClient } from "@tanstack/react-query";
-import { CalendarCheck, CalendarX, Download, Plus, Search } from "lucide-react";
+import { CalendarCheck, CalendarX, Download, ListChecks, Plus, Search, XCircle } from "lucide-react";
 import { Can } from "@/src/components/rbac/PermissionGate";
 import { Button } from "@/src/components/ui/button";
 import { Input } from "@/src/components/ui/input";
@@ -17,6 +17,7 @@ import type { NormalizedApiError } from "@/src/types/api";
 import { doctorService } from "@/src/features/doctors/doctor";
 import {
   appointmentService,
+  BULK_CANCEL_TABS,
   formatClock,
   formatCreatedAt,
   getDisplayStatus,
@@ -33,6 +34,7 @@ import { AppointmentFilters, type AppointmentFilterValues } from "./AppointmentF
 import { APPOINTMENT_ROW_GRID, AppointmentRow } from "./AppointmentRow";
 import { AppointmentTabs, type AppointmentTab } from "./AppointmentTabs";
 import { BookAppointmentDialog } from "./BookAppointmentDialog";
+import { BulkCancelDialog } from "./BulkCancelDialog";
 import { ConfirmAppointmentDialog } from "./ConfirmAppointmentDialog";
 import { DayTimeline } from "./DayTimeline";
 import { DeclineDialog } from "./DeclineDialog";
@@ -60,6 +62,19 @@ const EMPTY_STATES: Record<AppointmentTab, { title: string; hint: string }> = {
 const PAGED_TABS: AppointmentTab[] = ["past", "cancelled"];
 const PAGE_SIZE = 50;
 const EMPTY_COUNTS: AppointmentTabCounts = { today: 0, needs_approval: 0, upcoming: 0, past: 0, cancelled: 0 };
+
+/** Rows the backend can still cancel (PENDING / APPROVED / PATIENT_CONFIRMED). */
+const CANCELLABLE: DisplayStatus[] = ["needs_approval", "confirmed", "no_show", "in_clinic"];
+
+/** Bulk-cancel selection, tied to the list it was made on — changing tab,
+ * search or filters simply makes it stale (= empty) instead of carrying
+ * hidden rows along. */
+interface Selection {
+  listKey: string;
+  ids: ReadonlySet<string>;
+  /** "Select all N matching": the server resolves the filter at confirm time. */
+  allMatching: boolean;
+}
 
 /** Mutation responses are the bare appointment doc (no patient/doctor/booked_by
  * join) — keep the joined data we already have. */
@@ -112,6 +127,7 @@ export function AppointmentsBoard() {
   const { can } = usePermission();
   const canManage = can("appointments:manage");
   const canEdit = can("appointments:edit");
+  const canBulkCancel = can("appointments:bulk_cancel");
 
   const nowMs = useMinuteClock();
   const now = nowMs === null ? null : istNow(nowMs);
@@ -151,6 +167,9 @@ export function AppointmentsBoard() {
   const [followUpFor, setFollowUpFor] = useState<ApiAppointment | null>(null);
   const [declineFor, setDeclineFor] = useState<{ appointment: ApiAppointment; mode: "decline" | "cancel" } | null>(null);
   const [isCreating, setIsCreating] = useState(false);
+  const [selectMode, setSelectMode] = useState(false);
+  const [selection, setSelection] = useState<Selection>({ listKey: "", ids: new Set(), allMatching: false });
+  const [bulkDialog, setBulkDialog] = useState<{ key: number; open: boolean }>({ key: 0, open: false });
 
   // In-flight guard per appointment: the ref blocks a double click before the
   // re-render lands, the state drives the disabled/spinner UI.
@@ -210,6 +229,7 @@ export function AppointmentsBoard() {
     () => (timelineSharesList ? listAppointments : (timelineQuery.data ?? [])),
     [timelineSharesList, listAppointments, timelineQuery.data]
   );
+  const matchingCount = listQuery.data?.pages[0]?.count ?? 0;
   const isLoading = listQuery.isLoading || today === null;
   const timelineLoading = (timelineSharesList ? listQuery.isLoading : timelineQuery.isLoading) || today === null;
 
@@ -222,6 +242,29 @@ export function AppointmentsBoard() {
       })),
     [listAppointments]
   );
+
+  const bulkAvailable = canBulkCancel && BULK_CANCEL_TABS.includes(tab);
+  const inSelectMode = selectMode && bulkAvailable;
+  const listKey = JSON.stringify(listParams);
+  const activeSelection =
+    selection.listKey === listKey ? selection : { listKey, ids: new Set<string>(), allMatching: false };
+  const selectableIds = rows.filter((r) => CANCELLABLE.includes(r.status)).map((r) => r.appointment.id);
+  const allLoadedSelected =
+    selectableIds.length > 0 && selectableIds.every((id) => activeSelection.ids.has(id));
+  const selectedCount = activeSelection.allMatching ? matchingCount : activeSelection.ids.size;
+
+  const toggleRow = (a: ApiAppointment) => {
+    const ids = new Set(activeSelection.ids);
+    if (ids.has(a.id)) ids.delete(a.id);
+    else ids.add(a.id);
+    setSelection({ listKey, ids, allMatching: false });
+  };
+  const toggleAllLoaded = () =>
+    setSelection({ listKey, ids: allLoadedSelected ? new Set() : new Set(selectableIds), allMatching: false });
+  const exitSelectMode = () => {
+    setSelectMode(false);
+    setSelection({ listKey: "", ids: new Set(), allMatching: false });
+  };
 
   // Prefer the freshest copy from any loaded list; fall back to the snapshot.
   const drawerAppointment = useMemo(() => {
@@ -374,8 +417,66 @@ export function AppointmentsBoard() {
               />
             </div>
             <AppointmentFilters value={filters} onChange={setFilters} doctors={doctors} />
+            {bulkAvailable && !inSelectMode && (
+              <Button variant="outline" className="h-9 gap-2 bg-card shadow-none" onClick={() => setSelectMode(true)}>
+                <ListChecks className="h-4 w-4" />
+                Select
+              </Button>
+            )}
           </div>
         </div>
+
+        {inSelectMode && (
+          <div
+            className={cn(
+              APPT_UI.card,
+              "flex flex-col gap-3 px-4 py-3 text-sm sm:flex-row sm:items-center sm:justify-between md:px-5"
+            )}
+          >
+            <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
+              <label className="flex cursor-pointer items-center gap-2 font-medium">
+                <input
+                  type="checkbox"
+                  className="h-4 w-4 cursor-pointer accent-emerald-700"
+                  checked={activeSelection.allMatching || allLoadedSelected}
+                  disabled={selectableIds.length === 0}
+                  onChange={toggleAllLoaded}
+                />
+                Select all
+              </label>
+              <span className="text-muted-foreground">{selectedCount} selected</span>
+              {allLoadedSelected && !activeSelection.allMatching && (
+                <button
+                  type="button"
+                  className="font-medium text-emerald-700 underline-offset-2 hover:underline dark:text-emerald-300"
+                  onClick={() => setSelection({ listKey, ids: activeSelection.ids, allMatching: true })}
+                >
+                  Select all {matchingCount} matching this view
+                </button>
+              )}
+              {activeSelection.allMatching && (
+                <span className="text-muted-foreground">
+                  (every cancellable appointment matching this tab, search and filters)
+                </span>
+              )}
+            </div>
+            <div className="flex items-center gap-2">
+              <Button
+                variant="destructive"
+                size="sm"
+                className="gap-1.5"
+                disabled={selectedCount === 0}
+                onClick={() => setBulkDialog((d) => ({ key: d.key + 1, open: true }))}
+              >
+                <XCircle className="h-4 w-4" />
+                Cancel selected
+              </Button>
+              <Button variant="ghost" size="sm" onClick={exitSelectMode}>
+                Done
+              </Button>
+            </div>
+          </div>
+        )}
 
         {/* Table */}
         <section className={cn(APPT_UI.card, "overflow-hidden")}>
@@ -441,6 +542,17 @@ export function AppointmentsBoard() {
                   busy={busyIds.has(appointment.id)}
                   canManage={canManage}
                   canEdit={canEdit}
+                  selection={
+                    inSelectMode
+                      ? {
+                          selected: activeSelection.allMatching
+                            ? CANCELLABLE.includes(status)
+                            : activeSelection.ids.has(appointment.id),
+                          selectable: CANCELLABLE.includes(status) && !activeSelection.allMatching,
+                          onToggle: toggleRow,
+                        }
+                      : undefined
+                  }
                   {...actions}
                 />
               ))}
@@ -534,6 +646,26 @@ export function AppointmentsBoard() {
         }}
       />
 
+      <BulkCancelDialog
+        key={`bulk-cancel-${bulkDialog.key}`}
+        open={bulkDialog.open}
+        onOpenChange={(open) => setBulkDialog((d) => ({ ...d, open }))}
+        count={selectedCount}
+        selection={
+          activeSelection.allMatching
+            ? { filter: { tab, search: listParams.search, doctor_id: listParams.doctor_id, date: listParams.date } }
+            : { appointmentIds: [...activeSelection.ids] }
+        }
+        onCancelled={() => {
+          exitSelectMode();
+          void Promise.all([
+            queryClient.invalidateQueries({ queryKey: APPOINTMENTS_QUERY_KEY }),
+            queryClient.invalidateQueries({ queryKey: ["patients"] }),
+            queryClient.invalidateQueries({ queryKey: ["notifications"] }),
+          ]);
+        }}
+      />
+
       <FollowUpDialog
         key={`followup-${followUpFor?.id ?? "none"}`}
         open={Boolean(followUpFor)}
@@ -545,7 +677,7 @@ export function AppointmentsBoard() {
           const ok = await runAction(
             followUpFor,
             () => appointmentService.followUp(followUpFor.id, { slot_id: slotId }),
-            "Follow-up booked"
+            "Next appointment booked and confirmed"
           );
           if (ok) setFollowUpFor(null);
         }}

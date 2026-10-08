@@ -98,6 +98,13 @@ interface AppointmentRowProps extends AppointmentRowActions {
   busy: boolean;
   canManage: boolean;
   canEdit: boolean;
+  /** Bulk-cancel selection mode: a checkbox per row, and a row click toggles it. */
+  selection?: {
+    selected: boolean;
+    /** Completed/cancelled rows can't be cancelled — shown without a checkbox. */
+    selectable: boolean;
+    onToggle: (a: ApiAppointment) => void;
+  };
 }
 
 const stop = (fn: () => void) => (e: React.MouseEvent) => {
@@ -113,6 +120,7 @@ export function AppointmentRow({
   busy,
   canManage,
   canEdit,
+  selection,
   ...actions
 }: AppointmentRowProps) {
   const { date, minutes } = splitAppointmentDateTime(a.appointment_datetime);
@@ -169,7 +177,7 @@ export function AppointmentRow({
       onSelect: () => actions.onComplete(a),
     },
     canManage && status === "completed" && !a.follow_up_appointment_id && {
-      label: "Book follow-up",
+      label: "Book next appointment",
       icon: Repeat,
       onSelect: () => actions.onFollowUp(a),
     },
@@ -181,32 +189,55 @@ export function AppointmentRow({
     },
   ].filter(Boolean) as { label: string; icon: typeof Eye; destructive?: boolean; onSelect: () => void }[];
 
+  const activate = () => {
+    if (selection) {
+      if (selection.selectable) selection.onToggle(a);
+    } else {
+      actions.onOpen(a);
+    }
+  };
+
   return (
     <div
       role="button"
       tabIndex={0}
-      onClick={() => actions.onOpen(a)}
+      aria-pressed={selection ? selection.selected : undefined}
+      onClick={activate}
       onKeyDown={(e) => {
         if (e.target === e.currentTarget && (e.key === "Enter" || e.key === " ")) {
           e.preventDefault();
-          actions.onOpen(a);
+          activate();
         }
       }}
       className={cn(
         "flex cursor-pointer flex-col gap-3 border-b border-[#E3E9E5] px-4 py-3.5 text-sm transition-colors last:border-b-0 hover:bg-muted/40 focus-visible:bg-muted/40 focus-visible:outline-none dark:border-border md:px-5",
         APPOINTMENT_ROW_GRID,
         status === "needs_approval" && "bg-amber-50/60 hover:bg-amber-50 dark:bg-amber-500/5 dark:hover:bg-amber-500/10",
-        status === "completed" && "opacity-60"
+        status === "completed" && "opacity-60",
+        selection?.selected && "bg-emerald-50/70 hover:bg-emerald-50 dark:bg-emerald-500/10 dark:hover:bg-emerald-500/15"
       )}
     >
       {/* Time (+ status on mobile) */}
       <div className="flex items-start justify-between gap-3 md:block">
-        <div>
-          {showDate && <p className="text-xs font-medium text-muted-foreground">{friendlyDate(date, todayYmd)}</p>}
-          <p className={cn("text-lg font-semibold leading-tight tabular-nums", APPT_UI.ink)}>
-            {clock.time}
-            <span className="ml-1 text-xs font-normal text-muted-foreground md:ml-0 md:block">{clock.period}</span>
-          </p>
+        <div className="flex items-start gap-2.5">
+          {selection && (
+            <input
+              type="checkbox"
+              aria-label={`Select ${name}`}
+              className="mt-1 h-4 w-4 shrink-0 cursor-pointer accent-emerald-700 disabled:cursor-not-allowed disabled:opacity-30"
+              checked={selection.selected}
+              disabled={!selection.selectable}
+              onClick={(e) => e.stopPropagation()}
+              onChange={() => selection.onToggle(a)}
+            />
+          )}
+          <div>
+            {showDate && <p className="text-xs font-medium text-muted-foreground">{friendlyDate(date, todayYmd)}</p>}
+            <p className={cn("text-lg font-semibold leading-tight tabular-nums", APPT_UI.ink)}>
+              {clock.time}
+              <span className="ml-1 text-xs font-normal text-muted-foreground md:ml-0 md:block">{clock.period}</span>
+            </p>
+          </div>
         </div>
         <StatusBadge status={status} className="md:hidden" />
       </div>

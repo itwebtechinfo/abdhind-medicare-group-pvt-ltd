@@ -120,7 +120,7 @@ function DrawerBody({
       .reverse()
       .map((x) => ({
         appointment: x,
-        kind: x.follow_up_of ? "Follow-up" : x.id === firstId ? "First visit" : "Consultation",
+        kind: x.follow_up_of ? "Next Appointment" : x.id === firstId ? "First visit" : "Consultation",
         status: getDisplayStatus(x),
       }));
   }, [patientAppointments, a.id, a.appointment_datetime]);
@@ -218,7 +218,7 @@ function DrawerBody({
       );
     }
     if (canManage && !a.follow_up_appointment_id) {
-      footer.push(primaryBtn("Book follow-up", () => actions.onFollowUp(a)));
+      footer.push(primaryBtn("Book next appointment", () => actions.onFollowUp(a)));
     }
   }
   const footerButtons = footer.filter(Boolean);
@@ -372,6 +372,7 @@ function DrawerBody({
                                 {entry.from_status ? AUDIT_STATUS_LABELS[entry.from_status] ?? entry.from_status : "Booked"}
                               </span>{" "}
                               → <span className="font-medium">{AUDIT_STATUS_LABELS[entry.to_status] ?? entry.to_status}</span>
+                              {entry.event === "BULK_CANCEL" && <span className="text-muted-foreground"> (bulk cancel)</span>}
                             </>
                           )}
                           <span className="ml-2 text-muted-foreground">

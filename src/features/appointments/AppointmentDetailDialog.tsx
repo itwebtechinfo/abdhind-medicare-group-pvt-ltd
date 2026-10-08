@@ -278,9 +278,10 @@ export function AppointmentDetailDialog({
               Cancel
             </Button>
           )}
-          {current.status === "COMPLETED" && !current.follow_up_appointment_id && (
+          {/* Staff only - POST /follow-up needs appointments:manage (patients got a 403). */}
+          {current.status === "COMPLETED" && !current.follow_up_appointment_id && can("appointments:manage") && (
             <Button size="sm" variant="outline" onClick={() => onBookFollowUp(current)}>
-              Book Follow-up
+              Book Next Appointment
             </Button>
           )}
           {current.status === "COMPLETED" && can("pharmacy:manage") && (

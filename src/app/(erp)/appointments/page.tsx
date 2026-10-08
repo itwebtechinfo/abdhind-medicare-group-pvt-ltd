@@ -44,8 +44,10 @@ function AppointmentCard({
   onView: () => void;
   onFollowUp: () => void;
 }) {
+  const { can } = usePermission();
+  // Staff only - POST /follow-up needs appointments:manage (patients got a 403).
   const canFollowUp =
-    appointment.status === "COMPLETED" && !appointment.follow_up_appointment_id;
+    can("appointments:manage") && appointment.status === "COMPLETED" && !appointment.follow_up_appointment_id;
 
   return (
     <button
@@ -76,7 +78,7 @@ function AppointmentCard({
               onFollowUp();
             }}
           >
-            Book Follow-up
+            Book Next Appointment
           </Button>
         )}
         <Badge variant={STATUS_VARIANT[appointment.status]}>{appointment.status}</Badge>
@@ -177,7 +179,7 @@ function PatientAppointmentsView() {
   return (
     <ErpPageShell
       title="My Appointments"
-      description="Book visits, manage follow-ups, and track your visit history."
+      description="Book visits, see your next appointment, and track your visit history."
       icon={Calendar}
       actions={
         <Can module="appointments" action="create">

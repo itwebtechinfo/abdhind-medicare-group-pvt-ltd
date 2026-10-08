@@ -58,10 +58,11 @@ export function FollowUpDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-sm">
         <DialogHeader>
-          <DialogTitle>Book Follow-up</DialogTitle>
+          <DialogTitle>Book Next Appointment</DialogTitle>
           <DialogDescription>
             With {sourceAppointment?.doctor?.full_name ?? "the same doctor"} for{" "}
-            {sourceAppointment?.patient?.full_name ?? "this patient"}.
+            {sourceAppointment?.patient?.full_name ?? "this patient"}. It&rsquo;s confirmed right away and the
+            patient gets a WhatsApp confirmation.
           </DialogDescription>
         </DialogHeader>
 
@@ -122,7 +123,7 @@ export function FollowUpDialog({
           </Button>
           <Button disabled={!slotId || isSubmitting} onClick={() => onSubmit(slotId)}>
             {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-            Confirm Follow-up
+            Confirm Next Appointment
           </Button>
         </DialogFooter>
       </DialogContent>

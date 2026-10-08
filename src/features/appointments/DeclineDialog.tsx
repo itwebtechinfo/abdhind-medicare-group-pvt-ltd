@@ -44,7 +44,8 @@ export function DeclineDialog({ open, onOpenChange, appointment, mode, isSubmitt
           <DialogTitle>{verb} appointment</DialogTitle>
           <DialogDescription>
             {appointment?.patient?.full_name ?? "This patient"}
-            {appointment?.reference_code ? ` · ${appointment.reference_code}` : ""}. The slot will be freed up.
+            {appointment?.reference_code ? ` · ${appointment.reference_code}` : ""}. The slot will be freed up and the
+            patient gets a WhatsApp &ldquo;Sorry&rdquo; message.
           </DialogDescription>
         </DialogHeader>
 

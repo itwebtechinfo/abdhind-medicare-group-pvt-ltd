@@ -126,6 +126,11 @@ export function SystemTemplatesPanel() {
                       {isOpen ? <ChevronDown className="h-3.5 w-3.5" /> : <ChevronRight className="h-3.5 w-3.5" />}
                       <span className="font-mono text-xs">{name}</span>
                       <span className="text-xs text-muted-foreground">({first.category.toLowerCase()})</span>
+                      {first.active ? (
+                        <Badge variant="secondary" className="text-[10px]">In use</Badge>
+                      ) : (
+                        <span className="text-[10px] text-muted-foreground">not in use yet</span>
+                      )}
                     </p>
                     {first.purpose && <p className="mt-0.5 pl-4 text-xs text-muted-foreground">{first.purpose}</p>}
                   </div>

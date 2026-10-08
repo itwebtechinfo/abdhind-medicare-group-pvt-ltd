@@ -8,7 +8,15 @@ export type UserRole =
   | "pharmacy"
   | "lab";
 
-export type PermissionAction = "view" | "create" | "edit" | "delete" | "manage" | "reply" | "broadcast";
+export type PermissionAction =
+  | "view"
+  | "create"
+  | "edit"
+  | "delete"
+  | "manage"
+  | "reply"
+  | "broadcast"
+  | "bulk_cancel";
 
 /**
  * Matches the backend's documented permission module list. "users" is

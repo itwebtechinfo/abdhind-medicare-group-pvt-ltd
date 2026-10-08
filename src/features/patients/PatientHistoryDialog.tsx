@@ -30,7 +30,7 @@ const STATUS_VARIANT: Record<AppointmentStatus, "success" | "warning" | "seconda
 
 /** Oldest-first visit numbering with each entry's follow-up source resolved
  * to a visit number, so the list reads as a chain: Visit 1 -> Visit 2
- * (Follow-up of Visit 1) -> Visit 3 (Follow-up of Visit 2), etc. */
+ * (Next Appointment after Visit 1) -> Visit 3 (Next Appointment after Visit 2), etc. */
 function buildTimeline(appointments: PatientAppointmentRecord[]) {
   const sorted = [...appointments].sort((a, b) =>
     a.appointment_datetime.localeCompare(b.appointment_datetime)
@@ -86,7 +86,7 @@ export function PatientHistoryDialog({ open, onOpenChange, patientId }: PatientH
                     {appt.followUpOfVisitNumber && (
                       <span className="font-normal text-muted-foreground">
                         {" "}
-                        (Follow-up of Visit {appt.followUpOfVisitNumber})
+                        (Next Appointment after Visit {appt.followUpOfVisitNumber})
                       </span>
                     )}
                   </p>

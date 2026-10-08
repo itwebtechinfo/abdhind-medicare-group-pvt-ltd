@@ -75,7 +75,7 @@ export const DASHBOARD_BY_ROLE: Record<UserRole, DashboardConfig> = {
       { title: "My Appointments", value: "9", subtitle: "Today", progress: 70 },
       { title: "Patients Seen", value: "6", subtitle: "Completed today", progress: 55 },
       { title: "Pending Reports", value: "4", subtitle: "Lab & imaging", progress: 40 },
-      { title: "Follow-ups", value: "3", subtitle: "This week", progress: 25 },
+      { title: "Next Appointments", value: "3", subtitle: "This week", progress: 25 },
     ],
     quickActions: [
       { label: "Schedule", href: "/appointments", permission: "appointments:view" },
