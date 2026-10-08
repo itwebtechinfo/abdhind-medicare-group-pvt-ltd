@@ -144,7 +144,7 @@ export type CancelledBy = "clinic" | "patient";
 
 /** What happened to the patient's WhatsApp message after a staff cancel. */
 export interface CancelNotification {
-  status: "sent" | "window_closed" | "no_template" | "opted_out" | "blocked" | "failed" | null;
+  status: "sent" | "window_closed" | "template_not_approved" | "opted_out" | "blocked" | "failed" | null;
   channel: "text" | "template" | null;
 }
 
@@ -157,7 +157,7 @@ export function cancelNotificationNote(n: CancelNotification | undefined): strin
       return null;
     case "window_closed":
       return "Patient not notified (outside 24h window)";
-    case "no_template":
+    case "template_not_approved":
       return "Patient not notified — WhatsApp template not approved yet";
     case "opted_out":
       return "Patient not notified — they opted out of WhatsApp messages";
@@ -199,7 +199,7 @@ export interface BulkCancelPreview {
   previews: Record<string, string | null>;
 }
 
-export type BulkCancelNotificationStatus = "pending" | "sent" | "failed" | "opted_out" | "blocked" | "no_template";
+export type BulkCancelNotificationStatus = "pending" | "sent" | "failed" | "opted_out" | "blocked" | "template_not_approved";
 
 export interface BulkCancelJob {
   _id: string;

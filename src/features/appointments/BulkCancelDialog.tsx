@@ -37,7 +37,7 @@ const STATUS_LABELS: Record<BulkCancelNotificationStatus, string> = {
   failed: "Failed",
   opted_out: "Opted out (STOP)",
   blocked: "Blocked number",
-  no_template: "Not sent — template not approved",
+  template_not_approved: "Not sent — template not approved",
 };
 
 function newIdempotencyKey(): string {
