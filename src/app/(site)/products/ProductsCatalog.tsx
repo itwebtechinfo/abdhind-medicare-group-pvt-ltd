@@ -102,10 +102,10 @@ export function ProductsCatalog() {
                 </p>
               </div>
 
-              <div className="grid grid-cols-3 gap-2 text-center lg:grid-cols-1">
+              {/* Real counts only — no made-up figures (there is no rating data). */}
+              <div className="grid grid-cols-2 gap-2 text-center lg:grid-cols-1">
                 <StoreMetric label="Products" value={products.length} />
                 <StoreMetric label="Live Deals" value={availableCount} />
-                <StoreMetric label="Rating" value="5.0" />
               </div>
             </div>
 

@@ -22,4 +22,6 @@ export const POLL_INTERVALS = {
   /** Topbar notification bell (also refetches when the tab regains focus).
    * Paused while the WhatsApp inbox is open - its sync carries the count. */
   notifications: 60_000,
+  /** Dashboard "Right now" strip — the dashboard's ONLY periodic request. */
+  dashboardNow: 60_000,
 } as const;
