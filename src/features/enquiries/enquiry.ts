@@ -10,9 +10,9 @@ export const ENQUIRY_STATUSES: EnquiryStatus[] = ["NEW", "CONTACTED", "CONVERTED
 
 /** Must match PREFERRED_TIMES in routes/enquiries.py. */
 export const PREFERRED_TIMES = [
-  "Morning (9 AM - 12 PM)",
-  "Afternoon (12 PM - 4 PM)",
-  "Evening (4 PM - 8 PM)",
+  "Morning (11:30 AM - 1 PM)",
+  "Afternoon (1 PM - 5 PM)",
+  "Evening (5 PM - 8:30 PM)",
 ] as const;
 
 export interface EnquiryActor {

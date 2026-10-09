@@ -388,7 +388,7 @@ test("special: deep links open the right drawer (?appointment=, ?enquiry=)", asy
   }
   const appt = appts.body.data.appointments[0];
   await request.post(`http://localhost:8010/api/v1/public/enquiries`, {
-    data: { full_name: "QA Enquiry", phone: "9000090021", preferred_time: "Morning (9 AM - 12 PM)" },
+    data: { full_name: "QA Enquiry", phone: "9000090021", preferred_time: "Morning (11:30 AM - 1 PM)" },
     headers: { "x-forwarded-for": "10.200.0.1" },
   });
   const enq = await api(request, token, "GET", "/enquiries?search=QA%20Enquiry&limit=5");

@@ -32,11 +32,11 @@ const HOUR = 3_600_000;
 function snoozePresets(now: number): { label: string; until: number }[] {
   const today = istDayStart(now);
   const tonight = today + 18 * HOUR;
-  const tomorrow10 = today + 24 * HOUR + 10 * HOUR;
+  const tomorrowOpening = today + 24 * HOUR + 11.5 * HOUR; // clinic opens 11:30 AM
   return [
     { label: "1 hour", until: now + HOUR },
     ...(tonight > now + 10 * 60_000 ? [{ label: "Tonight, 6 PM", until: tonight }] : []),
-    { label: "Tomorrow, 10 AM", until: tomorrow10 },
+    { label: "Tomorrow, 11:30 AM", until: tomorrowOpening },
   ];
 }
 

@@ -188,7 +188,7 @@ export const editDoctorSchema = createDoctorSchema.partial().extend({
 
 export type EditDoctorFormValues = z.infer<typeof editDoctorSchema>;
 
-const DEFAULT_DAY = { is_working: false, start_time: "10:00", end_time: "18:00" };
+const DEFAULT_DAY = { is_working: false, start_time: "11:30", end_time: "20:30" };
 
 export const DEFAULT_WORKING_HOURS: CreateDoctorFormValues["working_hours"] = {
   monday: { ...DEFAULT_DAY, is_working: true },

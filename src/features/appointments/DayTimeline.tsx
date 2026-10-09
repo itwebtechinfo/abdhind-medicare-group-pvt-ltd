@@ -12,15 +12,26 @@ import {
 } from "./appointment";
 import { APPT_UI, STATUS_META } from "./StatusBadge";
 
-/** Clinic day shown on the rail, 24h clock. Appointments outside it are pinned to the nearest edge. */
-export const TIMELINE_START_HOUR = 10;
-export const TIMELINE_END_HOUR = 20;
+/** Clinic day shown on the rail (11:30 AM - 8:30 PM), minutes since midnight.
+ * Appointments outside it are pinned to the nearest edge. */
+export const TIMELINE_START_MINUTES = 11 * 60 + 30;
+export const TIMELINE_END_MINUTES = 20 * 60 + 30;
 /** How much of the rail one block covers — wide enough for a name + time. */
 const BLOCK_MINUTES = 55;
 const LANE_HEIGHT_PX = 52;
 
-const RAIL_START = TIMELINE_START_HOUR * 60;
-const RAIL_LENGTH = (TIMELINE_END_HOUR - TIMELINE_START_HOUR) * 60;
+const RAIL_START = TIMELINE_START_MINUTES;
+const RAIL_LENGTH = TIMELINE_END_MINUTES - TIMELINE_START_MINUTES;
+
+/** Axis ticks: opening time, every full hour in between, closing time. */
+const TICKS: number[] = [
+  TIMELINE_START_MINUTES,
+  ...Array.from(
+    { length: Math.floor(TIMELINE_END_MINUTES / 60) - Math.ceil(TIMELINE_START_MINUTES / 60) + 1 },
+    (_, i) => (Math.ceil(TIMELINE_START_MINUTES / 60) + i) * 60
+  ),
+  TIMELINE_END_MINUTES,
+].filter((m, i, all) => all.indexOf(m) === i);
 
 const LEGEND: DisplayStatus[] = ["needs_approval", "confirmed", "in_clinic", "completed", "no_show"];
 
@@ -28,11 +39,23 @@ function railPercent(minutes: number) {
   return ((minutes - RAIL_START) / RAIL_LENGTH) * 100;
 }
 
-function hourLabel(hour: number) {
-  // "10 AM", "11", "12 PM", "1", ... — period only at the start and at noon, like the mockup.
-  const { period } = formatClock(hour * 60);
-  const h12 = hour % 12 === 0 ? 12 : hour % 12;
-  return hour === TIMELINE_START_HOUR || hour === 12 ? `${h12} ${period}` : String(h12);
+/** Hour labels this close to an edge would overlap the "11:30 AM" / "8:30 PM" labels. */
+const LABEL_EDGE_GAP_MINUTES = 45;
+const LABELED_TICKS = TICKS.filter(
+  (m) =>
+    m === TIMELINE_START_MINUTES ||
+    m === TIMELINE_END_MINUTES ||
+    (m - TIMELINE_START_MINUTES >= LABEL_EDGE_GAP_MINUTES && TIMELINE_END_MINUTES - m >= LABEL_EDGE_GAP_MINUTES)
+);
+/** First labelled hour from noon on carries "PM" (12 PM itself is too close to opening to label). */
+const FIRST_PM_LABEL = LABELED_TICKS.find((m) => m >= 12 * 60 && m !== TIMELINE_END_MINUTES);
+
+function tickLabel(minutes: number) {
+  // "11:30 AM", "1 PM", "2", ... "7", "8:30 PM" — period only at the edges and the first PM hour.
+  const { time, period } = formatClock(minutes);
+  const short = minutes % 60 === 0 ? time.split(":")[0] : time;
+  const isEdge = minutes === TIMELINE_START_MINUTES || minutes === TIMELINE_END_MINUTES;
+  return isEdge || minutes === FIRST_PM_LABEL ? `${short} ${period}` : short;
 }
 
 interface DayTimelineProps {
@@ -73,10 +96,6 @@ export function DayTimeline({ appointments, nowMinutes, isLoading, onSelect }: D
     };
   }, [appointments]);
 
-  const hours = Array.from(
-    { length: TIMELINE_END_HOUR - TIMELINE_START_HOUR + 1 },
-    (_, i) => TIMELINE_START_HOUR + i
-  );
   const nowInRange = nowMinutes !== null && nowMinutes >= RAIL_START && nowMinutes <= RAIL_START + RAIL_LENGTH;
   const nowClock = nowMinutes !== null ? formatClock(nowMinutes) : null;
 
@@ -105,12 +124,12 @@ export function DayTimeline({ appointments, nowMinutes, isLoading, onSelect }: D
         <div className="relative min-w-[720px]">
           {/* Blocks */}
           <div className="relative" style={{ height: laneCount * LANE_HEIGHT_PX + 8 }}>
-            {hours.map((hour) => (
+            {TICKS.map((minutes) => (
               <span
-                key={hour}
+                key={minutes}
                 aria-hidden
                 className="absolute inset-y-0 w-px bg-[#E3E9E5] dark:bg-border"
-                style={{ left: `${railPercent(hour * 60)}%` }}
+                style={{ left: `${railPercent(minutes)}%` }}
               />
             ))}
 
@@ -163,16 +182,18 @@ export function DayTimeline({ appointments, nowMinutes, isLoading, onSelect }: D
 
           {/* Hour axis */}
           <div className="relative mt-2 h-4 text-xs text-muted-foreground">
-            {hours.map((hour) => (
+            {LABELED_TICKS.map((minutes) => (
               <span
-                key={hour}
+                key={minutes}
                 className={cn(
                   "absolute whitespace-nowrap",
-                  hour === TIMELINE_END_HOUR ? "-translate-x-full" : hour > TIMELINE_START_HOUR && "-translate-x-1/2"
+                  minutes === TIMELINE_END_MINUTES
+                    ? "-translate-x-full"
+                    : minutes > TIMELINE_START_MINUTES && "-translate-x-1/2"
                 )}
-                style={{ left: `${railPercent(hour * 60)}%` }}
+                style={{ left: `${railPercent(minutes)}%` }}
               >
-                {hourLabel(hour)}
+                {tickLabel(minutes)}
               </span>
             ))}
           </div>
