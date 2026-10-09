@@ -65,6 +65,7 @@ export function SourceIcon({ source, className }: { source: string; className?: 
   const cls = cn("h-4 w-4 shrink-0", className);
   switch (source) {
     case "whatsapp":
+    case "whatsapp_inbox":
       return <MessageCircle className={cn(cls, "text-[#25D366]")} />;
     case "follow_up":
       return <Repeat className={cls} />;

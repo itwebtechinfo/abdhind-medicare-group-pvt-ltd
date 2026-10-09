@@ -12,6 +12,7 @@ import { toast } from "@/src/lib/toast";
 import { cn } from "@/src/lib/utils";
 import {
   describeNotification,
+  OPEN_NOTIFICATIONS_EVENT,
   formatTimeAgo,
   notificationService,
   type AppNotification,
@@ -53,6 +54,13 @@ export function NotificationBell() {
   const [open, setOpen] = useState(false);
   const [closing, setClosing] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
+
+  // "Open to-do" on the dashboard opens this panel.
+  useEffect(() => {
+    const openPanel = () => setOpen(true);
+    window.addEventListener(OPEN_NOTIFICATIONS_EVENT, openPanel);
+    return () => window.removeEventListener(OPEN_NOTIFICATIONS_EVENT, openPanel);
+  }, []);
 
   // Real items from GET /notifications (enquiries NEW + appointments PENDING,
   // RBAC-filtered server-side). Polls every minute while the tab is visible

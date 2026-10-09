@@ -135,7 +135,11 @@ export function AppointmentsBoard() {
   const now = nowMs === null ? null : istNow(nowMs);
   const today = now?.date ?? null;
 
-  const [tab, setTab] = useState<AppointmentTab>("today");
+  // ?tab=needs_approval etc. — deep links from the dashboard's "Right now" strip.
+  const initialTab = useSearchParams().get("tab");
+  const [tab, setTab] = useState<AppointmentTab>(
+    (["today", "needs_approval", "upcoming", "past", "cancelled"] as const).find((t) => t === initialTab) ?? "today"
+  );
   const [search, setSearch] = useState("");
   const [filters, setFilters] = useState<AppointmentFilterValues>({});
   // Snapshot of the opened appointment — it can drop out of the current tab

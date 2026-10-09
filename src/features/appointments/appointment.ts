@@ -434,6 +434,8 @@ const SOURCE_LABELS: Record<string, string> = {
   phone: "Reception",
   web: "Website",
   follow_up: "Next Appointment",
+  // Staff quick-book from the WhatsApp inbox is a WhatsApp booking (the dashboard counts it there too).
+  whatsapp_inbox: "WhatsApp",
 };
 
 /** "follow_up" -> "Next Appointment"; unknown values are humanized, never shown raw. */

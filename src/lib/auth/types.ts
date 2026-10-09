@@ -16,7 +16,8 @@ export type PermissionAction =
   | "manage"
   | "reply"
   | "broadcast"
-  | "bulk_cancel";
+  | "bulk_cancel"
+  | "analytics";
 
 /**
  * Matches the backend's documented permission module list. "users" is

@@ -105,6 +105,12 @@ export const API_ENDPOINTS = {
   },
   dashboard: {
     today: "/api/v1/dashboard/today",
+    /** Every dashboard card/chart in one cached response. */
+    summary: "/api/v1/dashboard/summary",
+    /** "Right now" strip counts — polled every 60s while visible. */
+    now: "/api/v1/dashboard/now",
+    /** Day-by-day visits for one month (month-bar drill-down). */
+    daily: "/api/v1/dashboard/daily",
   },
   medicines: {
     /** GET: list. POST: create. */

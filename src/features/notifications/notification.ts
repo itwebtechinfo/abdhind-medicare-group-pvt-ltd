@@ -60,6 +60,9 @@ export type AppNotification =
   | InboxWaitingNotification;
 
 /** Deep link that opens one WhatsApp conversation in the inbox. */
+/** Window event that opens the bell's panel — the dashboard's "Open to-do". */
+export const OPEN_NOTIFICATIONS_EVENT = "abdhind:open-notifications";
+
 export function inboxChatHref(conversationId: string): string {
   return `/whatsapp?c=${encodeURIComponent(conversationId)}`;
 }
