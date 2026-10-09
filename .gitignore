@@ -50,3 +50,4 @@ next-env.d.ts
 # isolated E2E dev server build (NEXT_DIST_DIR)
 /.next-e2e/
 /playwright-report-inbox/
+.env*.disabled
