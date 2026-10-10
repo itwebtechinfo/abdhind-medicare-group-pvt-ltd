@@ -1,11 +1,12 @@
 "use client";
 
 import { useEffect } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { usePermission } from "@/src/hooks/usePermission";
 import { toast } from "@/src/lib/toast";
 import { whatsappService } from "./whatsapp";
 import { POLL_INTERVALS } from "@/src/lib/polling";
+import { TEMPLATES_PAGE_KEY } from "@/src/features/templates/templates";
 
 const POLL_MS = POLL_INTERVALS.activityWatcher;
 const STORAGE_KEY = "whatsapp_activity_last_seen";
@@ -32,6 +33,7 @@ function setLastSeen(ts: number) {
  */
 export function WhatsAppActivityWatcher() {
   const { canAction } = usePermission();
+  const queryClient = useQueryClient();
   const enabled = canAction("whatsapp_inbox", "broadcast");
 
   const { data } = useQuery({
@@ -51,6 +53,10 @@ export function WhatsAppActivityWatcher() {
         "Ready to use in your next broadcast."
       );
     }
+    // The Templates page has no poll of its own - it refreshes from here.
+    if (templates_approved > 0 || templates_rejected > 0) {
+      queryClient.invalidateQueries({ queryKey: TEMPLATES_PAGE_KEY });
+    }
     if (templates_rejected > 0) {
       toast.error(
         `${templates_rejected} template${templates_rejected === 1 ? "" : "s"} rejected`,
@@ -63,7 +69,7 @@ export function WhatsAppActivityWatcher() {
     if (templates_approved > 0 || templates_rejected > 0 || broadcasts_completed > 0) {
       setLastSeen(Date.now());
     }
-  }, [data]);
+  }, [data, queryClient]);
 
   return null;
 }
