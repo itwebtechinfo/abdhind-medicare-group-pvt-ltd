@@ -178,6 +178,12 @@ export const API_ENDPOINTS = {
     seedSystemTemplates: "/api/v1/whatsapp/templates/seed-system-templates",
     /** GET: which template each message type sends today. PUT (admin/system_admin): switch one, e.g. to its *_v2. */
     templateNameMap: "/api/v1/whatsapp/templates/name-map",
+    /** GET: Templates page list + cards in one cached response (admin/system_admin). */
+    templatesOverview: "/api/v1/whatsapp/templates/overview",
+    /** GET: every version x language of one row, for the drawer. */
+    templateDetail: (key: string) => `/api/v1/whatsapp/templates/${encodeURIComponent(key)}/detail`,
+    /** PUT {name, hidden}: move a custom template into / out of "Test & old". */
+    templatesHidden: "/api/v1/whatsapp/templates/hidden",
     /** POST: create a bulk (or scheduled) template broadcast job, admin/system_admin only.
      *  GET (same URL): list broadcast jobs, newest first. */
     broadcast: "/api/v1/whatsapp/broadcast",

@@ -85,6 +85,11 @@ const server = http.createServer(async (req, res) => {
     return json(res, 200, { id: `media.MOCK${n}` });
   }
   if (req.method === "GET" && url.pathname.endsWith("/message_templates")) return json(res, 200, { data: [] });
+  // Template submit: accepted for review (never reaches Meta).
+  if (req.method === "POST" && url.pathname.endsWith("/message_templates")) {
+    n += 1;
+    return json(res, 200, { id: `mock-template-${n}`, status: "PENDING", category: body?.category ?? "UTILITY" });
+  }
   if (req.method === "GET") {
     const id = url.pathname.split("/").pop();
     const item = media.get(id);
