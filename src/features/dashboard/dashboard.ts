@@ -90,6 +90,8 @@ export interface DashboardNow {
   approvals_pending?: number;
   enquiries_new?: number;
   in_clinic?: number;
+  /** Treatments whose next sitting isn't booked yet. */
+  next_sitting_pending?: number;
   updated_at: number;
 }
 

@@ -26,8 +26,10 @@ import {
 import { toast } from "@/src/lib/toast";
 import { cn } from "@/src/lib/utils";
 import {
+  canBookNext,
   formatClock,
   friendlyDate,
+  sittingLabel,
   maskPhone,
   sourceLabel,
   splitAppointmentDateTime,
@@ -113,6 +115,42 @@ const stop = (fn: () => void) => (e: React.MouseEvent) => {
   fn();
 };
 
+/** Staff-only treatment info: "Sitting 3 of 5", whether the next sitting is
+ * still to be booked, and a warning when a booking couldn't join its treatment. */
+export function TreatmentChips({ a }: { a: ApiAppointment }) {
+  const label = sittingLabel(a);
+  const chain = a.chain;
+  const isLast = chain && chain.last_sitting_id === a.id;
+  const chips: { text: string; tone: "neutral" | "amber" | "green" }[] = [];
+  if (label) chips.push({ text: label, tone: "neutral" });
+  if (chain && a.status === "COMPLETED") {
+    if (a.done_type === "final") chips.push({ text: "Treatment complete", tone: "green" });
+    else if (isLast && chain.state === "needs_next") chips.push({ text: "Next sitting not booked", tone: "amber" });
+    else if (isLast && chain.state === "stale") chips.push({ text: "No visit in 90 days", tone: "amber" });
+  }
+  if (a.chain_conflict) {
+    chips.push({ text: `Next sitting already booked (${a.chain_conflict.reference_code ?? "see treatment"})`, tone: "amber" });
+  }
+  if (!chips.length) return null;
+  return (
+    <span className="mt-1 flex flex-wrap gap-1">
+      {chips.map((c) => (
+        <span
+          key={c.text}
+          className={cn(
+            "rounded-full px-2 py-0.5 text-[11px] font-medium",
+            c.tone === "neutral" && "bg-muted text-foreground",
+            c.tone === "amber" && "bg-amber-50 text-amber-800 dark:bg-amber-500/15 dark:text-amber-300",
+            c.tone === "green" && "bg-green-50 text-green-800 dark:bg-green-500/15 dark:text-green-300"
+          )}
+        >
+          {c.text}
+        </span>
+      ))}
+    </span>
+  );
+}
+
 export function AppointmentRow({
   appointment: a,
   status,
@@ -177,8 +215,8 @@ export function AppointmentRow({
       icon: CheckCircle2,
       onSelect: () => actions.onComplete(a),
     },
-    canManage && status === "completed" && !a.follow_up_appointment_id && {
-      label: "Book next appointment",
+    canManage && status === "completed" && canBookNext(a) && {
+      label: a.done_type === "sitting" ? "Book next sitting" : "Book next appointment",
       icon: Repeat,
       onSelect: () => actions.onFollowUp(a),
     },
@@ -260,6 +298,7 @@ export function AppointmentRow({
             {maskPhone(a.patient?.phone)}
             {a.reference_code && <> · {a.reference_code}</>}
           </p>
+          <TreatmentChips a={a} />
         </div>
       </div>
 

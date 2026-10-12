@@ -73,6 +73,49 @@ export interface RawApiAppointment {
   /** Reception check-in, naive IST "YYYY-MM-DDTHH:MM" (same convention as
    * appointment_datetime). Set => "In clinic" until completed. */
   arrived_at?: string | null;
+  /** Multi-sitting treatment fields (staff-only; see TreatmentChain). */
+  done_type?: DoneType | null;
+  treatment_completed_at?: number | null;
+  sitting_no?: number | null;
+  chain_root_id?: string | null;
+  auto_linked?: boolean;
+  chain_conflict?: ChainConflict | null;
+  chain?: TreatmentChain | null;
+  can_book_next?: boolean;
+  can_join_chain?: boolean;
+}
+
+/** "sitting" = more sittings to come; "final" = treatment / single visit complete. */
+export type DoneType = "sitting" | "final";
+
+/** A booking that couldn't join its treatment because the next sitting is already booked. */
+export interface ChainConflict {
+  appointment_id: string;
+  appointment_datetime: string;
+  reference_code: string | null;
+  sitting_no: number | null;
+}
+
+/** A multi-sitting treatment = a chain of appointments (backend common/treatment_chain.py). */
+export interface TreatmentChain {
+  root_id: string;
+  /** complete · next_booked · needs_next (next sitting not booked) · stale (no visit in 90 days) */
+  state: "complete" | "next_booked" | "needs_next" | "stale" | "ongoing";
+  planned_sittings: number | null;
+  sittings_done: number;
+  last_sitting_id: string | null;
+  last_sitting_no: number | null;
+  completed_at: number | null;
+  next: { id: string; appointment_datetime: string; status: AppointmentStatus; sitting_no: number | null; reference_code: string | null } | null;
+  timeline: {
+    id: string;
+    sitting_no: number | null;
+    appointment_datetime: string;
+    status: AppointmentStatus;
+    done_type: DoneType | null;
+    no_show: boolean;
+    reference_code: string | null;
+  }[];
 }
 
 export interface ApiAppointment {
@@ -99,12 +142,25 @@ export interface ApiAppointment {
   reference_code: string | null;
   cancellation_reason: string | null;
   arrived_at: string | null;
+  done_type: DoneType | null;
+  treatment_completed_at: number | null;
+  sitting_no: number | null;
+  chain_root_id: string | null;
+  auto_linked: boolean;
+  chain_conflict: ChainConflict | null;
+  /** undefined = this response didn't include it (keep what's on screen). */
+  chain?: TreatmentChain | null;
+  can_book_next?: boolean;
+  can_join_chain?: boolean;
 }
 
 /** Appointments-page tabs — filtered server-side by GET /appointments?tab=. */
 export type AppointmentTab = "today" | "needs_approval" | "upcoming" | "past" | "cancelled";
 
-export type AppointmentTabCounts = Record<AppointmentTab, number>;
+export type AppointmentTabCounts = Record<AppointmentTab, number> & {
+  /** Treatments whose next sitting isn't booked (staff only). */
+  needs_next_sitting?: number;
+};
 
 export interface AppointmentListFilters {
   status?: AppointmentStatus;
@@ -121,6 +177,8 @@ export interface AppointmentListFilters {
   offset?: number;
   /** Adds per-tab `counts` (same base filters, ignoring tab/search). */
   include_counts?: boolean;
+  /** Staff: only treatments whose next sitting isn't booked (overrides `tab`). */
+  needs_next_sitting?: boolean;
   /** Patient-role only — staff ignore this and always see everything. */
   scope?: "mine" | "booked_by_me" | "all";
 }
@@ -170,6 +228,32 @@ export function cancelNotificationNote(n: CancelNotification | undefined): strin
 
 export interface FollowUpPayload {
   slot_id: string;
+  /** Optional estimate for the whole treatment ("Sitting 3 of 5"), staff-only. */
+  planned_sittings?: number | null;
+}
+
+export interface CompletePayload {
+  done_type: DoneType;
+  /** Only when a later sitting is booked and the treatment is being completed. */
+  next_sitting?: "cancel" | "keep";
+}
+
+export type TreatmentActionPayload =
+  | { action: "complete"; next_sitting?: "cancel" | "keep" }
+  | { action: "reopen" | "unlink" | "join" }
+  | { action: "set_planned"; planned_sittings: number };
+
+/** "Sitting 3 of 5" / "Sitting 6 (planned 5)" / "Sitting 3" — null outside a treatment. */
+export function sittingLabel(a: Pick<ApiAppointment, "sitting_no" | "chain" | "chain_root_id">): string | null {
+  if (!a.sitting_no || !a.chain_root_id) return null;
+  const planned = a.chain?.planned_sittings;
+  if (!planned) return `Sitting ${a.sitting_no}`;
+  return a.sitting_no > planned ? `Sitting ${a.sitting_no} (planned ${planned})` : `Sitting ${a.sitting_no} of ${planned}`;
+}
+
+/** The one rule for "Book next" (computed by the backend; safe fallback for old responses). */
+export function canBookNext(a: ApiAppointment): boolean {
+  return a.can_book_next ?? (a.status === "COMPLETED" && !a.follow_up_appointment_id);
 }
 
 /** Tabs that offer selection mode / bulk cancel (rows there are still cancellable). */
@@ -232,6 +316,8 @@ export interface RawAuditLogEntry {
   created_at: string;
   /** Non-status milestone, e.g. "ARRIVED" — from/to_status are then both the current status. */
   event?: string | null;
+  /** On a "Mark done" entry: which button was used. */
+  done_type?: DoneType | null;
   /** WhatsApp delivery state of the notification sent for this event, if any. */
   notification_status?: "sent" | "delivered" | "read" | "failed" | null;
 }
@@ -304,6 +390,15 @@ export function mapAppointment(raw: RawApiAppointment): ApiAppointment {
     reference_code: raw.reference_code ?? null,
     cancellation_reason: raw.cancellation_reason ?? null,
     arrived_at: raw.arrived_at ?? null,
+    done_type: raw.done_type ?? null,
+    treatment_completed_at: raw.treatment_completed_at ?? null,
+    sitting_no: raw.sitting_no ?? null,
+    chain_root_id: raw.chain_root_id ?? null,
+    auto_linked: Boolean(raw.auto_linked),
+    chain_conflict: raw.chain_conflict ?? null,
+    ...(raw.chain !== undefined ? { chain: raw.chain } : {}),
+    ...(raw.can_book_next !== undefined ? { can_book_next: raw.can_book_next } : {}),
+    ...(raw.can_join_chain !== undefined ? { can_join_chain: raw.can_join_chain } : {}),
   };
 }
 
@@ -339,10 +434,19 @@ export const appointmentService = {
     return { ...res, data: { appointment: mapAppointment(res.data.appointment) } };
   },
 
-  complete: async (id: string) => {
+  /** Mark done — "Sitting done" (more sittings) or "Treatment complete". A 409 with
+   * data.code "next_sitting_booked" means: ask cancel/keep, then resend with next_sitting. */
+  complete: async (id: string, payload: CompletePayload = { done_type: "final" }) => {
     const res = await http.post<{ appointment: RawApiAppointment }>(
-      API_ENDPOINTS.appointments.complete(id)
+      API_ENDPOINTS.appointments.complete(id),
+      payload
     );
+    return { ...res, data: { appointment: mapAppointment(res.data.appointment) } };
+  },
+
+  /** Treatment fix-ups from the drawer (complete / reopen / unlink / join / set_planned). */
+  treatment: async (id: string, payload: TreatmentActionPayload) => {
+    const res = await http.post<{ appointment: RawApiAppointment }>(API_ENDPOINTS.appointments.treatment(id), payload);
     return { ...res, data: { appointment: mapAppointment(res.data.appointment) } };
   },
 

@@ -18,6 +18,7 @@ import { LabOrdersSection } from "@/src/features/lab/LabOrdersSection";
 import { PatientHistoryDialog } from "@/src/features/patients/PatientHistoryDialog";
 import {
   appointmentService,
+  canBookNext,
   formatClock,
   formatCreatedAt,
   friendlyDate,
@@ -28,11 +29,21 @@ import {
   type ApiAppointment,
   type AppointmentReminders,
   type AppointmentStatus,
+  type TreatmentActionPayload,
 } from "./appointment";
+import { TreatmentSection } from "./TreatmentSection";
 import { SourceIcon } from "./AppointmentRow";
 import { APPT_UI, STATUS_META, StatusBadge } from "./StatusBadge";
 
 const HISTORY_LIMIT = 5;
+
+/** Treatment chain milestones (no status change). */
+const AUDIT_EVENT_LABELS: Record<string, string> = {
+  CHAIN_LINKED: "Added to the treatment as the next sitting",
+  CHAIN_UNLINKED: "Made a normal appointment (not part of the treatment)",
+  TREATMENT_COMPLETED: "Treatment marked complete",
+  TREATMENT_REOPENED: "Treatment reopened",
+};
 
 const AUDIT_STATUS_LABELS: Record<AppointmentStatus, string> = {
   PENDING: "Needs approval",
@@ -57,6 +68,10 @@ export interface AppointmentDrawerActions {
   onReschedule: (a: ApiAppointment) => void;
   onCancel: (a: ApiAppointment) => void;
   onFollowUp: (a: ApiAppointment) => void;
+  /** Treatment fix-ups (reopen / unlink / join / set_planned). */
+  onTreatmentAction: (a: ApiAppointment, payload: TreatmentActionPayload) => void;
+  /** "Mark treatment complete" from the chain's last sitting. */
+  onCompleteTreatment: (a: ApiAppointment) => void;
 }
 
 interface AppointmentDrawerProps extends AppointmentDrawerActions {
@@ -120,7 +135,9 @@ function DrawerBody({
       .reverse()
       .map((x) => ({
         appointment: x,
-        kind: x.follow_up_of ? "Next Appointment" : x.id === firstId ? "First visit" : "Consultation",
+        kind: x.sitting_no && x.chain_root_id
+          ? `Sitting ${x.sitting_no}`
+          : x.follow_up_of ? "Next Appointment" : x.id === firstId ? "First visit" : "Consultation",
         status: getDisplayStatus(x),
       }));
   }, [patientAppointments, a.id, a.appointment_datetime]);
@@ -217,8 +234,8 @@ function DrawerBody({
         </Button>
       );
     }
-    if (canManage && !a.follow_up_appointment_id) {
-      footer.push(primaryBtn("Book next appointment", () => actions.onFollowUp(a)));
+    if (canManage && canBookNext(a)) {
+      footer.push(primaryBtn(a.done_type === "sitting" ? "Book next sitting" : "Book next appointment", () => actions.onFollowUp(a)));
     }
   }
   const footerButtons = footer.filter(Boolean);
@@ -253,6 +270,15 @@ function DrawerBody({
             </div>
           ))}
         </dl>
+
+        <TreatmentSection
+          a={a}
+          todayYmd={todayYmd}
+          canManage={canManage}
+          busy={busy}
+          onAction={actions.onTreatmentAction}
+          onCompleteTreatment={actions.onCompleteTreatment}
+        />
 
         <section>
           <div className="mb-3 flex items-center justify-between gap-3">
@@ -366,6 +392,8 @@ function DrawerBody({
                         <div key={i} className="rounded-lg border border-[#E3E9E5] px-3 py-2 text-xs dark:border-border">
                           {entry.event === "ARRIVED" ? (
                             <span className="font-medium">Marked arrived</span>
+                          ) : entry.event && AUDIT_EVENT_LABELS[entry.event] ? (
+                            <span className="font-medium">{AUDIT_EVENT_LABELS[entry.event]}</span>
                           ) : (
                             <>
                               <span className="font-medium">
@@ -373,6 +401,11 @@ function DrawerBody({
                               </span>{" "}
                               → <span className="font-medium">{AUDIT_STATUS_LABELS[entry.to_status] ?? entry.to_status}</span>
                               {entry.event === "BULK_CANCEL" && <span className="text-muted-foreground"> (bulk cancel)</span>}
+                              {entry.done_type && (
+                                <span className="text-muted-foreground">
+                                  {entry.done_type === "sitting" ? " (sitting done)" : " (treatment complete)"}
+                                </span>
+                              )}
                             </>
                           )}
                           <span className="ml-2 text-muted-foreground">
