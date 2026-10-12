@@ -13,6 +13,7 @@ import {
   Phone,
   RefreshCw,
   Repeat,
+  Stethoscope,
   XCircle,
 } from "lucide-react";
 import { Button } from "@/src/components/ui/button";
@@ -71,6 +72,8 @@ export function SourceIcon({ source, className }: { source: string; className?: 
       return <MessageCircle className={cn(cls, "text-[#25D366]")} />;
     case "follow_up":
       return <Repeat className={cls} />;
+    case "routine_checkup":
+      return <Stethoscope className={cls} />;
     case "web":
       return <Globe className={cls} />;
     case "phone":
