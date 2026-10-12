@@ -17,6 +17,7 @@ const ITEMS: { key: keyof Omit<DashboardNow, "updated_at">; label: (n: number) =
   { key: "approvals_pending", label: (n) => `appointment${n === 1 ? "" : "s"} need approval`, href: "/appointments?tab=needs_approval" },
   { key: "enquiries_new", label: (n) => `enquir${n === 1 ? "y" : "ies"} to call back`, href: "/enquiries" },
   { key: "in_clinic", label: (n) => `patient${n === 1 ? "" : "s"} in clinic`, href: "/appointments?tab=today" },
+  { key: "next_sitting_pending", label: (n) => (n === 1 ? "treatment needs its next sitting" : "treatments need their next sitting"), href: "/appointments?filter=next_sitting" },
 ];
 
 /** Live counts that need someone now. Polls every 60s while the tab is

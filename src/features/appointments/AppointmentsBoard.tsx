@@ -29,6 +29,7 @@ import {
   type ApiAppointment,
   type AppointmentTabCounts,
   type CreateAppointmentPayload,
+  type TreatmentActionPayload,
   type DisplayStatus,
 } from "./appointment";
 import { AppointmentDrawer } from "./AppointmentDrawer";
@@ -40,11 +41,20 @@ import { BulkCancelDialog } from "./BulkCancelDialog";
 import { ConfirmAppointmentDialog } from "./ConfirmAppointmentDialog";
 import { DayTimeline } from "./DayTimeline";
 import { DeclineDialog } from "./DeclineDialog";
+import { CompleteDialog } from "./CompleteDialog";
 import { FollowUpDialog } from "./FollowUpDialog";
 import { RescheduleDialog } from "./RescheduleDialog";
 import { APPT_UI, STATUS_META } from "./StatusBadge";
 
 const APPOINTMENTS_QUERY_KEY = ["appointments"] as const;
+
+const TREATMENT_ACTION_TOAST: Record<TreatmentActionPayload["action"], string> = {
+  complete: "Treatment marked complete",
+  reopen: "Treatment reopened",
+  unlink: "Made a normal appointment",
+  join: "Added to the treatment",
+  set_planned: "Total sittings updated",
+};
 
 interface Row {
   appointment: ApiAppointment;
@@ -86,6 +96,10 @@ function mergeJoined(updated: ApiAppointment, prev: ApiAppointment): ApiAppointm
     patient: updated.patient ?? prev.patient,
     doctor: updated.doctor ?? prev.doctor,
     booked_by: updated.booked_by ?? prev.booked_by,
+    // Some responses (approve, arrive) don't carry treatment info - keep what's shown until the refetch.
+    chain: updated.chain !== undefined ? updated.chain : prev.chain,
+    can_book_next: updated.can_book_next ?? prev.can_book_next,
+    can_join_chain: updated.can_join_chain ?? prev.can_join_chain,
   };
 }
 
@@ -136,7 +150,10 @@ export function AppointmentsBoard() {
   const today = now?.date ?? null;
 
   // ?tab=needs_approval etc. — deep links from the dashboard's "Right now" strip.
-  const initialTab = useSearchParams().get("tab");
+  const urlParams = useSearchParams();
+  const initialTab = urlParams.get("tab");
+  // ?filter=next_sitting — treatments whose next sitting isn't booked.
+  const [needsNext, setNeedsNext] = useState(urlParams.get("filter") === "next_sitting");
   const [tab, setTab] = useState<AppointmentTab>(
     (["today", "needs_approval", "upcoming", "past", "cancelled"] as const).find((t) => t === initialTab) ?? "today"
   );
@@ -171,6 +188,7 @@ export function AppointmentsBoard() {
   const [confirmFor, setConfirmFor] = useState<ApiAppointment | null>(null);
   const [rescheduleFor, setRescheduleFor] = useState<ApiAppointment | null>(null);
   const [followUpFor, setFollowUpFor] = useState<ApiAppointment | null>(null);
+  const [completeFor, setCompleteFor] = useState<{ appointment: ApiAppointment; mode: "visit" | "treatment" } | null>(null);
   const [declineFor, setDeclineFor] = useState<{ appointment: ApiAppointment; mode: "decline" | "cancel" } | null>(null);
   const [isCreating, setIsCreating] = useState(false);
   const [selectMode, setSelectMode] = useState(false);
@@ -196,6 +214,7 @@ export function AppointmentsBoard() {
     doctor_id: filters.doctorId,
     date: filters.date,
     search: debouncedSearch || undefined,
+    ...(needsNext ? { needs_next_sitting: true } : {}),
   };
   const listQuery = useInfiniteQuery({
     queryKey: [...APPOINTMENTS_QUERY_KEY, "board", listParams],
@@ -249,7 +268,7 @@ export function AppointmentsBoard() {
     [listAppointments]
   );
 
-  const bulkAvailable = canBulkCancel && BULK_CANCEL_TABS.includes(tab);
+  const bulkAvailable = canBulkCancel && BULK_CANCEL_TABS.includes(tab) && !needsNext;
   const inSelectMode = selectMode && bulkAvailable;
   const listKey = JSON.stringify(listParams);
   const activeSelection =
@@ -331,7 +350,11 @@ export function AppointmentsBoard() {
     onDecline: (a: ApiAppointment) => setDeclineFor({ appointment: a, mode: "decline" }),
     onCancel: (a: ApiAppointment) => setDeclineFor({ appointment: a, mode: "cancel" }),
     onArrive: (a: ApiAppointment) => runAction(a, () => appointmentService.arrive(a.id), "Patient marked arrived"),
-    onComplete: (a: ApiAppointment) => runAction(a, () => appointmentService.complete(a.id), "Appointment marked done"),
+    // Mark done -> "Sitting done – book next" / "Treatment complete" (CompleteDialog).
+    onComplete: (a: ApiAppointment) => setCompleteFor({ appointment: a, mode: "visit" }),
+    onCompleteTreatment: (a: ApiAppointment) => setCompleteFor({ appointment: a, mode: "treatment" }),
+    onTreatmentAction: (a: ApiAppointment, payload: TreatmentActionPayload) =>
+      runAction(a, () => appointmentService.treatment(a.id, payload), TREATMENT_ACTION_TOAST[payload.action]),
     onReschedule: (a: ApiAppointment) => setRescheduleFor(a),
     onFollowUp: (a: ApiAppointment) => setFollowUpFor(a),
   };
@@ -341,7 +364,15 @@ export function AppointmentsBoard() {
     setIsCreating(true);
     try {
       const res = await appointmentService.create(payload);
-      toast.success(res.msg);
+      const created = res.data.appointment;
+      // A booking for a patient mid-treatment joins it by itself - tell staff.
+      if (created.sitting_no && created.chain_root_id) {
+        toast.success(res.msg, `Added to the patient's treatment as Sitting ${created.sitting_no}.`);
+      } else if (created.chain_conflict) {
+        toast.warning(res.msg, `Note: this patient's next sitting is already booked (${created.chain_conflict.reference_code ?? ""}).`);
+      } else {
+        toast.success(res.msg);
+      }
       setBookOpen(false);
       await Promise.all([
         queryClient.invalidateQueries({ queryKey: APPOINTMENTS_QUERY_KEY }),
@@ -366,7 +397,9 @@ export function AppointmentsBoard() {
       })
     : null;
 
-  const emptyState = EMPTY_STATES[tab];
+  const emptyState = needsNext
+    ? { title: "Every treatment has its next sitting booked", hint: "Treatments whose last sitting is done and nothing is booked show up here." }
+    : EMPTY_STATES[tab];
 
   return (
     // Bleeds over ErpShell's <main> padding so the page gets the mockup's tinted background.
@@ -411,7 +444,7 @@ export function AppointmentsBoard() {
 
         {/* Tabs + search + filters */}
         <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
-          <AppointmentTabs value={tab} onChange={setTab} counts={counts} />
+          <AppointmentTabs value={tab} onChange={(t) => { setTab(t); setNeedsNext(false); }} counts={counts} />
           <div className="flex items-center gap-2">
             <div className="relative flex-1 lg:w-80 lg:flex-none">
               <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
@@ -425,6 +458,23 @@ export function AppointmentsBoard() {
               />
             </div>
             <AppointmentFilters value={filters} onChange={setFilters} doctors={doctors} />
+            {canManage && (needsNext || (counts.needs_next_sitting ?? 0) > 0) && (
+              <Button
+                variant="outline"
+                aria-pressed={needsNext}
+                className={cn(
+                  "h-9 gap-2 whitespace-nowrap shadow-none",
+                  needsNext
+                    ? "border-amber-400 bg-amber-50 text-amber-900 hover:bg-amber-100 dark:bg-amber-500/15 dark:text-amber-200"
+                    : "bg-card"
+                )}
+                onClick={() => { setNeedsNext((v) => !v); setSelectMode(false); }}
+                title="Treatments whose next sitting isn't booked yet"
+              >
+                Next sitting not booked
+                <span className="rounded-full bg-amber-500/20 px-1.5 text-xs tabular-nums">{counts.needs_next_sitting ?? 0}</span>
+              </Button>
+            )}
             {bulkAvailable && !inSelectMode && (
               <Button variant="outline" className="h-9 gap-2 bg-card shadow-none" onClick={() => setSelectMode(true)}>
                 <ListChecks className="h-4 w-4" />
@@ -687,14 +737,40 @@ export function AppointmentsBoard() {
         onOpenChange={(open) => !open && setFollowUpFor(null)}
         sourceAppointment={followUpFor}
         isSubmitting={followUpFor ? busyIds.has(followUpFor.id) : false}
-        onSubmit={async (slotId) => {
+        onSubmit={async (slotId, plannedSittings) => {
           if (!followUpFor) return;
           const ok = await runAction(
             followUpFor,
-            () => appointmentService.followUp(followUpFor.id, { slot_id: slotId }),
-            "Next appointment booked and confirmed"
+            () =>
+              appointmentService.followUp(followUpFor.id, {
+                slot_id: slotId,
+                ...(plannedSittings !== undefined ? { planned_sittings: plannedSittings } : {}),
+              }),
+            followUpFor.done_type === "sitting" ? "Next sitting booked and confirmed" : "Next appointment booked and confirmed"
           );
           if (ok) setFollowUpFor(null);
+        }}
+      />
+
+      <CompleteDialog
+        key={`complete-${completeFor?.appointment.id ?? "none"}-${completeFor?.mode ?? ""}`}
+        mode={completeFor?.mode ?? "visit"}
+        appointment={completeFor?.appointment ?? null}
+        onOpenChange={(open) => !open && setCompleteFor(null)}
+        onDone={(updated, doneType) => {
+          const mode = completeFor?.mode;
+          setCompleteFor(null);
+          setPicked((prev) => (prev && updated.id === prev.id ? mergeJoined(updated, prev) : prev));
+          void Promise.all([
+            queryClient.invalidateQueries({ queryKey: APPOINTMENTS_QUERY_KEY }),
+            queryClient.invalidateQueries({ queryKey: ["patients"] }),
+            queryClient.invalidateQueries({ queryKey: ["dashboard"] }),
+          ]);
+          // "Sitting done – book next": go straight to picking the next sitting.
+          if (mode === "visit" && doneType === "sitting") {
+            const prev = completeFor?.appointment;
+            setFollowUpFor(prev ? mergeJoined(updated, prev) : updated);
+          }
         }}
       />
     </div>

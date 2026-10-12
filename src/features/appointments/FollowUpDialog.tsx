@@ -16,14 +16,15 @@ import { Input } from "@/src/components/ui/input";
 import { usePermission } from "@/src/hooks/usePermission";
 import { doctorService } from "@/src/features/doctors/doctor";
 import { publicBookingService } from "@/src/features/public-booking/public-booking";
-import type { ApiAppointment } from "./appointment";
+import { sittingLabel, type ApiAppointment } from "./appointment";
 
 interface FollowUpDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   sourceAppointment: ApiAppointment | null;
   isSubmitting: boolean;
-  onSubmit: (slotId: string) => void;
+  /** plannedSittings: only for a treatment's next sitting (undefined = unchanged, 0 = clear). */
+  onSubmit: (slotId: string, plannedSittings?: number) => void;
 }
 
 const today = () => new Date().toISOString().slice(0, 10);
@@ -39,6 +40,13 @@ export function FollowUpDialog({
   const [slotId, setSlotId] = useState("");
   const { role } = usePermission();
   const isPatient = role === "patient";
+  // "Sitting done": this books the treatment's next sitting (staff-only info).
+  const isSitting = sourceAppointment?.done_type === "sitting";
+  const initialPlanned = sourceAppointment?.chain?.planned_sittings ?? null;
+  const [planned, setPlanned] = useState(initialPlanned ? String(initialPlanned) : "");
+  const nextNo = (sourceAppointment?.sitting_no ?? 0) + 1;
+  const plannedValue = planned.trim() === "" ? 0 : Math.max(0, Math.min(50, Math.round(Number(planned)) || 0));
+  const plannedChanged = isSitting && plannedValue !== (initialPlanned ?? 0);
 
   const doctorId = sourceAppointment?.doctor_id;
 
@@ -58,13 +66,35 @@ export function FollowUpDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-sm">
         <DialogHeader>
-          <DialogTitle>Book Next Appointment</DialogTitle>
+          <DialogTitle>{isSitting ? `Book next sitting (Sitting ${nextNo})` : "Book Next Appointment"}</DialogTitle>
           <DialogDescription>
             With {sourceAppointment?.doctor?.full_name ?? "the same doctor"} for{" "}
             {sourceAppointment?.patient?.full_name ?? "this patient"}. It&rsquo;s confirmed right away and the
             patient gets a WhatsApp confirmation.
+            {isSitting && " (Sitting numbers are only shown to staff.)"}
           </DialogDescription>
         </DialogHeader>
+
+        {isSitting && (
+          <div>
+            <label htmlFor="followup-planned" className="mb-1.5 block text-sm font-medium">
+              Total sittings (estimate, optional)
+            </label>
+            <Input
+              id="followup-planned"
+              type="number"
+              inputMode="numeric"
+              min={1}
+              max={50}
+              placeholder="e.g. 5"
+              value={planned}
+              onChange={(e) => setPlanned(e.target.value)}
+            />
+            <p className="mt-1 text-xs text-muted-foreground">
+              Shown as &ldquo;{sittingLabel({ sitting_no: nextNo, chain_root_id: "x", chain: plannedValue ? { planned_sittings: plannedValue } as never : null }) ?? `Sitting ${nextNo}`}&rdquo;. You can change it any time.
+            </p>
+          </div>
+        )}
 
         <div>
           <label htmlFor="followup-date" className="mb-1.5 block text-sm font-medium">
@@ -119,11 +149,11 @@ export function FollowUpDialog({
             onClick={() => onOpenChange(false)}
             disabled={isSubmitting}
           >
-            Cancel
+            {isSitting ? "Book later" : "Cancel"}
           </Button>
-          <Button disabled={!slotId || isSubmitting} onClick={() => onSubmit(slotId)}>
+          <Button disabled={!slotId || isSubmitting} onClick={() => onSubmit(slotId, plannedChanged ? plannedValue : undefined)}>
             {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-            Confirm Next Appointment
+            {isSitting ? "Confirm next sitting" : "Confirm Next Appointment"}
           </Button>
         </DialogFooter>
       </DialogContent>
