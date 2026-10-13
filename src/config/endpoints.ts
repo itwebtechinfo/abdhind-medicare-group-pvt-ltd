@@ -165,6 +165,19 @@ export const API_ENDPOINTS = {
     savedReplies: "/api/v1/inbox/saved-replies",
     savedReply: (id: string) => `/api/v1/inbox/saved-replies/${id}`,
   },
+  /** WhatsApp > Free Routine Check-up: requests from the check-up reminder's "Routine Check-up" button. */
+  checkups: {
+    /** GET ?status=open|scheduled|closed|all&q=&limit=&skip= -> { requests, total, counts }. */
+    list: "/api/v1/checkup-requests",
+    /** POST { doctor_id, slot_id, notify }: book the check-up (confirmed) and optionally message the patient. */
+    schedule: (id: string) => `/api/v1/checkup-requests/${id}/schedule`,
+    /** POST: send (again) the booked appointment's date/time to the patient. */
+    notify: (id: string) => `/api/v1/checkup-requests/${id}/notify`,
+    /** POST { reason? }: open -> closed. */
+    close: (id: string) => `/api/v1/checkup-requests/${id}/close`,
+    /** POST: closed (or scheduled with the appointment cancelled) -> open. */
+    reopen: (id: string) => `/api/v1/checkup-requests/${id}/reopen`,
+  },
   whatsapp: {
     /** GET: staff action trail for a conversation. */
     auditLog: (phone: string) => `/api/v1/whatsapp/conversations/${encodeURIComponent(phone)}/audit-log`,
