@@ -2,7 +2,8 @@ import { http } from "@/src/services/http";
 import { API_ENDPOINTS } from "@/src/config/endpoints";
 
 // Free routine check-up requests - built by routes/checkups.py. A patient taps
-// "Routine Check-up" on the 3-month check-up reminder; staff book the visit here.
+// "Routine Check-up" on the 3-month check-up reminder; the chat is listed under
+// "Free Routine Check-up" in the WhatsApp inbox and staff book it from the chat.
 
 export type CheckupStatus = "open" | "scheduled" | "closed";
 export type CheckupTab = CheckupStatus | "all";
@@ -82,7 +83,7 @@ export function notifyStatusNote(status: string | null): string | null {
 }
 
 export const checkupService = {
-  list: async (params: { status: CheckupTab; q?: string; limit?: number; skip?: number }) =>
+  list: async (params: { status: CheckupTab; q?: string; phone?: string; limit?: number; skip?: number }) =>
     http.get<CheckupListResponse>(API_ENDPOINTS.checkups.list, {
       params: { ...params, q: params.q?.trim() || undefined },
     }),

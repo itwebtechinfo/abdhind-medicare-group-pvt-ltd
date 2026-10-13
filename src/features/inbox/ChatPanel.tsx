@@ -16,6 +16,7 @@ import { toast } from "@/src/lib/toast";
 import { cn } from "@/src/lib/utils";
 import type { NormalizedApiError } from "@/src/types/api";
 import { avatarColor, initials } from "@/src/features/appointments/AppointmentRow";
+import { CheckupStrip } from "@/src/features/checkups/CheckupStrip";
 import { AuditLogDialog } from "@/src/features/whatsapp/AuditLogDialog";
 import { TagsDialog } from "@/src/features/whatsapp/TagsDialog";
 import { Composer, retryRef } from "./Composer";
@@ -106,6 +107,7 @@ function OpenChat({ onBack, onShowPanel, panelOpen }: { onBack: () => void; onSh
           <Ban className="h-4 w-4" />This number is blocked - the bot is silent and nothing can be sent.
         </div>
       )}
+      <CheckupStrip phone={h.id} status={h.checkup_status} requestedAt={h.checkup_requested_at} onChanged={syncNow} />
       <MessageList />
       <Composer header={h} context={open.context} ai={open.ai} canReply={canReply} />
     </div>

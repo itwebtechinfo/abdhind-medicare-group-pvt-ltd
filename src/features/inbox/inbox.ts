@@ -6,7 +6,7 @@ import type { RawVisitSummary } from "@/src/features/patients/patient";
 // ---------- Types ----------
 
 export type InboxScope = "mine" | "team" | "all";
-export type InboxGroup = "waiting" | "in_progress" | "bot" | "snoozed" | "done";
+export type InboxGroup = "waiting" | "checkup" | "in_progress" | "bot" | "snoozed" | "done";
 
 export interface Assignee {
   user_id: string;
@@ -33,6 +33,9 @@ export interface InboxRow {
   opted_out: boolean;
   blocked: boolean;
   unread: number;
+  /** The phone's latest free routine check-up request; "open" lists the chat under "Free Routine Check-up". */
+  checkup_status: "open" | "scheduled" | "closed" | null;
+  checkup_requested_at: number | null;
   group: InboxGroup;
 }
 
@@ -249,11 +252,12 @@ export const inboxService = {
 
 // ---------- Groups (mirrors common/inbox_state.py) ----------
 
-export const GROUP_ORDER: InboxGroup[] = ["waiting", "in_progress", "bot", "snoozed", "done"];
+export const GROUP_ORDER: InboxGroup[] = ["waiting", "checkup", "in_progress", "bot", "snoozed", "done"];
 export const COLLAPSED_GROUPS: InboxGroup[] = ["snoozed", "done"];
 
 export const GROUP_LABEL: Record<InboxGroup, string> = {
   waiting: "Waiting for reply",
+  checkup: "Free Routine Check-up",
   in_progress: "In progress",
   bot: "Bot is handling",
   snoozed: "Snoozed",
@@ -269,6 +273,8 @@ export function istDayStart(ms: number): number {
 
 /** Which list group a row belongs to at `now` - snoozes end on their own. */
 export function groupOf(row: InboxRow, now: number): InboxGroup {
+  // An open check-up request wins over every other group (same as the backend).
+  if (row.checkup_status === "open") return "checkup";
   if ((row.snooze_until ?? 0) > now) return "snoozed";
   if (row.status === "done") return (row.done_at ?? 0) >= istDayStart(now) ? "done" : "bot";
   if (row.mode === "human") return row.waiting_since ? "waiting" : "in_progress";
@@ -285,6 +291,7 @@ export function sortRows(group: InboxGroup, rows: InboxRow[]): InboxRow[] {
   const by = (pick: (r: InboxRow) => number, asc: boolean) =>
     [...rows].sort((a, b) => (asc ? pick(a) - pick(b) : pick(b) - pick(a)) || (a.id < b.id ? -1 : 1));
   if (group === "waiting") return by((r) => r.waiting_since ?? 0, true);
+  if (group === "checkup") return by((r) => r.checkup_requested_at ?? 0, true);
   if (group === "snoozed") return by((r) => r.snooze_until ?? 0, true);
   if (group === "done") return by((r) => r.done_at ?? 0, false);
   return by((r) => r.last_at ?? 0, false);

@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { Bot, CheckCheck, ChevronRight, Hourglass, Loader2, Search, Timer, User, UserRound, AlarmClock, MessageCircle } from "lucide-react";
+import { Bot, CheckCheck, ChevronRight, Hourglass, Loader2, Search, Stethoscope, Timer, User, UserRound, AlarmClock, MessageCircle } from "lucide-react";
 import { Input } from "@/src/components/ui/input";
 import { Skeleton } from "@/src/components/ui/skeleton";
 import { useDebouncedValue } from "@/src/hooks/useDebouncedValue";
@@ -34,6 +34,7 @@ const SCOPES: { value: InboxScope; label: string }[] = [
 
 const GROUP_ICON: Record<InboxGroup, React.ComponentType<{ className?: string }>> = {
   waiting: Hourglass,
+  checkup: Stethoscope,
   in_progress: MessageCircle,
   bot: Bot,
   snoozed: AlarmClock,
@@ -129,7 +130,7 @@ export function ConversationList() {
             const open = !collapsible || expanded.includes(g);
             const rows = grouped[g];
             const count = counts?.groups[g] ?? rows.length;
-            if (g === "in_progress" && !count && !rows.length) return null;
+            if ((g === "in_progress" || g === "checkup") && !count && !rows.length) return null;
             return (
               <section key={g} aria-label={GROUP_LABEL[g]} data-group={g}>
                 <GroupHeader
@@ -180,7 +181,9 @@ function GroupHeader({
   const tone =
     group === "waiting"
       ? "bg-amber-50 text-amber-800 dark:bg-amber-500/10 dark:text-amber-300"
-      : "bg-muted/40 text-muted-foreground";
+      : group === "checkup"
+        ? "bg-sky-50 text-sky-800 dark:bg-sky-500/10 dark:text-sky-300"
+        : "bg-muted/40 text-muted-foreground";
   const content = (
     <>
       <span className="flex items-center gap-2 font-semibold uppercase tracking-wide">
@@ -191,7 +194,7 @@ function GroupHeader({
         <ChevronRight className={cn("h-4 w-4 transition-transform", open && "rotate-90")} />
       ) : (
         <span className="text-xs font-normal normal-case">
-          {group === "waiting" ? "oldest first" : group === "bot" || group === "in_progress" ? "latest" : ""}
+          {group === "waiting" || group === "checkup" ? "oldest first" : group === "bot" || group === "in_progress" ? "latest" : ""}
         </span>
       )}
     </>
@@ -219,7 +222,9 @@ export function ConversationRow({
 }) {
   const name = displayName(row);
   const known = Boolean(row.name || row.profile_name);
-  const waiting = row.waiting_since && groupOf(row, now) === "waiting";
+  const group = groupOf(row, now);
+  const waiting = row.waiting_since && group === "waiting";
+  const checkup = group === "checkup";
   const tone = waiting ? waitingTone(row.waiting_since!, now) : "normal";
   return (
     <button
@@ -261,6 +266,10 @@ export function ConversationRow({
             >
               <Timer className="h-3 w-3" />
               {waitingLabel(row.waiting_since!, now)}
+            </span>
+          ) : checkup && row.checkup_requested_at ? (
+            <span className="shrink-0 text-xs text-muted-foreground" title="Check-up requested">
+              {listTime(row.checkup_requested_at, now)}
             </span>
           ) : (
             <span className="shrink-0 text-xs text-muted-foreground">{listTime(row.last_at, now)}</span>
