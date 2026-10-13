@@ -107,11 +107,6 @@ export const ERP_NAV_SECTIONS: ErpNavSection[] = [
             permissions: ["whatsapp_inbox:view", "whatsapp_inbox:manage"],
           },
           {
-            name: "Free Routine Check-up",
-            href: "/whatsapp/checkups",
-            permissions: ["whatsapp_inbox:view", "whatsapp_inbox:manage"],
-          },
-          {
             name: "Broadcast",
             href: "/whatsapp/broadcast",
             permissions: ["whatsapp_inbox:broadcast", "whatsapp_inbox:manage"],
