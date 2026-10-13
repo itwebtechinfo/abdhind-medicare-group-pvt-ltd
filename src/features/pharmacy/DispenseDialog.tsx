@@ -126,8 +126,8 @@ export function DispenseDialog({ open, onOpenChange, appointmentId }: DispenseDi
             <div className="max-h-[25vh] space-y-1.5 overflow-y-auto">
               {dispenses.map((d, i) => (
                 <div key={i} className="rounded-lg border border-border px-3 py-2 text-xs">
-                  {d.items.map((item) => (
-                    <div key={item.medicine_id} className="flex justify-between">
+                  {d.items.map((item, j) => (
+                    <div key={`${item.medicine_id}-${j}`} className="flex justify-between">
                       <span>
                         {item.medicine_name} × {item.quantity}
                       </span>
@@ -149,7 +149,17 @@ export function DispenseDialog({ open, onOpenChange, appointmentId }: DispenseDi
             disabled={validLines.length === 0 || dispenseMutation.isPending}
             onClick={() =>
               dispenseMutation.mutate(
-                validLines.map((l) => ({ medicine_id: l.medicine_id, quantity: l.quantity }))
+                // Merge repeated medicines into one line so a dispense never lists the same item twice.
+                Object.values(
+                  validLines.reduce<Record<string, { medicine_id: string; quantity: number }>>((acc, l) => {
+                    const existing = acc[l.medicine_id];
+                    acc[l.medicine_id] = {
+                      medicine_id: l.medicine_id,
+                      quantity: (existing?.quantity ?? 0) + l.quantity,
+                    };
+                    return acc;
+                  }, {})
+                )
               )
             }
           >
