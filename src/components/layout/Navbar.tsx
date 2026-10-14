@@ -30,7 +30,6 @@ import {
   Sparkles,
   Star,
   LogIn,
-  LogOut,
   LayoutDashboard,
 } from "lucide-react";
 import { AUTH_ROUTES } from "@/src/lib/auth/constants";
@@ -52,7 +51,7 @@ interface NavItem {
 
 export function Navbar() {
   const pathname = usePathname();
-  const { isAuthenticated, isLoading, logout } = useAuth();
+  const { isAuthenticated, isLoading } = useAuth();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [openDropdown, setOpenDropdown] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState("/");
@@ -535,34 +534,30 @@ export function Navbar() {
                 )}
               </div>
 
-              {!isLoading &&
-                (isAuthenticated ? (
-                  <>
-                    <Link
-                      href={AUTH_ROUTES.dashboard}
-                      className="hidden md:flex items-center gap-2 px-4 py-2 rounded-xl font-medium text-sm bg-teal-50 text-teal-700 hover:bg-teal-100 transition-all duration-200"
-                    >
+              {/* One account button on the public site (Logout lives in the dashboard).
+                  Its slot is reserved while auth resolves so the navbar doesn't jump. */}
+              <div
+                className={`hidden md:flex min-w-[132px] justify-end transition-opacity duration-300 ${
+                  isLoading ? "opacity-0 pointer-events-none" : "opacity-100"
+                }`}
+              >
+                <Link
+                  href={isAuthenticated ? AUTH_ROUTES.dashboard : AUTH_ROUTES.login}
+                  className="flex items-center gap-2 px-4 py-2 rounded-xl font-medium text-sm bg-teal-50 text-teal-700 hover:bg-teal-100 transition-all duration-200"
+                >
+                  {isAuthenticated ? (
+                    <>
                       <LayoutDashboard className="w-4 h-4" />
                       Dashboard
-                    </Link>
-                    <button
-                      type="button"
-                      onClick={() => logout()}
-                      className="hidden md:flex items-center gap-2 px-4 py-2 rounded-xl font-medium text-sm bg-teal-50 text-teal-700 hover:bg-teal-100 transition-all duration-200"
-                    >
-                      <LogOut className="w-4 h-4" />
-                      Logout
-                    </button>
-                  </>
-                ) : (
-                  <Link
-                    href={AUTH_ROUTES.login}
-                    className="hidden md:flex items-center gap-2 px-4 py-2 rounded-xl font-medium text-sm bg-teal-50 text-teal-700 hover:bg-teal-100 transition-all duration-200"
-                  >
-                    <LogIn className="w-4 h-4" />
-                    Login
-                  </Link>
-                ))}
+                    </>
+                  ) : (
+                    <>
+                      <LogIn className="w-4 h-4" />
+                      Login
+                    </>
+                  )}
+                </Link>
+              </div>
 
               {/* Book Appointment Button */}
               <Link
@@ -655,39 +650,25 @@ export function Navbar() {
               )}
             </div>
           ))}
-          {!isLoading &&
-            (isAuthenticated ? (
+          <Link
+            href={isAuthenticated ? AUTH_ROUTES.dashboard : AUTH_ROUTES.login}
+            onClick={() => setMobileMenuOpen(false)}
+            className={`flex items-center justify-center gap-2 bg-teal-50 text-teal-700 px-5 py-3 rounded-xl mt-4 w-full font-medium transition-opacity duration-300 ${
+              isLoading ? "opacity-0 pointer-events-none" : "opacity-100"
+            }`}
+          >
+            {isAuthenticated ? (
               <>
-                <Link
-                  href={AUTH_ROUTES.dashboard}
-                  onClick={() => setMobileMenuOpen(false)}
-                  className="flex items-center justify-center gap-2 bg-teal-50 text-teal-700 px-5 py-3 rounded-xl mt-4 w-full font-medium"
-                >
-                  <LayoutDashboard className="w-4 h-4" />
-                  Dashboard
-                </Link>
-                <button
-                  type="button"
-                  onClick={() => {
-                    logout();
-                    setMobileMenuOpen(false);
-                  }}
-                  className="flex items-center justify-center gap-2 bg-teal-50 text-teal-700 px-5 py-3 rounded-xl mt-3 w-full font-medium"
-                >
-                  <LogOut className="w-4 h-4" />
-                  Logout
-                </button>
+                <LayoutDashboard className="w-4 h-4" />
+                Dashboard
               </>
             ) : (
-              <Link
-                href={AUTH_ROUTES.login}
-                onClick={() => setMobileMenuOpen(false)}
-                className="flex items-center justify-center gap-2 bg-teal-50 text-teal-700 px-5 py-3 rounded-xl mt-4 w-full font-medium"
-              >
+              <>
                 <LogIn className="w-4 h-4" />
                 Login
-              </Link>
-            ))}
+              </>
+            )}
+          </Link>
           <Link
             href="/book-appointment"
             onClick={() => {
