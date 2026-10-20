@@ -64,6 +64,9 @@ export function RescheduleDialog({
           <DialogDescription>
             With {appointment?.doctor?.full_name ?? "the same doctor"} for{" "}
             {appointment?.patient?.full_name ?? "this patient"}.
+            {role === "patient"
+              ? " The clinic will confirm the new time."
+              : " It stays confirmed — the patient gets one WhatsApp message with the new time."}
           </DialogDescription>
         </DialogHeader>
 
