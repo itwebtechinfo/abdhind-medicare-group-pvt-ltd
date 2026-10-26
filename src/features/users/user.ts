@@ -2,6 +2,7 @@ import { z } from "zod";
 import { http } from "@/src/services/http";
 import { API_ENDPOINTS } from "@/src/config/endpoints";
 import { INDIAN_MOBILE_REGEX } from "@/src/features/auth/login-schema";
+import { formatEpochTime12 } from "@/src/lib/time";
 
 // ---------- Types ----------
 
@@ -168,9 +169,9 @@ export const ONLINE_WINDOW_MS = 5 * 60 * 1000;
 const TZ = "Asia/Kolkata";
 const ymd = (ms: number) => new Intl.DateTimeFormat("en-CA", { timeZone: TZ }).format(new Date(ms));
 
-/** "4:48 PM" in clinic time. */
+/** "04:48 PM" in clinic time. */
 export function formatClockTime(ms: number): string {
-  return new Date(ms).toLocaleTimeString("en-US", { timeZone: TZ, hour: "numeric", minute: "2-digit" });
+  return formatEpochTime12(ms);
 }
 
 const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];

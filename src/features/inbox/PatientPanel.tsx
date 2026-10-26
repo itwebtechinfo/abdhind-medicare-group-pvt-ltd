@@ -10,6 +10,7 @@ import { Input } from "@/src/components/ui/input";
 import { usePermission } from "@/src/hooks/usePermission";
 import { useDebouncedValue } from "@/src/hooks/useDebouncedValue";
 import { languageLabel } from "@/src/lib/format";
+import { formatTime12 } from "@/src/lib/time";
 import { toast } from "@/src/lib/toast";
 import { cn } from "@/src/lib/utils";
 import type { NormalizedApiError } from "@/src/types/api";
@@ -30,11 +31,6 @@ const longDay = new Intl.DateTimeFormat("en-IN", { weekday: "short", day: "numer
 
 function ymd(ms: number): string {
   return new Date(ms + 5.5 * 3_600_000).toISOString().slice(0, 10);
-}
-
-function clock12(hhmm: string): string {
-  const [h, m] = hhmm.split(":").map(Number);
-  return `${((h + 11) % 12) + 1}:${String(m).padStart(2, "0")}`;
 }
 
 export function PatientPanel({ onCollapse, mobile }: { onCollapse: () => void; mobile?: boolean }) {
@@ -230,13 +226,13 @@ function QuickBook({ h, lastDoctorId, run }: { h: InboxHeader; lastDoctorId: str
           <button key={s.id} type="button" onClick={() => setSlotId(s.id)} aria-pressed={slotId === s.id}
             className={cn("rounded-md border px-2.5 py-1 text-sm font-semibold",
               slotId === s.id ? "border-[#1F7A4A] bg-[#1F7A4A] text-white dark:border-primary dark:bg-primary dark:text-primary-foreground" : "border-[#1F7A4A]/30 text-[#1F7A4A] hover:bg-[#1F7A4A]/5 dark:text-primary")}>
-            {clock12(s.start_time)}
+            {formatTime12(s.start_time)}
           </button>
         ))}
       </div>
       <Button className={cn("w-full", APPT_UI.primaryButton)} disabled={!slot || book.isPending || h.blocked} onClick={() => book.mutate()}>
         {book.isPending && <Loader2 className="mr-1.5 h-4 w-4 animate-spin" />}
-        {slot ? `Book ${clock12(slot.start_time)} ${Number(slot.start_time.slice(0, 2)) < 12 ? "AM" : "PM"} & send confirmation` : "Pick a slot"}
+        {slot ? `Book ${formatTime12(slot.start_time)} & send confirmation` : "Pick a slot"}
       </Button>
     </section>
   );

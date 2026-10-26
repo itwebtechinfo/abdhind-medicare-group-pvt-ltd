@@ -1,5 +1,6 @@
 "use client";
 
+import { formatNaiveDateTime12 } from "@/src/lib/time";
 import { useState } from "react";
 import { CheckCircle2, Loader2, Repeat } from "lucide-react";
 import {
@@ -68,7 +69,7 @@ export function CompleteDialog({ mode, appointment, onOpenChange, onDone }: Comp
     }
   };
 
-  const when = nextBooked ? nextBooked.appointment_datetime.replace("T", " · ") : "";
+  const when = nextBooked ? formatNaiveDateTime12(nextBooked.appointment_datetime).replace(" ", " · ") : "";
 
   return (
     <Dialog open={Boolean(appointment)} onOpenChange={(open) => !submitting && onOpenChange(open)}>

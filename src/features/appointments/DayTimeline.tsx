@@ -51,9 +51,10 @@ const LABELED_TICKS = TICKS.filter(
 const FIRST_PM_LABEL = LABELED_TICKS.find((m) => m >= 12 * 60 && m !== TIMELINE_END_MINUTES);
 
 function tickLabel(minutes: number) {
-  // "11:30 AM", "1 PM", "2", ... "7", "8:30 PM" — period only at the edges and the first PM hour.
+  // "11:30 AM", "1 PM", "2", ... "7", "08:30 PM" — period only at the edges and the first
+  // PM hour; whole-hour ticks stay compact so the rail doesn't crowd on small screens.
   const { time, period } = formatClock(minutes);
-  const short = minutes % 60 === 0 ? time.split(":")[0] : time;
+  const short = minutes % 60 === 0 ? String(Number(time.split(":")[0])) : time;
   const isEdge = minutes === TIMELINE_START_MINUTES || minutes === TIMELINE_END_MINUTES;
   return isEdge || minutes === FIRST_PM_LABEL ? `${short} ${period}` : short;
 }
@@ -163,7 +164,7 @@ export function DayTimeline({ appointments, nowMinutes, isLoading, onSelect }: D
                       <span className="truncate text-xs font-semibold">
                         {appointment.patient?.full_name ?? "Patient"}
                       </span>
-                      <span className="truncate text-[11px] opacity-80">{clock.time}</span>
+                      <span className="truncate text-[11px] opacity-80">{clock.time} {clock.period}</span>
                     </button>
                   );
                 })}

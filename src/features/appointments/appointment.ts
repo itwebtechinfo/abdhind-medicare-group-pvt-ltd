@@ -1,3 +1,4 @@
+import { clock12 } from "@/src/lib/time";
 import { z } from "zod";
 import { http } from "@/src/services/http";
 import { API_ENDPOINTS } from "@/src/config/endpoints";
@@ -583,12 +584,9 @@ export function splitAppointmentDateTime(value: string): { date: string; minutes
   return { date, minutes: (h || 0) * 60 + (m || 0) };
 }
 
-/** 1110 -> { time: "6:30", period: "PM" }. */
+/** 1110 -> { time: "06:30", period: "PM" } - see src/lib/time.ts (12-hour everywhere). */
 export function formatClock(minutes: number): { time: string; period: "AM" | "PM" } {
-  const h24 = Math.floor(minutes / 60) % 24;
-  const m = minutes % 60;
-  const h12 = h24 % 12 === 0 ? 12 : h24 % 12;
-  return { time: `${h12}:${String(m).padStart(2, "0")}`, period: h24 < 12 ? "AM" : "PM" };
+  return clock12(minutes);
 }
 
 function ymdToUtcDate(ymd: string): Date {

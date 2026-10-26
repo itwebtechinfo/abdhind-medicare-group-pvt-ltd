@@ -1,5 +1,6 @@
 "use client";
 
+import { formatNaiveDateTime12 } from "@/src/lib/time";
 import { useState } from "react";
 import { AlertTriangle, Check, Pencil } from "lucide-react";
 import { Button } from "@/src/components/ui/button";
@@ -70,7 +71,7 @@ export function TreatmentSection({ a, todayYmd, canManage, busy, onAction, onCom
         <p role="alert" className="mb-3 flex gap-2 rounded-lg bg-amber-50 p-2.5 text-xs text-amber-900 dark:bg-amber-500/10 dark:text-amber-200">
           <AlertTriangle className="mt-0.5 h-3.5 w-3.5 shrink-0" />
           This booking wasn&apos;t added to the patient&apos;s treatment because Sitting {a.chain_conflict.sitting_no} is already
-          booked for {a.chain_conflict.appointment_datetime.replace("T", " ")} ({a.chain_conflict.reference_code}). Check whether
+          booked for {formatNaiveDateTime12(a.chain_conflict.appointment_datetime)} ({a.chain_conflict.reference_code}). Check whether
           it&apos;s a duplicate.
         </p>
       )}

@@ -1,6 +1,7 @@
 import { http } from "@/src/services/http";
 import { apiClient } from "@/src/services/api-client";
 import { API_ENDPOINTS } from "@/src/config/endpoints";
+import { formatEpochTime12 } from "@/src/lib/time";
 import type { RawVisitSummary } from "@/src/features/patients/patient";
 
 // ---------- Types ----------
@@ -325,15 +326,15 @@ export function waitingTone(since: number, now: number): "normal" | "amber" | "r
   return hours >= 4 ? "red" : hours >= 1 ? "amber" : "normal";
 }
 
-const timeFmt = new Intl.DateTimeFormat("en-IN", { hour: "2-digit", minute: "2-digit", hour12: false, timeZone: "Asia/Kolkata" });
 const dayMonthFmt = new Intl.DateTimeFormat("en-IN", { day: "numeric", month: "short", timeZone: "Asia/Kolkata" });
 const fullDayFmt = new Intl.DateTimeFormat("en-IN", { weekday: "short", day: "numeric", month: "short", year: "numeric", timeZone: "Asia/Kolkata" });
 
+/** "02:30 PM" (IST). */
 export function clockTime(ms: number): string {
-  return timeFmt.format(ms);
+  return formatEpochTime12(ms);
 }
 
-/** List timestamp: "01:27" today, "Yesterday", else "2 Oct". */
+/** List timestamp: "01:27 AM" today, "Yesterday", else "2 Oct". */
 export function listTime(ms: number | null, now: number): string {
   if (!ms) return "";
   const today = istDayStart(now);

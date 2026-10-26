@@ -4,6 +4,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { CalendarDays, Lock, NotebookPen, Paperclip, Plus, SendHorizontal, Sparkles } from "lucide-react";
 import { Button } from "@/src/components/ui/button";
+import { formatTime12 } from "@/src/lib/time";
 import { toast } from "@/src/lib/toast";
 import { cn } from "@/src/lib/utils";
 import type { NormalizedApiError } from "@/src/types/api";
@@ -30,10 +31,7 @@ type Pending = { kind: "text"; text: string } | { kind: "media"; file: File; tex
 const ACCEPT = "image/jpeg,image/png,image/webp,application/pdf";
 
 const slotDayFmt = new Intl.DateTimeFormat("en-IN", { weekday: "short", day: "numeric", month: "short", timeZone: "UTC" });
-function slotTime(hhmm: string): string {
-  const [h, m] = hhmm.split(":").map(Number);
-  return `${((h + 11) % 12) + 1}:${String(m).padStart(2, "0")} ${h < 12 ? "AM" : "PM"}`;
-}
+const slotTime = formatTime12;
 
 interface Props {
   header: InboxHeader;

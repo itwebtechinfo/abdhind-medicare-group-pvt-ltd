@@ -1,5 +1,6 @@
 "use client";
 
+import { formatTime12 } from "@/src/lib/time";
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Loader2 } from "lucide-react";
@@ -135,7 +136,7 @@ export function FollowUpDialog({
                       : "border-input hover:bg-accent"
                   }`}
                 >
-                  {slot.start_time}
+                  {formatTime12(slot.start_time)}
                 </button>
               ))}
             </div>

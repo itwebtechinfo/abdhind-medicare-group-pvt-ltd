@@ -1,20 +1,11 @@
 /** Shared display formatters for values the API returns raw. */
 
-const DATE_TIME_FORMAT: Intl.DateTimeFormatOptions = {
-  day: "numeric",
-  month: "short",
-  year: "numeric",
-  hour: "2-digit",
-  minute: "2-digit",
-};
+import { formatEpochDateTime12 } from "@/src/lib/time";
 
-/** Epoch-ms (what the backend's unique_timestamp() stores) -> "29 Sep 2026, 09:15 pm".
+/** Epoch-ms (what the backend's unique_timestamp() stores) -> "29 Sep 2026, 09:15 PM" (IST).
  * Falls back to "—" for a missing or unparseable value instead of "Invalid Date". */
 export function formatEpochMs(value: number | null | undefined): string {
-  if (value === null || value === undefined) return "—";
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return "—";
-  return date.toLocaleString("en-IN", DATE_TIME_FORMAT);
+  return formatEpochDateTime12(value);
 }
 
 /** The WhatsApp bot's language codes (TRANSLATIONS keys in routes/whatsapp.py). */

@@ -63,7 +63,7 @@ export default function ContactPage() {
               <div>
                 <h2 className="font-extrabold text-slate-950">Dental clinic hours</h2>
                 <p className="mt-1 text-sm text-slate-600">
-                  Monday to Saturday, 11:30 AM to 8:30 PM. Other specialties are coming soon.
+                  Monday to Saturday, 11:30 AM to 08:30 PM. Other specialties are coming soon.
                 </p>
               </div>
             </div>

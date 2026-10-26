@@ -1,5 +1,6 @@
 "use client";
 
+import { formatTime12 } from "@/src/lib/time";
 import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Loader2, RefreshCw, Trash2 } from "lucide-react";
@@ -221,7 +222,7 @@ export function LeaveCalendarDialog({ open, onOpenChange, doctor }: LeaveCalenda
             >
               <p className="font-medium">{slot.date}</p>
               <p className="text-xs text-muted-foreground">
-                {slot.start_time} - {slot.end_time}
+                {formatTime12(slot.start_time)} - {formatTime12(slot.end_time)}
               </p>
             </div>
           ))}

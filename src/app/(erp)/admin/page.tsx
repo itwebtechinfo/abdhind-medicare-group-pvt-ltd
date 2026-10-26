@@ -1,5 +1,6 @@
 "use client";
 
+import { formatDisplayDateTime12 } from "@/src/lib/time";
 import { useState } from "react";
 import Link from "next/link";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -104,7 +105,7 @@ export default function AdminPage() {
           columns={[
             { key: "name", header: "Name", render: (r) => r.name },
             { key: "description", header: "Description", render: (r) => r.description ?? "—" },
-            { key: "created_at", header: "Created", render: (r) => r.created_at },
+            { key: "created_at", header: "Created", render: (r) => formatDisplayDateTime12(r.created_at) },
           ]}
         />
       </div>

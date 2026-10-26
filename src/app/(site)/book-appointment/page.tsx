@@ -1,5 +1,6 @@
 "use client";
 
+import { formatTime12 } from "@/src/lib/time";
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useMutation, useQuery } from "@tanstack/react-query";
@@ -160,7 +161,7 @@ export default function BookAppointmentPage() {
             <div className="flex justify-between py-2 border-b">
               <span className="text-gray-500">Date &amp; Time</span>
               <span className="font-medium">
-                {selectedDate} • {selectedSlot?.start_time}
+                {selectedDate} • {selectedSlot ? formatTime12(selectedSlot.start_time) : ""}
               </span>
             </div>
             <div className="flex justify-between py-2 border-b">
@@ -342,7 +343,7 @@ export default function BookAppointmentPage() {
                       }`}
                     >
                       <Clock className="w-3 h-3 inline mr-1" />
-                      {slot.start_time}
+                      {formatTime12(slot.start_time)}
                     </button>
                   ))}
                 </div>
@@ -464,7 +465,7 @@ export default function BookAppointmentPage() {
                   </p>
                   <p>
                     <span className="text-gray-500">Date &amp; Time:</span> {selectedDate} at{" "}
-                    {selectedSlot.start_time}
+                    {formatTime12(selectedSlot.start_time)}
                   </p>
                 </div>
               </div>

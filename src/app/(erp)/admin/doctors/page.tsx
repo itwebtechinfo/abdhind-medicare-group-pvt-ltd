@@ -1,5 +1,6 @@
 "use client";
 
+import { formatDisplayDateTime12 } from "@/src/lib/time";
 import { useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { CalendarOff, Pencil, Stethoscope, UserPlus } from "lucide-react";
@@ -177,7 +178,7 @@ export default function AdminDoctorsPage() {
                 <Badge variant="warning">Not linked</Badge>
               ),
           },
-          { key: "created_at", header: "Joined On", render: (r) => r.created_at },
+          { key: "created_at", header: "Joined On", render: (r) => formatDisplayDateTime12(r.created_at) },
         ]}
       />
 

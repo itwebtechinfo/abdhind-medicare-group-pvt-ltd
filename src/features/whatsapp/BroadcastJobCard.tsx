@@ -1,5 +1,6 @@
 "use client";
 
+import { formatDisplayDateTime12, formatEpochDateTime12, formatEpochTime12 } from "@/src/lib/time";
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Loader2 } from "lucide-react";
@@ -68,7 +69,7 @@ export function BroadcastJobCard({ jobId }: BroadcastJobCardProps) {
           <div>
             <p className="text-sm font-medium">{job.template_name}</p>
             <p className="text-xs text-muted-foreground">
-              by {job.created_by.name} · {job.created_at}
+              by {job.created_by.name} · {formatDisplayDateTime12(job.created_at)}
             </p>
           </div>
           <Badge variant={STATUS_VARIANT[job.status]}>{job.status}</Badge>
@@ -82,14 +83,14 @@ export function BroadcastJobCard({ jobId }: BroadcastJobCardProps) {
         </p>
         {job.status === "scheduled" && job.scheduled_at && (
           <p className="text-[11px] text-muted-foreground">
-            Scheduled for {new Date(job.scheduled_at).toLocaleString()}
+            Scheduled for {formatEpochDateTime12(job.scheduled_at)}
           </p>
         )}
         {(job.started_at || job.completed_at) && (
           <p className="text-[11px] text-muted-foreground">
-            {job.started_at && <>Started {new Date(job.started_at).toLocaleTimeString()}</>}
+            {job.started_at && <>Started {formatEpochTime12(job.started_at)}</>}
             {job.started_at && job.completed_at && " · "}
-            {job.completed_at && <>Completed {new Date(job.completed_at).toLocaleTimeString()}</>}
+            {job.completed_at && <>Completed {formatEpochTime12(job.completed_at)}</>}
           </p>
         )}
 
