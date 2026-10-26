@@ -1,5 +1,6 @@
 "use client";
 
+import { formatDisplayDateTime12, formatNaiveDateTime12 } from "@/src/lib/time";
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { FileText, Star } from "lucide-react";
@@ -208,7 +209,7 @@ export default function ReportsPage() {
             {
               key: "appointment_datetime",
               header: "Visit",
-              render: (r) => r.appointment_datetime?.replace("T", " ") ?? "—",
+              render: (r) => formatNaiveDateTime12(r.appointment_datetime),
             },
             {
               key: "rating",
@@ -221,7 +222,7 @@ export default function ReportsPage() {
               ),
             },
             { key: "comment", header: "Comment", render: (r) => r.comment ?? "—" },
-            { key: "created_at", header: "Submitted", render: (r) => r.created_at },
+            { key: "created_at", header: "Submitted", render: (r) => formatDisplayDateTime12(r.created_at) },
           ]}
         />
       </div>

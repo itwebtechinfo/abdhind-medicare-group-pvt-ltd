@@ -1,5 +1,6 @@
 "use client";
 
+import { formatNaiveDateTime12 } from "@/src/lib/time";
 import { useMemo, useState } from "react";
 import * as DialogPrimitive from "@radix-ui/react-dialog";
 import { useMutation, useQuery } from "@tanstack/react-query";
@@ -418,7 +419,7 @@ function DrawerBody({
                           )}
                           {entry.old_datetime && entry.new_datetime && (
                             <p className="mt-1 text-muted-foreground">
-                              Rescheduled: {entry.old_datetime.replace("T", " ")} → {entry.new_datetime.replace("T", " ")}
+                              Rescheduled: {formatNaiveDateTime12(entry.old_datetime)} → {formatNaiveDateTime12(entry.new_datetime)}
                             </p>
                           )}
                         </div>

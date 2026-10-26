@@ -1,5 +1,6 @@
 "use client";
 
+import { formatTime12 } from "@/src/lib/time";
 import { useEffect, useState } from "react";
 import { useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -293,7 +294,7 @@ export function BookAppointmentDialog({
                         : "border-input hover:bg-accent"
                     }`}
                   >
-                    {slot.start_time}
+                    {formatTime12(slot.start_time)}
                   </button>
                 ))}
               </div>

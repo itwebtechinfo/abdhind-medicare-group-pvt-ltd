@@ -1,5 +1,6 @@
 "use client";
 
+import { formatNaiveDateTime12 } from "@/src/lib/time";
 import { useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Loader2 } from "lucide-react";
@@ -92,7 +93,7 @@ export function PatientHistoryDialog({ open, onOpenChange, patientId }: PatientH
                   </p>
                   <p className="text-xs text-muted-foreground">
                     {appt.reference_code && <span className="font-mono">{appt.reference_code} · </span>}
-                    {appt.appointment_datetime.replace("T", " ")} · Source: {appt.source}
+                    {formatNaiveDateTime12(appt.appointment_datetime)} · Source: {appt.source}
                   </p>
                   {appt.status === "CANCELLED" && (
                     <p className="text-xs text-muted-foreground">

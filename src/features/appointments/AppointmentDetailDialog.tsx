@@ -1,5 +1,6 @@
 "use client";
 
+import { formatDisplayDateTime12, formatNaiveDateTime12 } from "@/src/lib/time";
 import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
@@ -186,7 +187,7 @@ export function AppointmentDetailDialog({
             <p className="text-xs text-muted-foreground">{patientDetails}</p>
           )}
           <DialogDescription>
-            {current.doctor?.full_name ?? "—"} · {current.appointment_datetime.replace("T", " ")} ·
+            {current.doctor?.full_name ?? "—"} · {formatNaiveDateTime12(current.appointment_datetime)} ·
             Source: {current.source}
             {current.booked_by && <> · Booked by {current.booked_by.full_name}</>}
           </DialogDescription>
@@ -325,7 +326,7 @@ export function AppointmentDetailDialog({
                 <span className="font-medium">{entry.to_status}</span>
                 <span className="ml-2 text-muted-foreground">
                   by {entry.changed_by_name ?? `${entry.changed_by_role} (WhatsApp bot)`} ·{" "}
-                  {entry.created_at}
+                  {formatDisplayDateTime12(entry.created_at)}
                 </span>
                 {entry.notification_status && (
                   <Badge variant="secondary" className="ml-2 align-middle">
@@ -334,8 +335,8 @@ export function AppointmentDetailDialog({
                 )}
                 {entry.old_datetime && entry.new_datetime && (
                   <p className="mt-1 text-muted-foreground">
-                    Rescheduled: {entry.old_datetime.replace("T", " ")} →{" "}
-                    {entry.new_datetime.replace("T", " ")}
+                    Rescheduled: {formatNaiveDateTime12(entry.old_datetime)} →{" "}
+                    {formatNaiveDateTime12(entry.new_datetime)}
                   </p>
                 )}
               </div>

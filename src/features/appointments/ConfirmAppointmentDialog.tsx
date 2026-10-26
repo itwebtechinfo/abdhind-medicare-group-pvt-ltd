@@ -1,5 +1,6 @@
 "use client";
 
+import { formatNaiveDateTime12, formatTime12 } from "@/src/lib/time";
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Loader2 } from "lucide-react";
@@ -66,7 +67,7 @@ export function ConfirmAppointmentDialog({
           <DialogDescription>
             With {appointment?.doctor?.full_name ?? "the doctor"} for{" "}
             {appointment?.patient?.full_name ?? "this patient"}. Currently booked for{" "}
-            {appointment?.appointment_datetime.replace("T", " ") ?? "—"}.
+            {appointment ? formatNaiveDateTime12(appointment.appointment_datetime) : "—"}.
           </DialogDescription>
         </DialogHeader>
 
@@ -109,7 +110,7 @@ export function ConfirmAppointmentDialog({
                       : "border-input hover:bg-accent"
                   }`}
                 >
-                  {slot.start_time}
+                  {formatTime12(slot.start_time)}
                 </button>
               ))}
             </div>

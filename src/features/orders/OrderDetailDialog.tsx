@@ -1,5 +1,6 @@
 "use client";
 
+import { formatDisplayDateTime12 } from "@/src/lib/time";
 import { useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Loader2 } from "lucide-react";
@@ -108,7 +109,7 @@ export function OrderDetailDialog({ open, onOpenChange, order }: OrderDetailDial
               <Badge variant={ORDER_STATUS_VARIANT[current.status]}>{current.status}</Badge>
             </DialogTitle>
             <DialogDescription>
-              Placed {current.created_at} via {current.source === "whatsapp" ? "WhatsApp" : current.source}
+              Placed {formatDisplayDateTime12(current.created_at)} via {current.source === "whatsapp" ? "WhatsApp" : current.source}
             </DialogDescription>
           </DialogHeader>
 

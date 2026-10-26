@@ -6,8 +6,9 @@ import { Loader2, Phone, X } from "lucide-react";
 import { Button } from "@/src/components/ui/button";
 import { Textarea } from "@/src/components/ui/textarea";
 import { usePermission } from "@/src/hooks/usePermission";
+import { formatEpochDateTime12 } from "@/src/lib/time";
 import { cn } from "@/src/lib/utils";
-import { CLINIC_TIME_ZONE, formatCreatedAt } from "@/src/features/appointments/appointment";
+import { formatCreatedAt } from "@/src/features/appointments/appointment";
 import { avatarColor, initials } from "@/src/features/appointments/AppointmentRow";
 import { APPT_UI } from "@/src/features/appointments/StatusBadge";
 import { formatPatientPhone, patientPhoneE164 } from "@/src/features/patients/patient";
@@ -23,16 +24,8 @@ interface EnquiryDrawerProps {
   onBook: (e: ApiEnquiry) => void;
 }
 
-function formatEpoch(ms: number): string {
-  return new Date(ms).toLocaleString("en-GB", {
-    timeZone: CLINIC_TIME_ZONE,
-    day: "numeric",
-    month: "short",
-    hour: "numeric",
-    minute: "2-digit",
-    hour12: true,
-  });
-}
+/** "14 Aug 2026, 04:48 PM" (IST). */
+const formatEpoch = formatEpochDateTime12;
 
 /** Right-side panel (full-screen on mobile). Closes on ×, Esc or backdrop click. */
 export function EnquiryDrawer({ enquiry, onClose, ...rest }: EnquiryDrawerProps) {

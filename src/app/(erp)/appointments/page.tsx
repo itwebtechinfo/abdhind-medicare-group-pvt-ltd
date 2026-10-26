@@ -1,5 +1,6 @@
 "use client";
 
+import { formatNaiveDateTime12 } from "@/src/lib/time";
 import { useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Calendar, CalendarClock, Plus, Stethoscope } from "lucide-react";
@@ -62,7 +63,7 @@ function AppointmentCard({
         </p>
         <p className="mt-0.5 flex items-center gap-1.5 text-xs text-muted-foreground">
           <CalendarClock className="h-3.5 w-3.5 shrink-0" />
-          {appointment.appointment_datetime.replace("T", " ")}
+          {formatNaiveDateTime12(appointment.appointment_datetime)}
         </p>
         {appointment.patient?.full_name && (
           <p className="mt-0.5 text-xs text-muted-foreground">For {appointment.patient.full_name}</p>

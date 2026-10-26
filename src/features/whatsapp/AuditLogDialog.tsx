@@ -1,5 +1,6 @@
 "use client";
 
+import { formatDisplayDateTime12 } from "@/src/lib/time";
 import { useQuery } from "@tanstack/react-query";
 import { Loader2 } from "lucide-react";
 import { Badge } from "@/src/components/ui/badge";
@@ -56,7 +57,7 @@ export function AuditLogDialog({ open, onOpenChange, phone }: AuditLogDialogProp
             <div key={log.id} className="rounded-lg border border-border px-3 py-2 text-sm">
               <div className="flex items-center justify-between gap-2">
                 <Badge variant="secondary">{ACTION_LABELS[log.action] ?? log.action}</Badge>
-                <span className="text-xs text-muted-foreground">{log.created_at}</span>
+                <span className="text-xs text-muted-foreground">{formatDisplayDateTime12(log.created_at)}</span>
               </div>
               <p className="mt-1 text-xs text-muted-foreground">by {log.actor_name}</p>
               {Object.keys(log.details).length > 0 && (

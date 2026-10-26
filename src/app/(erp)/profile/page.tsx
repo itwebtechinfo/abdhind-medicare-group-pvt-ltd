@@ -1,5 +1,6 @@
 "use client";
 
+import { formatDisplayDateTime12, formatEpochDateTime12 } from "@/src/lib/time";
 import { useQuery } from "@tanstack/react-query";
 import {
   BadgeCheck,
@@ -151,7 +152,7 @@ export default function ProfilePage() {
               icon={CalendarClock}
               label="Session started"
               value={
-                session?.loggedInAt ? new Date(session.loggedInAt).toLocaleString() : "—"
+                session?.loggedInAt ? formatEpochDateTime12(new Date(session.loggedInAt).getTime()) : "—"
               }
             />
           </CardContent>
@@ -185,7 +186,7 @@ export default function ProfilePage() {
                       : "—"
                   }
                 />
-                <InfoRow icon={CalendarClock} label="Registered" value={patientRecord.patient.created_at} />
+                <InfoRow icon={CalendarClock} label="Registered" value={formatDisplayDateTime12(patientRecord.patient.created_at)} />
               </div>
             ) : (
               <p className="text-sm text-muted-foreground">

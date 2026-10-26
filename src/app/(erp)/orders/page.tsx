@@ -1,5 +1,6 @@
 "use client";
 
+import { formatDisplayDateTime12 } from "@/src/lib/time";
 import { useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Eye, ShoppingBag } from "lucide-react";
@@ -137,7 +138,7 @@ export default function ProductOrdersPage() {
             header: "Status",
             render: (r) => <Badge variant={ORDER_STATUS_VARIANT[r.status]}>{r.status}</Badge>,
           },
-          { key: "created_at", header: "Placed", render: (r) => r.created_at },
+          { key: "created_at", header: "Placed", render: (r) => formatDisplayDateTime12(r.created_at) },
         ]}
       />
 
