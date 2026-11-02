@@ -65,14 +65,16 @@ function ErpSidebarComponent() {
                 sizes="36px"
               />
             </div>
+            {/* Same two-tone wordmark as the public site's Navbar. */}
             {!collapsed && (
-              <div className="min-w-0">
-                <p className="truncate text-sm font-bold text-sidebar-foreground">
-                  Abd Hind MediCare
+              <div className="min-w-0 leading-tight">
+                <p className="truncate text-lg font-bold tracking-tight">
+                  <span className="text-sky-400">Abd Hind </span>
+                  <span className="text-green-400">MediCare</span>
                 </p>
-                <Badge variant="secondary" className="mt-1 text-[10px]">
-                  Healthcare ERP
-                </Badge>
+                <p className="text-[10px] font-medium tracking-[0.2em] text-muted-foreground">
+                  HEALTHCARE ERP
+                </p>
               </div>
             )}
           </Link>
