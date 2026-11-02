@@ -304,7 +304,9 @@ export function BookAppointmentDialog({
             )}
           </div>
 
-          <DialogFooter>
+          {/* Pinned to the bottom of the scrolling dialog so Book stays reachable. */}
+          <DialogFooter className="sticky bottom-0 -mx-6 -mb-6 border-t border-border bg-card px-6 py-4">
+
             <Button
               type="button"
               variant="outline"
